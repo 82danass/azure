@@ -1,7 +1,8 @@
 # Azure
 
-Kurs: Microsoft Azure · Företag: Novatrix AB
-Repo: <https://github.com/82danass/azure>
+**Daniel Assarélius** · MOV25 · Microsoft Azure · Novatrix AB
+
+Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 
 ## Uppgifter
 

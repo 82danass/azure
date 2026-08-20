@@ -1,5 +1,9 @@
 # v34 — Compute och kom igång
 
+**Daniel Assarélius** · MOV25 · Microsoft Azure · Novatrix AB
+
+Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [v34](https://github.com/82danass/azure/tree/master/v34)
+
 - [x] Sätt upp kursrepo på GitHub (README med namn, kurs, veckorubrik)
 - [x] Provisionera Ubuntu-VM
 - [x] Installera Nginx
