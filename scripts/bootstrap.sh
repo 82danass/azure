@@ -3,8 +3,8 @@
 # Host provisioning. cloud-init clones this repository to $MOV_APP_DIR on first
 # boot and then runs this script as root.
 #
-# It knows nothing about any particular week or site. Everything it needs comes
-# from /etc/mov/deploy.env, which cloud-init writes from the deployment profile:
+# No week, site or repository name is hardcoded. Configuration is read from
+# /etc/mov/deploy.env, which cloud-init writes from the deployment profile:
 #
 #   MOV_WEEK      the profile that produced this host
 #   MOV_REPO      owner/name of the repository that was cloned
@@ -42,7 +42,7 @@ log "week=$MOV_WEEK repo=$MOV_REPO ref=$MOV_REF serving=$SOURCE_DIR"
 
 # --- nginx ------------------------------------------------------------------
 
-# cloud-init installs nginx, but a manual re-run should not depend on that.
+# cloud-init installs nginx on first boot. This covers a manual re-run.
 if ! command -v nginx >/dev/null 2>&1; then
     log "installing nginx"
     export DEBIAN_FRONTEND=noninteractive
@@ -78,8 +78,7 @@ server {
         try_files \$uri \$uri/ =404;
     }
 
-    # Static content only. Anything the repo ships that is not meant to be
-    # public should not be inside the served directory in the first place.
+    # Dotfiles are not served.
     location ~ /\. {
         deny all;
     }
