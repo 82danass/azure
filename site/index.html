@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Novatrix AB — Kundtjänst</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #16191d;
+      --muted: #5b6570;
+      --line: #dfe3e8;
+      --accent: #1f6feb;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14171a;
+        --panel: #1c2024;
+        --ink: #e9edf1;
+        --muted: #9aa5b1;
+        --line: #2c3238;
+        --accent: #58a6ff;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 2rem 1rem;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main { max-width: 40rem; margin: 0 auto; }
+    header { margin-bottom: 2rem; }
+    h1 { margin: 0 0 .25rem; font-size: 1.75rem; letter-spacing: -0.01em; }
+    .tagline { margin: 0; color: var(--muted); }
+    form {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    h2 { margin: 0 0 1.25rem; font-size: 1.1rem; }
+    label { display: block; margin-bottom: 1rem; }
+    label span { display: block; margin-bottom: .35rem; font-weight: 600; font-size: .9rem; }
+    input, textarea {
+      width: 100%;
+      padding: .6rem .7rem;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit;
+    }
+    textarea { min-height: 8rem; resize: vertical; }
+    button {
+      padding: .65rem 1.4rem;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    footer { margin-top: 2rem; color: var(--muted); font-size: .85rem; }
+    code { font-family: Consolas, "SFMono-Regular", monospace; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Novatrix AB</h1>
+      <p class="tagline">Kundtjänst — skicka in ditt ärende så återkommer vi.</p>
+    </header>
+
+    <form method="post" action="/arende">
+      <h2>Nytt ärende</h2>
+
+      <label>
+        <span>Namn</span>
+        <input type="text" name="namn" required autocomplete="name">
+      </label>
+
+      <label>
+        <span>E-post</span>
+        <input type="email" name="epost" required autocomplete="email">
+      </label>
+
+      <label>
+        <span>Meddelande</span>
+        <textarea name="meddelande" required></textarea>
+      </label>
+
+      <button type="submit">Skicka ärende</button>
+    </form>
+
+    <footer>
+      <p>Driftsatt från <code>82danass/azure</code> av <code>mov</code>.</p>
+    </footer>
+  </main>
+</body>
+</html>

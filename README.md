@@ -6,11 +6,11 @@ Repo: <https://github.com/82danass/azure>
 ## Uppgifter
 
 ### [v34 — Compute och kom igång](v34/README.md)
-- [ ] Sätt upp kursrepo på GitHub (README med namn, kurs, veckorubrik)
-- [ ] Provisionera Ubuntu-VM
-- [ ] Installera Nginx
-- [ ] Driftsätt kundtjänstsidan med ärendeformulär
-- [ ] Verifiera och dokumentera
+- [x] Sätt upp kursrepo på GitHub (README med namn, kurs, veckorubrik)
+- [x] Provisionera Ubuntu-VM
+- [x] Installera Nginx
+- [x] Driftsätt kundtjänstsidan med ärendeformulär
+- [x] Verifiera och dokumentera
 
 ### [v35 — IAM och identitet](v35/README.md)
 - [ ] Uppdatera README för v35
