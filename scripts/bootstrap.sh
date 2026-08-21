@@ -3,10 +3,10 @@
 # Host provisioning. cloud-init clones this repository to $MOV_APP_DIR on first
 # boot and then runs this script as root.
 #
-# No week, site or repository name is hardcoded. Configuration is read from
+# No environment, site or repository name is hardcoded. Configuration is read from
 # /etc/mov/deploy.env, which cloud-init writes from the deployment profile:
 #
-#   MOV_WEEK      the profile that produced this host
+#   MOV_ENV       the environment that produced this host
 #   MOV_REPO      owner/name of the repository that was cloned
 #   MOV_REF       the branch or tag that was cloned
 #   MOV_PATH      directory inside the repo to serve, relative to MOV_APP_DIR
@@ -30,7 +30,7 @@ fail() { printf '[bootstrap] error: %s\n' "$*" >&2; exit 1; }
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-for var in MOV_WEEK MOV_REPO MOV_REF MOV_PATH MOV_APP_DIR; do
+for var in MOV_ENV MOV_REPO MOV_REF MOV_PATH MOV_APP_DIR; do
     [[ -n ${!var:-} ]] || fail "$var is not set in $ENV_FILE"
 done
 
@@ -38,7 +38,7 @@ readonly SOURCE_DIR="${MOV_APP_DIR%/}/${MOV_PATH#/}"
 [[ -d $SOURCE_DIR ]] || fail "$SOURCE_DIR does not exist. Check source.path in the profile."
 [[ -f $SOURCE_DIR/index.html ]] || fail "$SOURCE_DIR has no index.html."
 
-log "week=$MOV_WEEK repo=$MOV_REPO ref=$MOV_REF serving=$SOURCE_DIR"
+log "env=$MOV_ENV repo=$MOV_REPO ref=$MOV_REF serving=$SOURCE_DIR"
 
 # --- nginx ------------------------------------------------------------------
 
@@ -97,7 +97,7 @@ systemctl reload nginx
 install -d -m 0755 "$(dirname "$STAMP")"
 cat > "$STAMP" <<JSON
 {
-  "week": "$MOV_WEEK",
+  "env": "$MOV_ENV",
   "repo": "$MOV_REPO",
   "ref": "$MOV_REF",
   "path": "$MOV_PATH",
