@@ -1,0 +1,80 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/profile.schema.json",
+
+  "env": "v37",
+  "extends": "v36",
+  "description": "Storage. Errands and attachments land in a blob container, reached by the application's managed identity -- shared keys are switched off, so no secret can end up in the repo.",
+
+  "stages": [
+    "preflight", "rg", "network", "cost", "directory",
+    "identity", "storage", "rbac", "compute", "verify"
+  ],
+
+  "network": {
+    "addressSpace": "10.37.0.0/16",
+    "subnets": [
+      { "purpose": "web", "prefix": "10.37.1.0/24", "nsg": "web" },
+      {
+        "purpose": "data",
+        "prefix": "10.37.2.0/24",
+        "nsg": "data",
+        "private": true,
+        "serviceEndpoints": ["Microsoft.Storage"]
+      }
+    ],
+    "nsg": {
+      "web": [
+        { "name": "http", "priority": 100, "ports": ["80"] },
+        { "name": "https", "priority": 110, "ports": ["443"] },
+        { "name": "ssh", "priority": 120, "ports": ["22"], "source": "${admin.sshSource}" },
+        { "name": "deny-all-inbound", "priority": 4000, "access": "Deny", "protocol": "*", "ports": ["*"] }
+      ],
+      "data": [
+        { "name": "allow-web-subnet", "priority": 100, "protocol": "*", "ports": ["*"], "source": "10.37.1.0/24" },
+        { "name": "deny-internet-inbound", "priority": 4000, "access": "Deny", "protocol": "*", "ports": ["*"], "source": "Internet" }
+      ]
+    }
+  },
+
+  "storage": {
+    "seq": 1,
+    "sku": "Standard_LRS",
+    "kind": "StorageV2",
+    "accessTier": "Hot",
+    "allowBlobPublicAccess": false,
+    "allowSharedKeyAccess": false,
+    "minimumTlsVersion": "TLS1_2",
+    "containers": [
+      { "name": "arenden", "publicAccess": "None" }
+    ]
+  },
+
+  "rbac": {
+    "assignments": [
+      {
+        "role": "Virtual Machine Contributor",
+        "principal": { "kind": "group", "purpose": "drift" },
+        "scope": "resourceGroup",
+        "justification": "Operations must start, stop, resize and rebuild the VM, but not alter the network or hand out roles."
+      },
+      {
+        "role": "Reader",
+        "principal": { "kind": "group", "purpose": "utveckling" },
+        "scope": "resourceGroup",
+        "justification": "Developers diagnose from the portal and change the environment through the pipeline."
+      },
+      {
+        "role": "Storage Blob Data Contributor",
+        "principal": { "kind": "managedIdentity", "purpose": "app" },
+        "scope": "storageAccount",
+        "justification": "The form writes errands and attachments. Scoped to the storage account rather than the resource group, and granted to the identity rather than to a key, so nothing secret exists to leak."
+      }
+    ]
+  },
+
+  "compute": {
+    "vms": [
+      { "purpose": "web", "subnet": "web", "identities": ["app"] }
+    ]
+  }
+}

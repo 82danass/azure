@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/profile.schema.json",
+
+  "env": "v35",
+  "extends": "v34",
+  "description": "IAM: Entra ID roles for Novatrix, least-privilege RBAC on the resource group, and a managed identity prepared for the storage env.",
+
+  "stages": ["preflight", "rg", "network", "cost", "directory", "identity", "rbac", "compute", "verify"],
+
+  "network": {
+    "addressSpace": "10.35.0.0/16",
+    "subnets": [
+      { "purpose": "web", "prefix": "10.35.1.0/24", "nsg": "web" }
+    ]
+  },
+
+  "directory": {
+    "domain": "82danassgafemolndal.onmicrosoft.com",
+    "groups": [
+      { "purpose": "drift", "displayName": "Novatrix Drift", "description": "Operations: runs and repairs the environment." },
+      { "purpose": "utveckling", "displayName": "Novatrix Utveckling", "description": "Developers: read the environment, deploy through the pipeline." }
+    ],
+    "users": [
+      { "purpose": "drift", "displayName": "Novatrix Driftstekniker", "groups": ["drift"] },
+      { "purpose": "utveckling", "displayName": "Novatrix Utvecklare", "groups": ["utveckling"] }
+    ]
+  },
+
+  "identity": {
+    "userAssigned": [
+      {
+        "purpose": "app",
+        "description": "The errand form's identity. Deliberately given no permissions this env -- v37 grants it write access to exactly one blob container."
+      }
+    ]
+  },
+
+  "rbac": {
+    "assignments": [
+      {
+        "role": "Virtual Machine Contributor",
+        "principal": { "kind": "group", "purpose": "drift" },
+        "scope": "resourceGroup",
+        "justification": "Operations must start, stop, resize and rebuild the VM. It stops short of Contributor, so they cannot alter the network or hand out roles."
+      },
+      {
+        "role": "Reader",
+        "principal": { "kind": "group", "purpose": "utveckling" },
+        "scope": "resourceGroup",
+        "justification": "Developers need to see the environment to diagnose the application. They change it through the pipeline, never by hand, so read is all they need."
+      }
+    ]
+  }
+}

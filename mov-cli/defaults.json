@@ -1,0 +1,120 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/defaults.schema.json",
+  "location": "swedencentral",
+  "tags": {
+    "course": "MOV25",
+    "company": "Novatrix AB",
+    "env": "${env}",
+    "managedBy": "mov"
+  },
+  "stages": [
+    "preflight",
+    "rg",
+    "cost"
+  ],
+  "admin": {
+    "sshSource": "*"
+  },
+  "cost": {
+    "amount": 200,
+    "currency": "SEK",
+    "timeGrain": "Monthly",
+    "thresholds": [
+      {
+        "percent": 50,
+        "type": "Actual",
+        "operator": "GreaterThan"
+      },
+      {
+        "percent": 80,
+        "type": "Actual",
+        "operator": "GreaterThan"
+      },
+      {
+        "percent": 90,
+        "type": "Actual",
+        "operator": "GreaterThan"
+      },
+      {
+        "percent": 100,
+        "type": "Forecasted",
+        "operator": "GreaterThan"
+      }
+    ],
+    "notify": {
+      "emails": [
+        "82danass@gafe.molndal.se"
+      ]
+    }
+  },
+  "verify": {
+    "httpPath": "/",
+    "expectStatus": 200,
+    "expectText": "Novatrix",
+    "timeoutSeconds": 420,
+    "intervalSeconds": 10
+  },
+  "docs": {
+    "maxOutputLines": 40,
+    "redact": [
+      {
+        "pattern": "(\"customData\"\\s*:\\s*\")[A-Za-z0-9+/=]{40,}",
+        "replacement": "\\1<base64 cloud-init, see cloud-init.yaml>"
+      },
+      {
+        "pattern": "(ssh-(?:rsa|ed25519)\\s+)[A-Za-z0-9+/=]{20,}",
+        "replacement": "\\1<public key>"
+      }
+    ]
+  },
+  "itemDefaults": {
+    "network.subnets": {
+      "private": false
+    },
+    "network.nsg.*": {
+      "direction": "Inbound",
+      "access": "Allow",
+      "protocol": "Tcp",
+      "source": "*",
+      "destination": "*",
+      "ports": [
+        "*"
+      ]
+    },
+    "compute.vms": {
+      "image": "Ubuntu2404",
+      "size": "Standard_B2ts_v2",
+      "publicIp": true,
+      "publicIpSku": "Standard",
+      "publicIpAllocationMethod": "Static",
+      "adminUsername": "azureuser",
+      "osDisk": {
+        "sku": "Standard_LRS"
+      },
+      "ssh": {
+        "mode": "generate",
+        "keyName": "mov-${env}",
+        "keyType": "ed25519"
+      },
+      "source": {
+        "repo": "82danass/azure",
+        "ref": "master",
+        "path": "${env}/public",
+        "bootstrap": "scripts/bootstrap.sh",
+        "auth": "public"
+      },
+      "host": {
+        "packages": [
+          "git",
+          "nginx"
+        ],
+        "updatePackages": true,
+        "upgradePackages": true,
+        "rebootIfRequired": false
+      }
+    },
+    "storage.containers": {
+      "publicAccess": "None"
+    }
+  }
+}

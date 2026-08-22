@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/workspace.schema.json",
+  "name": "mov25-azure",
+  "azure": {
+    "tenantId": "183c226e-1463-4978-8672-ac9c4a38d90b",
+    "subscriptionId": "fb5e8372-fcd5-4ab5-ac1a-b155e805eb42"
+  },
+  "paths": {
+    "profiles": "profiles",
+    "state": "state",
+    "keys": "keys",
+    "docs": "..",
+    "naming": "naming.json",
+    "defaults": "defaults.json"
+  },
+  "github": {
+    "owner": "82danass",
+    "repo": "azure",
+    "defaultBranch": "master"
+  },
+  "description": "The MOV25 Azure environment. Profiles and naming live with the coursework so the work is visible; keys and state are gitignored."
+}

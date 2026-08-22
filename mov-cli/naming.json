@@ -1,0 +1,35 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/naming.schema.json",
+
+  "tokens": {
+    "company": "novatrix",
+    "user": "82danass"
+  },
+
+  "patterns": {
+    "resourceGroup": "rg-{company}-{env}",
+    "budget": "budget-{company}-{env}",
+    "virtualNetwork": "vnet-{company}",
+    "subnet": "snet-{company}-{purpose}",
+    "networkSecurityGroup": "nsg-{company}-{purpose}",
+    "publicIPAddress": "pip-{company}-{purpose}",
+    "networkInterface": "nic-{company}-{purpose}",
+    "virtualMachine": "vm-{company}-{purpose}",
+    "userAssignedIdentity": "id-{company}-{purpose}",
+    "storageAccount": "st{company}{user}{seq:02d}",
+    "entraGroup": "grp-{company}-{purpose}",
+    "entraUser": "usr-{company}-{purpose}"
+  },
+
+  "rules": {
+    "default": {
+      "pattern": "^[a-z][a-z0-9-]{1,62}[a-z0-9]$",
+      "description": "typ-foretag-syfte, lower case, no spaces and no a-ring/a-umlaut/o-umlaut, per the course naming brief."
+    },
+    "storageAccount": {
+      "pattern": "^[a-z0-9]{3,24}$",
+      "transform": ["lower", "remove:-"],
+      "description": "Azure storage accounts: 3-24 chars, lower-case letters and digits only, globally unique. The user name segment is what makes it unique; seq is set per environment in the profile."
+    }
+  }
+}

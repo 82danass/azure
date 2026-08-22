@@ -1,0 +1,57 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/profile.schema.json",
+
+  "env": "v36",
+  "extends": "v35",
+  "description": "Network and defence in depth. The form stays public; a private subnet is prepared for storage. Set admin.sshSource to your own address before deploying -- run `mov up v36 --set admin.sshSource=<your-ip>/32`.",
+
+  "stages": ["preflight", "rg", "network", "cost", "directory", "identity", "rbac", "compute", "verify"],
+
+  "network": {
+    "addressSpace": "10.36.0.0/16",
+    "subnets": [
+      { "purpose": "web", "prefix": "10.36.1.0/24", "nsg": "web" },
+      { "purpose": "data", "prefix": "10.36.2.0/24", "nsg": "data", "private": true }
+    ],
+    "nsg": {
+      "web": [
+        { "name": "http", "priority": 100, "ports": ["80"], "description": "The errand form is public by design." },
+        { "name": "https", "priority": 110, "ports": ["443"], "description": "Reserved for TLS." },
+        {
+          "name": "ssh",
+          "priority": 120,
+          "ports": ["22"],
+          "source": "${admin.sshSource}",
+          "description": "Administrative access from one source only. Layer one of defence in depth."
+        },
+        {
+          "name": "deny-all-inbound",
+          "priority": 4000,
+          "access": "Deny",
+          "protocol": "*",
+          "ports": ["*"],
+          "description": "Everything not allowed above is refused explicitly, rather than relying on the default rules."
+        }
+      ],
+      "data": [
+        {
+          "name": "allow-web-subnet",
+          "priority": 100,
+          "protocol": "*",
+          "ports": ["*"],
+          "source": "10.36.1.0/24",
+          "description": "Only the web tier may reach the data tier. Layer two: even inside the VNet, tiers are separated."
+        },
+        {
+          "name": "deny-internet-inbound",
+          "priority": 4000,
+          "access": "Deny",
+          "protocol": "*",
+          "ports": ["*"],
+          "source": "Internet",
+          "description": "The data subnet is never reachable from the internet."
+        }
+      ]
+    }
+  }
+}

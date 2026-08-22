@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/profile.schema.json",
+
+  "env": "v34",
+  "description": "Compute: Ubuntu VM running Nginx, serving the Novatrix errand form.",
+
+  "stages": ["preflight", "rg", "network", "cost", "compute", "verify"],
+
+  "network": {
+    "addressSpace": "10.34.0.0/16",
+    "subnets": [
+      { "purpose": "web", "prefix": "10.34.1.0/24", "nsg": "web" }
+    ],
+    "nsg": {
+      "web": [
+        { "name": "http", "priority": 100, "ports": ["80"], "description": "The errand form is public by design." },
+        { "name": "https", "priority": 110, "ports": ["443"], "description": "Reserved for TLS." },
+        {
+          "name": "ssh",
+          "priority": 120,
+          "ports": ["22"],
+          "source": "${admin.sshSource}",
+          "description": "Administrative access. v36 narrows this to a single source."
+        }
+      ]
+    }
+  },
+
+  "compute": {
+    "vms": [
+      { "purpose": "web", "subnet": "web" }
+    ]
+  }
+}
