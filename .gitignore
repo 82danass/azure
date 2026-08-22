@@ -1,4 +1,4 @@
 # mov writes these. Private keys, initial passwords and deployment state are
 # never public; the configuration that produces them is.
-mov-cli/keys/
-mov-cli/state/
+mov-workspace/keys/
+mov-workspace/state/
