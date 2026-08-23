@@ -99,7 +99,7 @@ Miljön är ombyggd i omgångar och många gånger, både på det sättet och fr
 Verktygen ersätter jag med ett eget 'harness' där miljön byggs utifrån en
 profil: **vad** som ska byggas blir skalbart och dynamiskt, och **hur** det ska
 gå till sköts metodiskt av den underliggande infrastrukturen. Det är i ett
-nötskal [Arelius-D/MOV-CLI](https://github.com/Arelius-D/MOV-CLI).
+nötskal [Arelius-D/mov](https://github.com/Arelius-D/mov).
 
 > Dokumentationen ligger öppet på [mov-cli.duckdns.org](https://mov-cli.duckdns.org). Du har dessutom bjudits in till det privata repot. Det går att installera utan att klona repot, mer om det och annat finns där.
 

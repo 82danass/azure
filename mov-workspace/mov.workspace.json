@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/workspace.schema.json",
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/workspace.schema.json",
   "name": "mov25-azure",
   "azure": {
     "tenantId": "183c226e-1463-4978-8672-ac9c4a38d90b",

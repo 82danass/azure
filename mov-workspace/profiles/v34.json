@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov-cli/main/src/mov/data/schema/profile.schema.json",
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
 
   "env": "v34",
   "description": "Compute: Ubuntu VM running Nginx, serving the Novatrix errand form.",
