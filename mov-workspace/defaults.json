@@ -52,7 +52,37 @@
     "expectStatus": 200,
     "expectText": "Novatrix",
     "timeoutSeconds": 420,
-    "intervalSeconds": 10
+    "intervalSeconds": 10,
+    "host": [
+      {
+        "name": "cloud-init",
+        "run": "cloud-init status --wait",
+        "expect": "status: done"
+      },
+      {
+        "name": "bootstrap",
+        "run": "test -f /etc/mov/deploy.env && echo present",
+        "expect": "present"
+      },
+      {
+        "name": "nginx",
+        "run": "systemctl is-active nginx",
+        "expect": "active",
+        "via": "run-command"
+      },
+      {
+        "name": "pending upgrades",
+        "run": "apt-get -s upgrade | grep -c '^Inst' || true",
+        "expect": "0",
+        "optional": true
+      },
+      {
+        "name": "reboot",
+        "run": "test ! -f /var/run/reboot-required && echo clean",
+        "expect": "clean",
+        "optional": true
+      }
+    ]
   },
   "docs": {
     "maxOutputLines": 40,
