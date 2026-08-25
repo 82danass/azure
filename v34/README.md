@@ -12,6 +12,8 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [
 
 ## Verifiering
 
+Först den handbyggda servern från portalen. Nyckelfil och användarnamn nedan är de som portalen skapade, den automatiserade versionen längre ner använder egna.
+
 Ansluter till servern via SSH:
 
 `ssh -i D:\MOV25\GitHub\azure\keys\vm-novatrix-web-key.pem azureuser-web@57.174.232.138`
@@ -32,6 +34,12 @@ Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.17.0-1022-azure x86_64)
 
 Last login: Thu Aug 20 15:40:29 2026 from 80.217.168.6
 ```
+
+Uppdaterar paketlistan, uppgraderar OS och installerar sedan Nginx:
+
+`sudo apt update && sudo apt upgrade -y && sudo apt install -y nginx`
+
+Kontrollerar att tjänsten är igång med `sudo systemctl status nginx`, som kan följas upp med `sudo systemctl restart nginx` om den inte är det.
 
 Kontrollerar att Nginx lyssnar på port 80:
 
@@ -95,13 +103,9 @@ style.css    100% 1319    39.0KB/s   00:00
 
 ## Automatisering
 
-Miljön är ombyggd i omgångar och många gånger, både på det sättet och från kod som IaC.
-Verktygen ersätter jag med ett eget 'harness' där miljön byggs utifrån en
-profil: **vad** som ska byggas blir skalbart och dynamiskt, och **hur** det ska
-gå till sköts metodiskt av den underliggande infrastrukturen. Det är i ett
-nötskal [Arelius-D/mov](https://github.com/Arelius-D/mov).
+Miljön ovan är byggd för hand i portalen. Sedan har jag rivit och byggt om denmånga gånger, till slut helt från kod och det är vad automatisering och nedan återberättar. I stället för lösa CLI-skript använder jag ett eget harness där miljön byggs utifrån en profil: **vad** som ska byggas står i profilen, **hur** det görs sköter verktyget. Det är i ett nötskal, [Arelius-D/mov](https://github.com/Arelius-D/mov).
 
-> Dokumentationen ligger öppet på [mov-cli.duckdns.org](https://mov-cli.duckdns.org). Du har dessutom bjudits in till det privata repot. Det går att installera utan att klona repot, mer om det och annat finns där.
+> Publik och interaktiv **showcase**-sida nås via [mov-cli.duckdns.org](https://mov-cli.duckdns.org). Själva [mov](https://github.com/Arelius-D/mov) är dock privat och kommer att förbli det, du är däremot inbjuden. Det går att installera utan att behöva klona något. Mer om det och annat finns under [README.md](https://github.com/Arelius-D/mov/blob/main/README.md).
 
 ### Profil för att driva automationen
 
@@ -134,12 +138,12 @@ nötskal [Arelius-D/mov](https://github.com/Arelius-D/mov).
 }
 ```
 
-Profilen är allt som är eget för v34. Region, taggar, budget, VM-storlek, image,
-SSH-nycklar och vilket repo som klonas till värden står i
-[`defaults.json`](../mov-workspace/defaults.json), namnmönstren i
-[`naming.json`](../mov-workspace/naming.json). Inga Azure-värden finns i kod.
+Profilen är allt som är eget för v34. Region, taggar, budget, VM-storlek, image, SSH-nycklar och vilket repo som klonas till värden står i [`defaults.json`](../mov-workspace/defaults.json), namnmönstren i [`naming.json`](../mov-workspace/naming.json). Inga Azure-värden finns i kod.
 
-### Bygga miljön
+Namnen sätts av `naming.json` efter kursens mönster typ-företag-syfte, inte för hand:
+`rg-novatrix-v34`, `vnet-novatrix`, `snet-novatrix-web`, `nsg-novatrix-web`, `pip-novatrix-web`, `nic-novatrix-web` och `vm-novatrix-web`. Storage har egna regler och får ett mönster, `st{företag}{användare}{löpnummer}`.
+
+### Bygga miljön med `mov`
 
 `mov up v34`
 
@@ -173,9 +177,7 @@ OK   generated SSH key D:\MOV25\GitHub\azure\mov-workspace\keys\mov-v34
 OK   web: http://20.240.254.36/ -> 200 in 47s
 ```
 
-Sista stagen gör samma kontroll mot den publika adressen som gjordes för hand
-ovan, och preflight varnar för att SSH står öppet mot hela internet innan något
-byggs, dock är användaren den enda med rätta nyckeln och server med ändå låset så det är ingen större fara ändå (knappast hardening men men vi är inte där än så).
+Sista staget gör samma kontroll mot den publika adressen som gjordes för hand ovan. Preflight varnar för att SSH står öppet mot hela internet innan något byggs. Det är medvetet den här veckan, regeln står kvar tills v36 snävar in den till en enda källadress. Lösenordsinloggning är avstängd och nyckeln finns bara lokalt, så det som skyddar servern är nyckeln och inte brandväggen. Öppen port 22 är den svagaste punkten i miljön.
 
 ### Läsa tillbaka vad som står uppe
 
@@ -218,20 +220,29 @@ OK   deleting rg-novatrix-v34
 
 ### Hur sidan hamnar på servern
 
-Ingen fil laddas upp till servern. cloud-init klonar repot på värden och kör
-[`scripts/bootstrap.sh`](../scripts/bootstrap.sh), som lägger
-[`v34/public/`](public/) i webbroten och konfigurerar Nginx. Nästa `mov up` kör
-om samma skript, och så når en ändring servern.
+Ingen fil laddas upp till servern. cloud-init klonar repot på värden och kör [`scripts/bootstrap.sh`](../scripts/bootstrap.sh), som lägger [`v34/public/`](public/) i webbroten som ansvarar för att konfigurerar Nginx. Nästa `mov up` kör om samma skript, och så når en ändring servern.
+
+### Återskapa miljön från repot
+
+Inget steg ovan kräver ett klick i portalen. På en ny dator räcker det med:
+
+```powershell
+(gh api repos/Arelius-D/mov/contents/install.ps1 -H "Accept: application/vnd.github.raw") -join "`n" | iex
+git clone https://github.com/82danass/azure.git
+mov use .\azure\mov-workspace
+az login
+mov up v34
+```
+
+Profil, defaults, namnmönster, cloud-init och själva webbsidan ligger i repot. SSH-nycklarna gör det inte, de genereras vid första `mov up` och hamnar i en gitignorerad mapp. Resultatet blir samma miljö med samma namn, samma region och samma budget, och `verify` säger till om sidan inte svarar.
 
 ### Dokumentation och mallar
 
-Varje kommando spelas in med sitt utdata medan deployen sker, och mallarna Azure
-får är vanliga ARM-mallar:
+Varje kommando spelas in med sitt utdata medan deployen sker, och mallarna Azure får är vanliga ARM-mallar:
 
 ```powershell
 mov docs v34
 mov templates export v34
 ```
 
-`mov docs v34` skriver ut de tio kommandon som byggde miljön med sina svar.
-Utskriften innehåller tenant- och subscription-id och ligger därför inte i repot.
+`mov docs v34` skriver ut de tio kommandon som byggde miljön med sina svar. Utskriften innehåller tenant- och subscription-id och ligger därför inte i repot.
