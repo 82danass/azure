@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v35",
+        "managedBy": "mov"
+      }
+    },
+    "identities": {
+      "value": [
+        {
+          "purpose": "app",
+          "name": "id-novatrix-app"
+        }
+      ]
+    }
+  }
+}

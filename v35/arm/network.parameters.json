@@ -1,0 +1,85 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v35",
+        "managedBy": "mov"
+      }
+    },
+    "vnetName": {
+      "value": "vnet-novatrix"
+    },
+    "addressSpace": {
+      "value": "10.35.0.0/16"
+    },
+    "networkSecurityGroups": {
+      "value": [
+        {
+          "name": "nsg-novatrix-web",
+          "rules": [
+            {
+              "name": "http",
+              "properties": {
+                "description": "The errand form is public by design.",
+                "priority": 100,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "Tcp",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80"
+              }
+            },
+            {
+              "name": "https",
+              "properties": {
+                "description": "Reserved for TLS.",
+                "priority": 110,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "Tcp",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443"
+              }
+            },
+            {
+              "name": "ssh",
+              "properties": {
+                "description": "Administrative access. v36 narrows this to a single source.",
+                "priority": 120,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "Tcp",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "subnets": {
+      "value": [
+        {
+          "purpose": "web",
+          "name": "snet-novatrix-web",
+          "prefix": "10.35.1.0/24",
+          "nsgName": "nsg-novatrix-web",
+          "serviceEndpoints": []
+        }
+      ]
+    }
+  }
+}

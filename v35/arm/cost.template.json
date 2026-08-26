@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "A cost budget scoped to this environment's resource group, with alert thresholds. On a Free Trial subscription the spending limit already stops the subscription when the credit runs out, so these alerts are early warning rather than a hard stop."
+  },
+
+  "parameters": {
+    "budgetName": { "type": "string" },
+    "amount": {
+      "type": "int",
+      "metadata": { "description": "Budget amount in the subscription's billing currency." }
+    },
+    "timeGrain": {
+      "type": "string",
+      "allowedValues": ["Monthly", "Quarterly", "Annually"]
+    },
+    "startDate": {
+      "type": "string",
+      "metadata": { "description": "First day of a period, ISO 8601. Azure rejects a start date mid-month." }
+    },
+    "notifications": {
+      "type": "object",
+      "metadata": { "description": "One entry per threshold, keyed by a stable name mov derives from the threshold itself." }
+    }
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Consumption/budgets",
+      "apiVersion": "2024-08-01",
+      "name": "[parameters('budgetName')]",
+      "properties": {
+        "category": "Cost",
+        "amount": "[parameters('amount')]",
+        "timeGrain": "[parameters('timeGrain')]",
+        "timePeriod": {
+          "startDate": "[parameters('startDate')]"
+        },
+        "notifications": "[parameters('notifications')]"
+      }
+    }
+  ],
+
+  "outputs": {
+    "budgetName": {
+      "type": "string",
+      "value": "[parameters('budgetName')]"
+    },
+    "budgetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Consumption/budgets', parameters('budgetName'))]"
+    }
+  }
+}

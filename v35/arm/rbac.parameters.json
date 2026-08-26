@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "groupAssignments": {
+      "value": [
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+          "principalId": "bdc36e89-ac5e-4144-9f68-f47b54b97b7f",
+          "principalType": "Group",
+          "description": "Operations must start, stop, resize and rebuild the VM. It stops short of Contributor, so they cannot alter the network or hand out roles."
+        },
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "principalId": "90600745-98f4-432d-8867-8c219eee5151",
+          "principalType": "Group",
+          "description": "Developers need to see the environment to diagnose the application. They change it through the pipeline, never by hand, so read is all they need."
+        }
+      ]
+    },
+    "scopedAssignments": {
+      "value": []
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "User-assigned managed identities. These let the application reach other services with no secret in the code, which is the point of the identity env."
+  },
+
+  "parameters": {
+    "location": { "type": "string" },
+    "tags": { "type": "object" },
+    "identities": {
+      "type": "array",
+      "metadata": { "description": "One entry per identity: { purpose, name }." }
+    }
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2024-11-30",
+      "name": "[parameters('identities')[copyIndex()].name]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "copy": {
+        "name": "identities",
+        "count": "[length(parameters('identities'))]"
+      }
+    }
+  ],
+
+  "outputs": {
+    "identities": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('identities'))]",
+        "input": {
+          "purpose": "[parameters('identities')[copyIndex()].purpose]",
+          "name": "[parameters('identities')[copyIndex()].name]",
+          "id": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identities')[copyIndex()].name)]",
+          "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identities')[copyIndex()].name), '2024-11-30').principalId]",
+          "clientId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('identities')[copyIndex()].name), '2024-11-30').clientId]"
+        }
+      }
+    }
+  }
+}
