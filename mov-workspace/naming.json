@@ -1,11 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/naming.schema.json",
-
   "tokens": {
     "company": "novatrix",
     "user": "82danass"
   },
-
   "patterns": {
     "resourceGroup": "rg-{company}-{env}",
     "budget": "budget-{company}-{env}",
@@ -18,9 +16,9 @@
     "userAssignedIdentity": "id-{company}-{purpose}",
     "storageAccount": "st{company}{user}{seq:02d}",
     "entraGroup": "grp-{company}-{purpose}",
-    "entraUser": "usr-{company}-{purpose}"
+    "entraUser": "usr-{company}-{purpose}",
+    "resource": "{shorttype}-{company}-{purpose}"
   },
-
   "rules": {
     "default": {
       "pattern": "^[a-z][a-z0-9-]{1,62}[a-z0-9]$",
@@ -28,7 +26,10 @@
     },
     "storageAccount": {
       "pattern": "^[a-z0-9]{3,24}$",
-      "transform": ["lower", "remove:-"],
+      "transform": [
+        "lower",
+        "remove:-"
+      ],
       "description": "Azure storage accounts: 3-24 chars, lower-case letters and digits only, globally unique. The user name segment is what makes it unique; seq is set per environment in the profile."
     }
   }
