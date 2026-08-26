@@ -14,11 +14,11 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 - [x] Verifiera och dokumentera
 
 ### [v35 — IAM och identitet](v35/README.md)
-- [ ] Uppdatera README för v35
-- [ ] Skapa identiteter/grupper i Entra ID
-- [ ] Tilldela RBAC-roller (least privilege)
-- [ ] Förbered managed identity för appen
-- [ ] Verifiera och dokumentera
+- [x] Uppdatera README för v35
+- [x] Skapa identiteter/grupper i Entra ID
+- [x] Tilldela RBAC-roller (least privilege)
+- [x] Förbered managed identity för appen
+- [x] Verifiera och dokumentera
 
 ### [v36 — Nätverk och säkerhet](v36/README.md)
 - [ ] Uppdatera README för v36
