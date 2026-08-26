@@ -2,3 +2,6 @@
 # never public; the configuration that produces them is.
 mov-workspace/keys/
 mov-workspace/state/
+
+# mov docs transcripts carry the initial passwords from `az ad user create`.
+v*/commands.md
