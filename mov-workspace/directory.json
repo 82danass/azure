@@ -1,0 +1,61 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/directory.schema.json",
+  "domain": "82danassgafemolndal.onmicrosoft.com",
+  "groups": [
+    {
+      "purpose": "drift",
+      "displayName": "Novatrix Drift",
+      "description": "Operations: runs and repairs the environment."
+    },
+    {
+      "purpose": "utveckling",
+      "displayName": "Novatrix Utveckling",
+      "description": "Developers: read the environment, deploy through the pipeline."
+    },
+    {
+      "purpose": "granskning",
+      "displayName": "Novatrix Granskning",
+      "description": "Reviewers: read everything, change nothing."
+    }
+  ],
+  "users": [
+    {
+      "purpose": "drift",
+      "displayName": "Anna Lindqvist (drift)",
+      "for": "anna.lindqvist@82danassgafemolndal.onmicrosoft.com",
+      "origin": "internal",
+      "groups": [
+        "drift"
+      ]
+    },
+    {
+      "purpose": "utveckling",
+      "displayName": "Erik Holm (utveckling)",
+      "for": "erik.holm@82danassgafemolndal.onmicrosoft.com",
+      "origin": "internal",
+      "groups": [
+        "utveckling"
+      ]
+    },
+    {
+      "purpose": "konsult",
+      "displayName": "Kim Tran (Acme Consulting)",
+      "for": "kim.tran@acme-consulting.io",
+      "origin": "external",
+      "expires": "2026-12-31",
+      "groups": [
+        "utveckling"
+      ]
+    },
+    {
+      "purpose": "granskning",
+      "displayName": "Lars Moen (NordSec)",
+      "for": "lars.moen@nordsec.no",
+      "origin": "external",
+      "expires": "2026-10-31",
+      "groups": [
+        "granskning"
+      ]
+    }
+  ]
+}
