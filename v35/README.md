@@ -12,13 +12,16 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [
 
 ## Rollmodell
 
-Novatrix har fått två roller och två fiktiva användare (med faktiska konton och anknytningar) den här veckan. Behörigheter sätts på grupper, aldrig på personer, och alla tilldelningar görs på resursgruppen `rg-novatrix-v35`, inte på prenumerationen.
+Novatrix har fått tre grupper och fyra konton den här veckan: två interna medarbetare och två externa konsulter. Ingen av dem loggar in med sitt eget konto. Var och en får ett eget syfteskonto som bara finns för arbetet i den här miljön, så att behörigheten kan tas bort utan att röra personens ordinarie inloggning, och så att ett komprometterat vardagskonto inte bär med sig rättigheter in i Azure. Behörigheter sätts på grupper, aldrig på personer, och alla tilldelningar görs på resursgruppen `rg-novatrix-v35`, inte på prenumerationen.
 
 | Grupp | Medlem | Roll | Scope | Varför |
 | --- | --- | --- | --- | --- |
-| `grp-novatrix-drift` (SysOp) | `usr-novatrix-drift` | Virtual Machine Contributor | `rg-novatrix-v35` | 'Drift' kan starta, stoppa, ändra storlek på och bygga om servern. Rollen stannar under Contributor, så drift kan inte ändra nätverket eller dela ut roller. |
-| `grp-novatrix-utveckling` (DevOp) | `usr-novatrix-utveckling` | Reader | `rg-novatrix-v35` | Utvecklarna behöver se miljön för att felsöka applikationen. Ändringar går via pipeline, aldrig för hand, så läsrätt räcker. |
+| `grp-novatrix-drift` (SysOp) | `usr-novatrix-drift` — Anna Lindqvist, intern | Virtual Machine Contributor | `rg-novatrix-v35` | 'Drift' kan starta, stoppa, ändra storlek på och bygga om servern. Rollen stannar under Contributor, så drift kan inte ändra nätverket eller dela ut roller. |
+| `grp-novatrix-utveckling` (DevOp) | `usr-novatrix-utveckling` — Erik Holm, intern<br>`usr-novatrix-konsult` — Kim Tran, extern, t.o.m. 2026-12-31 | Reader | `rg-novatrix-v35` | Utvecklarna behöver se miljön för att felsöka applikationen. Ändringar går via pipeline, aldrig för hand, så läsrätt räcker. Konsulten ligger i samma grupp och får därmed inte mer än de anställda. |
+| `grp-novatrix-granskning` | `usr-novatrix-granskning` — Lars Moen, extern, t.o.m. 2026-10-31 | Reader | `rg-novatrix-v35` | En säkerhetsgranskning läser miljön och ändrar ingenting. Läsrätt är allt den får, och kontot har ett slutdatum. |
 | `id-novatrix-app` (managed identity) | — | ingen | — | Appens identitet. Får ingen behörighet i v35. |
+
+Varje konto bär med sig vem det är till för (`for`), om personen är intern eller extern (`origin`) och, för de externa, vilket datum behörigheten ska vara borta (`expires`). Det står i katalogfilen och följer med till `mov directory show`, så frågan "vems är det här kontot och när ska det bort?" har ett svar i repot i stället för i någons minne.
 
 Jag valde inbyggda roller framför egna: de är dokumenterade, granskade och kända för den som läser IAM-bladet efter mig. Contributor på resursgruppen hade räckt för drift men ger också `Microsoft.Network/*` och `Microsoft.Authorization/roleAssignments/write`, och det är precis det drift inte ska ha. Virtual Machine Contributor är den minsta inbyggda rollen som täcker det drift faktiskt gör (borde få göra).
 Ingen människa får Owner. Owner ligger kvar på mitt eget konto på prenumerationen, och det är det enda stället. Modellen alltså Account Owner knuten till en person har alltid sina brister dock men det är vad det är.
@@ -27,15 +30,20 @@ Ingen människa får Owner. Owner ligger kvar på mitt eget konto på prenumerat
 
 Grupper och användare skapas i Entra ID av `mov`, med namn från [`naming.json`](../mov-workspace/naming.json): `grp-{företag}-{syfte}` och `usr-{företag}-{syfte}`.
 
+Katalogen står i [`mov-workspace/directory.json`](../mov-workspace/directory.json) och hör till workspacet, inte till profilen: objekten ligger i tenanten och lever vidare mellan miljöer, så samma personer och grupper gäller för v35, v36 och v37 utan att beskrivas om. `mov directory up` skapar dem utan att någon miljö behöver byggas.
+
 `mov directory show`
 
 ```shell
- kind  ┃ purpose    ┃ name                                                        ┃ created for
-━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━
- group │ drift      │ grp-novatrix-drift                                          │ v35
- group │ utveckling │ grp-novatrix-utveckling                                     │ v35
- user  │ drift      │ usr-novatrix-drift@82danassgafemolndal.onmicrosoft.com      │ v35
- user  │ utveckling │ usr-novatrix-utveckling@82danassgafemolndal.onmicrosoft.com │ v35
+ kind  ┃ purpose    ┃ name                                                        ┃ for                                                ┃ origin   ┃ expires    ┃ env
+━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━
+ group │ drift      │ grp-novatrix-drift                                          │                                                    │          │            │ v35
+ group │ utveckling │ grp-novatrix-utveckling                                     │                                                    │          │            │ v35
+ group │ granskning │ grp-novatrix-granskning                                     │                                                    │          │            │ v35
+ user  │ drift      │ usr-novatrix-drift@82danassgafemolndal.onmicrosoft.com      │ anna.lindqvist@82danassgafemolndal.onmicrosoft.com │ internal │            │ v35
+ user  │ utveckling │ usr-novatrix-utveckling@82danassgafemolndal.onmicrosoft.com │ erik.holm@82danassgafemolndal.onmicrosoft.com      │ internal │            │ v35
+ user  │ konsult    │ usr-novatrix-konsult@82danassgafemolndal.onmicrosoft.com    │ kim.tran@acme-consulting.io                        │ external │ 2026-12-31 │ v35
+ user  │ granskning │ usr-novatrix-granskning@82danassgafemolndal.onmicrosoft.com │ lars.moen@nordsec.no                               │ external │ 2026-10-31 │ v35
 ```
 
 Varje användare skapas med ett genererat lösenord på 24 tecken och tvingas byta det vid första inloggningen. Startlösenordet skrivs till en gitignorerad fil i workspacet och är förbrukat efter första inloggningen. Tenanten har Entra security defaults påslaget, så MFA krävs för varje ny användare direkt, det är inget jag valt bort och inget jag tycker man ska slentrianmässigt välja bort.
@@ -54,6 +62,7 @@ Så här ser tilldelningarna på gruppen ut, läst tillbaka från Azure. Identit
 Who can change the group — rg-novatrix-v35
 Role                        ┃ Principal           ┃ Type  ┃ Inherited from
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Reader                      │ Novatrix Granskning │ Group │ /subscriptions/…/resourcegroups/rg-novatrix-v35
 Reader                      │ Novatrix Utveckling │ Group │ /subscriptions/…/resourcegroups/rg-novatrix-v35
 Virtual Machine Contributor │ Novatrix Drift      │ Group │ /subscriptions/…/resourcegroups/rg-novatrix-v35
 ```
@@ -80,13 +89,13 @@ En roll är en grupp plus en rad i profilen. Ett nytt team, säg support, blir:
 { "purpose": "support", "displayName": "Novatrix Support", "description": "..." }
 ```
 
-under `directory.groups`, och
+i [`mov-workspace/directory.json`](../mov-workspace/directory.json) under `groups`, och
 
 ```json
 { "role": "Reader", "principal": { "kind": "group", "purpose": "support" }, "scope": "resourceGroup", "justification": "..." }
 ```
 
-under `rbac.assignments`. `mov up v35` skapar gruppen och tilldelningen, `mov plan v35` visar innan att det är det enda som ändras. En ny person i ett befintligt team är ett gruppmedlemskap i Entra, inga roller rörs.
+i profilen under `rbac.assignments`. `mov directory up` skapar gruppen, `mov up v35` tilldelningen, och `mov plan v35` visar innan att det är det enda som ändras. En ny person i ett befintligt team är ett konto med `groups` satt i katalogfilen, inga roller rörs.
 
 `justification` är obligatoriskt i profilen och skrivs in som beskrivning på själva rolltilldelningen, så motiveringen följer med till portalen och syns för den som granskar IAM-bladet. Tilldelningarnas namn genereras deterministiskt från scope, principal och roll, så en omkörning verifierar mot tillståndet i stället för att skapa dubbletter.
 
@@ -104,55 +113,138 @@ Allt ovan byggs från en profil med [mov](https://github.com/Arelius-D/mov), sam
 {
   "env": "v35",
   "extends": "v34",
-  "description": "IAM: Entra ID roles for Novatrix, least-privilege RBAC on the resource group, and a managed identity prepared for the storage env.",
-
-  "stages": ["preflight", "rg", "network", "cost", "directory", "identity", "rbac", "compute", "verify"],
-
+  "description": "IAM: Entra ID accounts for the people who work on Novatrix's environment -- two of the staff and two externals, each on a separate purpose account, never their own -- least-privilege RBAC on the resource group through groups, and a managed identity prepared for the storage env.",
+  "stages": [
+    "preflight",
+    "rg",
+    "network",
+    "cost",
+    "directory",
+    "identity",
+    "rbac",
+    "compute",
+    "verify"
+  ],
   "network": {
     "addressSpace": "10.35.0.0/16",
     "subnets": [
-      { "purpose": "web", "prefix": "10.35.1.0/24", "nsg": "web" }
+      {
+        "purpose": "web",
+        "prefix": "10.35.1.0/24",
+        "nsg": "web"
+      }
     ]
   },
-
-  "directory": {
-    "domain": "82danassgafemolndal.onmicrosoft.com",
-    "groups": [
-      { "purpose": "drift", "displayName": "Novatrix Drift", "description": "Operations: runs and repairs the environment." },
-      { "purpose": "utveckling", "displayName": "Novatrix Utveckling", "description": "Developers: read the environment, deploy through the pipeline." }
-    ],
-    "users": [
-      { "purpose": "drift", "displayName": "Novatrix Driftstekniker", "groups": ["drift"] },
-      { "purpose": "utveckling", "displayName": "Novatrix Utvecklare", "groups": ["utveckling"] }
-    ]
-  },
-
   "identity": {
     "userAssigned": [
-      { "purpose": "app", "description": "The errand form's identity. Deliberately given no permissions this env -- v37 grants it write access to exactly one blob container." }
+      {
+        "purpose": "app",
+        "description": "The errand form's identity. Deliberately given no permissions this env -- v37 grants it write access to exactly one blob container."
+      }
     ]
   },
-
   "rbac": {
     "assignments": [
       {
         "role": "Virtual Machine Contributor",
-        "principal": { "kind": "group", "purpose": "drift" },
+        "principal": {
+          "kind": "group",
+          "purpose": "drift"
+        },
         "scope": "resourceGroup",
         "justification": "Operations must start, stop, resize and rebuild the VM. It stops short of Contributor, so they cannot alter the network or hand out roles."
       },
       {
         "role": "Reader",
-        "principal": { "kind": "group", "purpose": "utveckling" },
+        "principal": {
+          "kind": "group",
+          "purpose": "utveckling"
+        },
         "scope": "resourceGroup",
         "justification": "Developers need to see the environment to diagnose the application. They change it through the pipeline, never by hand, so read is all they need."
+      },
+      {
+        "role": "Reader",
+        "principal": {
+          "kind": "group",
+          "purpose": "granskning"
+        },
+        "scope": "resourceGroup",
+        "justification": "A security review reads the environment and changes nothing. Read is all it gets, and the account has a date."
       }
     ]
   }
 }
 ```
 
-Rollerna står med portalens namn. Definitions-id slås upp vid deploy, och principal-id kommer från vad `directory`- och `identity`-stegen skapade, så profilen innehåller inga GUID:n.
+![v35.json som graf: rot, stages, network, identity och rbac med sina rolltilldelningar](img/json-visualization.png)
+
+Profilen beskriver miljön och ingenting annat: den innehåller ingen `directory`-sektion, för personerna är tenantens och står i workspacets katalogfil. `directory`-steget läser den filen, och `rbac` slår upp gruppernas id vid deploy. Rollerna står med portalens namn, definitions-id slås upp vid deploy, så profilen innehåller inga GUID:n.
+
+[`mov-workspace/directory.json`](../mov-workspace/directory.json)
+
+```json
+{
+  "domain": "82danassgafemolndal.onmicrosoft.com",
+  "groups": [
+    {
+      "purpose": "drift",
+      "displayName": "Novatrix Drift",
+      "description": "Operations: runs and repairs the environment."
+    },
+    {
+      "purpose": "utveckling",
+      "displayName": "Novatrix Utveckling",
+      "description": "Developers: read the environment, deploy through the pipeline."
+    },
+    {
+      "purpose": "granskning",
+      "displayName": "Novatrix Granskning",
+      "description": "Reviewers: read everything, change nothing."
+    }
+  ],
+  "users": [
+    {
+      "purpose": "drift",
+      "displayName": "Anna Lindqvist (drift)",
+      "for": "anna.lindqvist@82danassgafemolndal.onmicrosoft.com",
+      "origin": "internal",
+      "groups": [
+        "drift"
+      ]
+    },
+    {
+      "purpose": "utveckling",
+      "displayName": "Erik Holm (utveckling)",
+      "for": "erik.holm@82danassgafemolndal.onmicrosoft.com",
+      "origin": "internal",
+      "groups": [
+        "utveckling"
+      ]
+    },
+    {
+      "purpose": "konsult",
+      "displayName": "Kim Tran (Acme Consulting)",
+      "for": "kim.tran@acme-consulting.io",
+      "origin": "external",
+      "expires": "2026-12-31",
+      "groups": [
+        "utveckling"
+      ]
+    },
+    {
+      "purpose": "granskning",
+      "displayName": "Lars Moen (NordSec)",
+      "for": "lars.moen@nordsec.no",
+      "origin": "external",
+      "expires": "2026-10-31",
+      "groups": [
+        "granskning"
+      ]
+    }
+  ]
+}
+```
 
 ### Bygga
 
@@ -175,10 +267,15 @@ up v35 -> rg-novatrix-v35 in swedencentral
 5/9 directory Entra ID users and groups (tenant scope)
      OK   created group Novatrix Drift (grp-novatrix-drift)
      OK   created group Novatrix Utveckling (grp-novatrix-utveckling)
+     OK   created group Novatrix Granskning (grp-novatrix-granskning)
      OK   created user usr-novatrix-drift@82danassgafemolndal.onmicrosoft.com
      OK   created user usr-novatrix-utveckling@82danassgafemolndal.onmicrosoft.com
+     OK   created user usr-novatrix-konsult@82danassgafemolndal.onmicrosoft.com
+     OK   created user usr-novatrix-granskning@82danassgafemolndal.onmicrosoft.com
      OK   added usr-novatrix-drift@82danassgafemolndal.onmicrosoft.com to grp-novatrix-drift
      OK   added usr-novatrix-utveckling@82danassgafemolndal.onmicrosoft.com to grp-novatrix-utveckling
+     OK   added usr-novatrix-konsult@82danassgafemolndal.onmicrosoft.com to grp-novatrix-utveckling
+     OK   added usr-novatrix-granskning@82danassgafemolndal.onmicrosoft.com to grp-novatrix-granskning
 6/9 identity User-assigned managed identities
      mov-v35-identity-b0537912
 7/9 rbac Role assignments
@@ -231,4 +328,4 @@ mov templates export v35    # mallarna och parametrarna Azure fick
 mov audit -f md -o audit.md # tenanten läst tillbaka
 ```
 
-`mov docs` skrev 30 kommandon och `mov audit` läste hela tenanten. Ingen av de utskrifterna ligger i repot: transkriptet innehåller startlösenorden, auditen fakturerings- och kontouppgifter. Utdraget under *Managed identity* ovan är den del av auditen som hör till uppgiften. [`arm/`](arm/) ligger i repot, det är mallarna och parametrarna Azure fick.
+`mov docs` skrev 40 kommandon och `mov audit` läste hela tenanten. Ingen av de utskrifterna ligger i repot: transkriptet innehåller startlösenorden, auditen fakturerings- och kontouppgifter. Utdraget under *Managed identity* ovan är den del av auditen som hör till uppgiften. [`arm/`](arm/) ligger i repot, det är mallarna och parametrarna Azure fick.

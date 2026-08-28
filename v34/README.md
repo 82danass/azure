@@ -229,7 +229,7 @@ Inget steg ovan kräver ett klick i portalen. På en ny dator räcker det med:
 ```powershell
 (gh api repos/Arelius-D/mov/contents/install.ps1 -H "Accept: application/vnd.github.raw") -join "`n" | iex
 git clone https://github.com/82danass/azure.git
-mov use .\azure\mov-workspace
+mov setup .\azure\mov-workspace
 az login
 mov up v34
 ```
