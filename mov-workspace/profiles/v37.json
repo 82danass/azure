@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v37",
   "extends": "v36",
-  "description": "Storage. Errands and attachments land in a blob container, reached by the application's managed identity -- shared keys are switched off, so no secret can end up in the repo.",
+  "description": "Storage. Errands and attachments land in a blob container, reached by the application's managed identity. Shared keys are switched off, so no secret can end up in the repo.",
   "stages": [
     "preflight",
     "rg",

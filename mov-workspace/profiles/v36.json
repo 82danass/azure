@@ -3,7 +3,7 @@
 
   "env": "v36",
   "extends": "v35",
-  "description": "Network and defence in depth. The form stays public; a private subnet is prepared for storage. Set admin.sshSource to your own address before deploying -- run `mov up v36 --set admin.sshSource=<your-ip>/32`.",
+  "description": "Network and defence in depth. The form stays public; a private subnet is prepared for storage. Set admin.sshSource to your own address before deploying. Run `mov up v36 --set admin.sshSource=<your-ip>/32`.",
 
   "stages": ["preflight", "rg", "network", "cost", "directory", "identity", "rbac", "compute", "verify"],
 
