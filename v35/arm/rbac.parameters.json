@@ -6,15 +6,21 @@
       "value": [
         {
           "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
-          "principalId": "bdc36e89-ac5e-4144-9f68-f47b54b97b7f",
+          "principalId": "098950f3-a0d4-4804-9c80-10c122bd318c",
           "principalType": "Group",
           "description": "Operations must start, stop, resize and rebuild the VM. It stops short of Contributor, so they cannot alter the network or hand out roles."
         },
         {
           "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
-          "principalId": "90600745-98f4-432d-8867-8c219eee5151",
+          "principalId": "664579d3-b561-4916-a775-85ee5be617c2",
           "principalType": "Group",
           "description": "Developers need to see the environment to diagnose the application. They change it through the pipeline, never by hand, so read is all they need."
+        },
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "principalId": "18f4a93e-bfa1-42a1-a0a2-3a60e50a9b8f",
+          "principalType": "Group",
+          "description": "A security review reads the environment and changes nothing. Read is all it gets, and the account has a date."
         }
       ]
     },
