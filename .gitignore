@@ -8,3 +8,6 @@ v*/commands*.md
 
 # mov audit reads the billing account: profile ids, address, card, balance.
 v*/audit.md
+
+# The subscription cog names the address budget alerts go to.
+mov-workspace/subscription.json
