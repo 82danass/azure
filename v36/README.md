@@ -12,7 +12,7 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [
 
 ## Nätverket
 
-Ärendeformuläret v34-35 nu med ett ett riktigt nätverk. Ett VNet, `vnet-novatrix`, med adressrymden `10.36.0.0/16`, och tjänsterna delade i skikt i stället för att ligga på samma yta:
+Ärendeformuläret v34-35 nu med ett riktigt nätverk. Ett VNet, `vnet-novatrix`, med adressrymden `10.36.0.0/16`, och tjänsterna delade i skikt i stället för att ligga på samma yta:
 
 | Subnät | Prefix | NSG | Publikt | Vad som ligger där |
 | --- | --- | --- | --- | --- |
@@ -134,7 +134,7 @@ Sista varianten tar bort porten helt. `AzureBastionSubnet` på `10.36.4.0/26`, e
 
 ![mov up v36-bastion: tio steg, resources-steget bygger publik IP och bastion, och preflight rapporterar ingen öppen administrativ regel](img/mov_up_v36-bastion.svg)
 
-Miljön får ett extra steg, `resources`, som bygger den publika adressen och själva bastion-värden ur profilens resurskatalog. Anslutningen går sedan genom Azures kontrollplan i stället för genom nätverket:
+Miljön får ett extra steg, `resources`, som bygger den publika adressen och själva bastion-värden ur profilens resurskatalog. Anslutningen går sedan genom Azures Bastion-tjänst över HTTPS i stället för direkt mot maskinen:
 
 ![mov ssh v36-bastion: az network bastion ssh mot vm-novatrix-web](img/mov_ssh_v36-bastion.svg)
 
@@ -172,7 +172,7 @@ Varje `mov up` slutar med samma kontroller, ställda till maskinerna och inte ti
 
 Sidan svarar med 200 och rätt innehåll, cloud-init är klart, Nginx kör, det finns inga väntande säkerhetsuppdateringar och maskinen behöver inte startas om. I bastion-miljön ställs frågorna över `run-command`, alltså genom kontrollplanet, eftersom det inte finns någon väg utifrån att ställa dem över.
 
-Att nätverket faktiskt stänger syns på hur inloggningen sker: i `v36` går SSH direkt till den publika adressen, i `v36-jumphost` avslutas sessionen mot `10.36.1.4`, och i `v36-bastion` finns ingen adress att ansluta till alls, bara ett resurs-id.
+Att nätverket faktiskt stänger syns på hur inloggningen sker: i `v36` går SSH direkt till den publika adressen, i `v36-jumphost` avslutas sessionen mot `10.36.1.4`, och i `v36-bastion` finns ingen adress att administrera över alls, bara ett resurs-id.
 
 ## Automatisering
 
@@ -259,4 +259,4 @@ mov rebuild v36-bastion
 
 `mov down` tar resursgruppen, budgeten, SSH-nyckeln och posten i `ssh_config`. Grupperna och användarna i Entra ID från v35 ligger kvar i tenanten och rörs inte. `mov rebuild` gör ner och upp i ett svep.
 
-Deployerna är vanliga ARM-mallar och skrivs ut med `mov templates export v36`, `mov docs v36` skriver varje kommando som kördes med sitt svar. Ingen av de utskrifterna ligger i repot, de innehåller tenant- och prenumerations-id.
+Deployerna är vanliga ARM-mallar och skrivs ut med `mov templates export v36`; de ligger i [`arm/`](arm/), [`arm-jumphost/`](arm-jumphost/) och [`arm-bastion/`](arm-bastion/). `mov docs v36` skriver varje kommando som kördes med sitt svar. De utskrifterna ligger inte i repot, de innehåller lösenord och faktureringsuppgifter.
