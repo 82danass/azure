@@ -25,7 +25,7 @@
 <text y="692" xml:space="preserve"><tspan x="16" textLength="420" lengthAdjust="spacing">See https://ubuntu.com/esm or run: sudo pro status</tspan></text>
 <text y="776" xml:space="preserve"><tspan x="16" textLength="352.8" lengthAdjust="spacing">1 device has a firmware upgrade available.</tspan></text>
 <text y="797" xml:space="preserve"><tspan x="16" textLength="411.6" lengthAdjust="spacing">Run `fwupdmgr get-upgrades` for more information.</tspan></text>
-<text y="839" xml:space="preserve"><tspan x="16" textLength="453.6" lengthAdjust="spacing">Last login: Fri Sep  4 17:38:12 2026 from 80.217.168.6</tspan></text>
+<text y="839" xml:space="preserve"><tspan x="16" textLength="453.6" lengthAdjust="spacing">Last login: Fri Sep  4 17:38:12 2026 from 203.0.113.42</tspan></text>
 <text y="860" xml:space="preserve"><tspan x="16" textLength="588" lengthAdjust="spacing">To run a command as administrator (user &quot;root&quot;), use &quot;sudo &lt;command&gt;&quot;.</tspan></text>
 <text y="881" xml:space="preserve"><tspan x="16" textLength="268.8" lengthAdjust="spacing">See &quot;man sudo_root&quot; for details.</tspan></text>
 <text y="923" xml:space="preserve"><tspan x="16" textLength="218.4" lengthAdjust="spacing" fill="#a6da95" font-weight="bold">azureuser@vm-novatrix-jump</tspan><tspan x="234.4" textLength="8.4" lengthAdjust="spacing">:</tspan><tspan x="242.8" textLength="8.4" lengthAdjust="spacing" fill="#8aadf4" font-weight="bold">~</tspan><tspan x="251.2" textLength="75.6" lengthAdjust="spacing">$ ssh web</tspan></text>

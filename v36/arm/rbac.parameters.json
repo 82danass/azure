@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "groupAssignments": {
+      "value": [
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+          "principalId": "37583679-fc7e-42e8-ba51-3cc3b01b3bf3",
+          "principalType": "Group",
+          "description": "Operations must start, stop, resize and rebuild the VM. It stops short of Contributor, so they cannot alter the network or hand out roles."
+        },
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "principalId": "5a369680-dadb-491d-92dc-69361227bb76",
+          "principalType": "Group",
+          "description": "Developers need to see the environment to diagnose the application. They change it through the pipeline, never by hand, so read is all they need."
+        },
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "principalId": "0b86bcbd-ba61-4dd4-95c2-1d04f71ebd33",
+          "principalType": "Group",
+          "description": "A security review reads the environment and changes nothing. Read is all it gets, and the account has a date."
+        }
+      ]
+    },
+    "scopedAssignments": {
+      "value": []
+    }
+  }
+}

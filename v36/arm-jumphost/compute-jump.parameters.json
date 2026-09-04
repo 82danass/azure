@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v36-jumphost",
+        "managedBy": "mov"
+      }
+    },
+    "vmName": {
+      "value": "vm-novatrix-jump"
+    },
+    "nicName": {
+      "value": "nic-novatrix-jump"
+    },
+    "publicIpName": {
+      "value": "pip-novatrix-jump"
+    },
+    "createPublicIp": {
+      "value": true
+    },
+    "publicIpSku": {
+      "value": "Standard"
+    },
+    "publicIpAllocationMethod": {
+      "value": "Static"
+    },
+    "subnetId": {
+      "value": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/resourceGroups/rg-novatrix-v36-jumphost/providers/Microsoft.Network/virtualNetworks/vnet-novatrix/subnets/snet-novatrix-mgmt"
+    },
+    "vmSize": {
+      "value": "Standard_B2ts_v2"
+    },
+    "imageReference": {
+      "value": {
+        "publisher": "Canonical",
+        "offer": "ubuntu-24_04-lts",
+        "sku": "server",
+        "version": "latest"
+      }
+    },
+    "osDiskSku": {
+      "value": "Standard_LRS"
+    },
+    "osDiskSizeGb": {
+      "value": 0
+    },
+    "adminUsername": {
+      "value": "azureuser"
+    },
+    "sshPublicKey": {
+      "value": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDPEi4A5OsaS63N0BPklsb2ZN+ULJ82DjWAOnhD0I07L mov-mov-v36-jumphost"
+    },
+    "customData": {
+      "value": "I2Nsb3VkLWNvbmZpZwojIFJlbmRlcmVkIGJ5IG1vdiBmcm9tIHRoZSBlbnYncyBwcm9maWxlLCBmb3IgYSBtYWNoaW5lIHRoYXQgc2VydmVzIG5vdGhpbmc6CiMgYSBob3AsIGEgcHJvYmUsIGEgaG9zdCB3aG9zZSBvbmx5IGpvYiBpcyB0byBiZSByZWFjaGFibGUuIFBhY2thZ2VzIGFuZAojIHVwZGF0ZXMgb25seS4gTm90aGluZyBpcyBjbG9uZWQgYW5kIG5vIGJvb3RzdHJhcCBydW5zLgpwYWNrYWdlX3VwZGF0ZTogdHJ1ZQpwYWNrYWdlX3VwZ3JhZGU6IHRydWUKcGFja2FnZV9yZWJvb3RfaWZfcmVxdWlyZWQ6IGZhbHNlCgpwYWNrYWdlczoKICAtIG9wZW5zc2gtY2xpZW50CgpmaW5hbF9tZXNzYWdlOiAibW92OiB2MzYtanVtcGhvc3QgaG9zdCByZWFkeSIK"
+    },
+    "userAssignedIdentities": {
+      "value": {}
+    }
+  }
+}

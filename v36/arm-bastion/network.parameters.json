@@ -1,0 +1,146 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v36-bastion",
+        "managedBy": "mov"
+      }
+    },
+    "vnetName": {
+      "value": "vnet-novatrix"
+    },
+    "addressSpace": {
+      "value": "10.36.0.0/16"
+    },
+    "networkSecurityGroups": {
+      "value": [
+        {
+          "name": "nsg-novatrix-web",
+          "rules": [
+            {
+              "name": "http",
+              "properties": {
+                "description": "The errand form is public by design.",
+                "priority": 100,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "Tcp",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80"
+              }
+            },
+            {
+              "name": "https",
+              "properties": {
+                "description": "Reserved for TLS.",
+                "priority": 110,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "Tcp",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443"
+              }
+            },
+            {
+              "name": "ssh",
+              "properties": {
+                "description": "Administrative access from the bastion subnet only. The bastion is the one door, and it is Azure's.",
+                "priority": 120,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "Tcp",
+                "sourceAddressPrefix": "10.36.4.0/26",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22"
+              }
+            },
+            {
+              "name": "deny-all-inbound",
+              "properties": {
+                "description": "Everything not allowed above is refused explicitly.",
+                "priority": 4000,
+                "direction": "Inbound",
+                "access": "Deny",
+                "protocol": "*",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*"
+              }
+            }
+          ]
+        },
+        {
+          "name": "nsg-novatrix-data",
+          "rules": [
+            {
+              "name": "allow-web-subnet",
+              "properties": {
+                "description": "Only the web tier may reach the data tier.",
+                "priority": 100,
+                "direction": "Inbound",
+                "access": "Allow",
+                "protocol": "*",
+                "sourceAddressPrefix": "10.36.1.0/24",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*"
+              }
+            },
+            {
+              "name": "deny-internet-inbound",
+              "properties": {
+                "description": "The data subnet is never reachable from the internet.",
+                "priority": 4000,
+                "direction": "Inbound",
+                "access": "Deny",
+                "protocol": "*",
+                "sourceAddressPrefix": "Internet",
+                "destinationAddressPrefix": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "subnets": {
+      "value": [
+        {
+          "purpose": "web",
+          "name": "snet-novatrix-web",
+          "prefix": "10.36.1.0/24",
+          "nsgName": "nsg-novatrix-web",
+          "serviceEndpoints": []
+        },
+        {
+          "purpose": "data",
+          "name": "snet-novatrix-data",
+          "prefix": "10.36.2.0/24",
+          "nsgName": "nsg-novatrix-data",
+          "serviceEndpoints": []
+        },
+        {
+          "purpose": "bastion",
+          "name": "AzureBastionSubnet",
+          "prefix": "10.36.4.0/26",
+          "nsgName": "",
+          "serviceEndpoints": []
+        }
+      ]
+    }
+  }
+}

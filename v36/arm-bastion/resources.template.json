@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "object"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-05-01",
+      "name": "bastionip-novatrix-v36-bastion",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      },
+      "sku": {
+        "name": "Standard"
+      }
+    },
+    {
+      "type": "Microsoft.Network/bastionHosts",
+      "apiVersion": "2024-05-01",
+      "name": "bastion-novatrix-v36-bastion",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "enableTunneling": true,
+        "ipConfigurations": [
+          {
+            "name": "bastion",
+            "properties": {
+              "subnet": {
+                "id": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/resourceGroups/rg-novatrix-v36-bastion/providers/Microsoft.Network/virtualNetworks/vnet-novatrix/subnets/AzureBastionSubnet"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'bastionip-novatrix-v36-bastion')]"
+              }
+            }
+          }
+        ]
+      },
+      "sku": {
+        "name": "Standard"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', 'bastionip-novatrix-v36-bastion')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "bastionipId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/publicIPAddresses', 'bastionip-novatrix-v36-bastion')]"
+    },
+    "bastionipName": {
+      "type": "string",
+      "value": "bastionip-novatrix-v36-bastion"
+    },
+    "bastionipType": {
+      "type": "string",
+      "value": "Microsoft.Network/publicIPAddresses"
+    },
+    "bastionId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/bastionHosts', 'bastion-novatrix-v36-bastion')]"
+    },
+    "bastionName": {
+      "type": "string",
+      "value": "bastion-novatrix-v36-bastion"
+    },
+    "bastionType": {
+      "type": "string",
+      "value": "Microsoft.Network/bastionHosts"
+    }
+  }
+}

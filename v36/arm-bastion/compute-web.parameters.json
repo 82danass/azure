@@ -1,0 +1,67 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v36-bastion",
+        "managedBy": "mov"
+      }
+    },
+    "vmName": {
+      "value": "vm-novatrix-web"
+    },
+    "nicName": {
+      "value": "nic-novatrix-web"
+    },
+    "publicIpName": {
+      "value": "pip-novatrix-web"
+    },
+    "createPublicIp": {
+      "value": true
+    },
+    "publicIpSku": {
+      "value": "Standard"
+    },
+    "publicIpAllocationMethod": {
+      "value": "Static"
+    },
+    "subnetId": {
+      "value": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/resourceGroups/rg-novatrix-v36-bastion/providers/Microsoft.Network/virtualNetworks/vnet-novatrix/subnets/snet-novatrix-web"
+    },
+    "vmSize": {
+      "value": "Standard_B2ts_v2"
+    },
+    "imageReference": {
+      "value": {
+        "publisher": "Canonical",
+        "offer": "ubuntu-24_04-lts",
+        "sku": "server",
+        "version": "latest"
+      }
+    },
+    "osDiskSku": {
+      "value": "Standard_LRS"
+    },
+    "osDiskSizeGb": {
+      "value": 0
+    },
+    "adminUsername": {
+      "value": "azureuser"
+    },
+    "sshPublicKey": {
+      "value": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxaj5Ow+enqlehTwruiUDxWQn3dr2bghVV4IIjTMaYR mov-mov-v36-bastion"
+    },
+    "customData": {
+      "value": "I2Nsb3VkLWNvbmZpZwojIFJlbmRlcmVkIGJ5IG1vdiBmcm9tIHRoZSBlbnYncyBwcm9maWxlLiBUaGUgc2l0ZSBpcyBuZXZlciB1cGxvYWRlZCBmcm9tIHRoZQojIHdvcmtzdGF0aW9uOiB0aGUgaG9zdCBjbG9uZXMgaXQgZnJvbSBHaXRIdWIsIHNvIHRoZSBtYWNoaW5lIGlzIHJlcHJvZHVjaWJsZQojIGZyb20gdGhlIHJlcG9zaXRvcnkgYWxvbmUuCnBhY2thZ2VfdXBkYXRlOiB0cnVlCnBhY2thZ2VfdXBncmFkZTogdHJ1ZQpwYWNrYWdlX3JlYm9vdF9pZl9yZXF1aXJlZDogZmFsc2UKCnBhY2thZ2VzOgogIC0gZ2l0CiAgLSBuZ2lueAoKd3JpdGVfZmlsZXM6CiAgLSBwYXRoOiAvZXRjL21vdi9kZXBsb3kuZW52CiAgICBwZXJtaXNzaW9uczogJzA2NDQnCiAgICBjb250ZW50OiB8CiAgICAgIE1PVl9FTlY9djM2LWJhc3Rpb24KICAgICAgTU9WX1JFUE89ODJkYW5hc3MvYXp1cmUKICAgICAgTU9WX1JFRj1tYXN0ZXIKICAgICAgTU9WX1BBVEg9djM2L3B1YmxpYwogICAgICBNT1ZfQVBQX0RJUj0vb3B0L21vdi9hcHAKCnJ1bmNtZDoKICAtIFsgbWtkaXIsIC1wLCAnL29wdC9tb3YvYXBwJyBdCiAgLSBbIGdpdCwgY2xvbmUsIC0tZGVwdGgsICcxJywgLS1icmFuY2gsICdtYXN0ZXInLCAnaHR0cHM6Ly9naXRodWIuY29tLzgyZGFuYXNzL2F6dXJlLmdpdCcsICcvb3B0L21vdi9hcHAnIF0KICAtIFsgYmFzaCwgJy9vcHQvbW92L2FwcC9zY3JpcHRzL2Jvb3RzdHJhcC5zaCcgXQoKZmluYWxfbWVzc2FnZTogIm1vdjogdjM2LWJhc3Rpb24gYm9vdHN0cmFwIGZpbmlzaGVkIgo="
+    },
+    "userAssignedIdentities": {
+      "value": {}
+    }
+  }
+}

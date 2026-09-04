@@ -4,7 +4,7 @@ mov-workspace/keys/
 mov-workspace/state/
 
 # mov docs transcripts carry the initial passwords from `az ad user create`.
-v*/commands.md
+v*/commands*.md
 
 # mov audit reads the billing account: profile ids, address, card, balance.
 v*/audit.md

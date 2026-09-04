@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "budgetName": {
+      "value": "budget-novatrix-v36-jumphost"
+    },
+    "amount": {
+      "value": 200
+    },
+    "timeGrain": {
+      "value": "Monthly"
+    },
+    "startDate": {
+      "value": "2026-09-01T00:00:00Z"
+    },
+    "notifications": {
+      "value": {
+        "Actual_GreaterThan_50_Percent": {
+          "enabled": true,
+          "operator": "GreaterThan",
+          "threshold": 50,
+          "thresholdType": "Actual",
+          "contactEmails": [
+            "82danass@gafe.molndal.se"
+          ]
+        },
+        "Actual_GreaterThan_80_Percent": {
+          "enabled": true,
+          "operator": "GreaterThan",
+          "threshold": 80,
+          "thresholdType": "Actual",
+          "contactEmails": [
+            "82danass@gafe.molndal.se"
+          ]
+        },
+        "Actual_GreaterThan_90_Percent": {
+          "enabled": true,
+          "operator": "GreaterThan",
+          "threshold": 90,
+          "thresholdType": "Actual",
+          "contactEmails": [
+            "82danass@gafe.molndal.se"
+          ]
+        },
+        "Forecasted_GreaterThan_100_Percent": {
+          "enabled": true,
+          "operator": "GreaterThan",
+          "threshold": 100,
+          "thresholdType": "Forecasted",
+          "contactEmails": [
+            "82danass@gafe.molndal.se"
+          ]
+        }
+      }
+    }
+  }
+}

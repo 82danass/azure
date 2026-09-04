@@ -32,7 +32,7 @@ Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.17.0-1022-azure x86_64)
   Memory usage: 36%               IPv4 address for eth0: 172.16.0.4
   Swap usage:   0%
 
-Last login: Thu Aug 20 15:40:29 2026 from 80.217.168.6
+Last login: Thu Aug 20 15:40:29 2026 from 203.0.113.42
 ```
 
 Uppdaterar paketlistan, uppgraderar OS och installerar sedan Nginx:

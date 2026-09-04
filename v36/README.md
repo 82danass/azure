@@ -12,7 +12,7 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [
 
 ## Nätverket
 
-Ärendeformuläret från v34 flyttar in i ett riktigt nätverk. Ett VNet, `vnet-novatrix`, med adressrymden `10.36.0.0/16`, och tjänsterna delade i skikt i stället för att ligga på samma yta:
+Ärendeformuläret v34-35 nu med ett ett riktigt nätverk. Ett VNet, `vnet-novatrix`, med adressrymden `10.36.0.0/16`, och tjänsterna delade i skikt i stället för att ligga på samma yta:
 
 | Subnät | Prefix | NSG | Publikt | Vad som ligger där |
 | --- | --- | --- | --- | --- |
@@ -93,21 +93,24 @@ Webbservern kan inte längre öppnas från internet över SSH, oavsett vad `admi
 
 ![mov up v36-jumphost: två VM byggs, web och jump, och verifieringen kontrollerar att hoppmaskinen inte serverar något](img/mov_up_v36-jumphost.svg)
 
-Hoppmaskinen bär nyckeln till webbservern (`holdsKeys`), så därifrån är det bara `ssh web`. Från min laptop går `mov ssh v36-jumphost web` genom hoppet i stället:
+Hoppmaskinen bär nyckeln till webbservern, och `compute`-steget säger det rakt ut:
+
+```shell
+     OK   jump holds the keys for web
+     jump: log in and hop onward with `ssh <purpose>`
+```
+
+Det ger två vägar in, och båda går genom hoppet. `mov ssh v36-jumphost web` når webbservern direkt från laptopen:
 
 ![mov ssh v36-jumphost web: inloggning på web genom hoppet, från min laptop](img/mov_ssh_v36-jumphost_web.svg)
 
+Två rader i den utskriften visar att hoppet användes: `Last login` på webbservern kommer från `10.36.3.4`, alltså mgmt-subnätet, och sessionen avslutas mot `10.36.1.4`. Båda är privata adresser.
+
+Den andra vägen är att logga in på hoppet och hoppa vidare därifrån:
+
 ![mov ssh v36-jumphost jump, sedan ssh web från hoppet: hoppmaskinen bär nyckeln och når webbservern på 10.36.1.4](img/mov_ssh_v36-jumphost_web_ssh_jump.svg)
 
-Två maskiner betyder att miljön måste veta vilken jag menar:
-
-```shell
-ERROR Several VMs are deployed for v36-jumphost. One of:
-  mov ssh v36-jumphost web
-  mov ssh v36-jumphost jump
-```
-
-Beviset för att hoppet faktiskt används står i sista raden när jag loggar ut från webbservern: `Connection to 10.36.1.4 closed.` Det är en privat adress. Trafiken gick aldrig direkt.
+`ssh web` fungerar på hoppmaskinen för att nyckeln till webbservern ligger där, och utloggningen sker i två steg: först `10.36.1.4`, sedan hoppets egen adress.
 
 Kvar finns ändå en publik SSH-port, den på hoppmaskinen, och även den körningen är gjord med `admin.sshSource` på `*`:
 
