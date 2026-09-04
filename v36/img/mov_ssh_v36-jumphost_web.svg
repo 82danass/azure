@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="855.2" height="988" viewBox="0 0 855.2 988" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="14" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="855.2" height="988" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="855.2" height="956" fill="#24273a"/>
+
+<text y="62" xml:space="preserve"><tspan x="16" textLength="25.2" lengthAdjust="spacing" fill="#e1c682">mov</tspan><tspan x="41.2" textLength="8.4" lengthAdjust="spacing"> </tspan><tspan x="49.6" textLength="25.2" lengthAdjust="spacing" fill="#a5adcb">ssh</tspan><tspan x="74.8" textLength="8.4" lengthAdjust="spacing"> </tspan><tspan x="83.2" textLength="100.8" lengthAdjust="spacing" fill="#a5adcb">v36-jumphost</tspan><tspan x="184" textLength="8.4" lengthAdjust="spacing"> </tspan><tspan x="192.4" textLength="25.2" lengthAdjust="spacing" fill="#a5adcb">web</tspan></text>
+<text y="83" xml:space="preserve"><tspan x="16" textLength="92.4" lengthAdjust="spacing" fill="#8bd5ca">mov25-azure</tspan><tspan x="108.4" textLength="8.4" lengthAdjust="spacing"> </tspan><tspan x="116.8" textLength="8.4" lengthAdjust="spacing" opacity="0.5">·</tspan><tspan x="125.2" textLength="369.6" lengthAdjust="spacing"> tenant 82danassgafemolndal.onmicrosoft.com </tspan><tspan x="494.8" textLength="8.4" lengthAdjust="spacing" opacity="0.5">·</tspan><tspan x="503.2" textLength="336" lengthAdjust="spacing"> subscription MOV25 - Azure subscription</tspan></text>
+<text y="104" xml:space="preserve"><tspan x="16" textLength="646.8" lengthAdjust="spacing" opacity="0.5">ssh -F &quot;D:/MOV25/GitHub/azure/mov-workspace/keys/ssh_config&quot; v36-jumphost-web</tspan></text>
+<text y="125" xml:space="preserve"><tspan x="16" textLength="554.4" lengthAdjust="spacing">Welcome to Ubuntu 24.04.4 LTS (GNU/Linux 6.17.0-1022-azure x86_64)</tspan></text>
+<text y="167" xml:space="preserve"><tspan x="16" textLength="352.8" lengthAdjust="spacing"> * Documentation:  https://help.ubuntu.com</tspan></text>
+<text y="188" xml:space="preserve"><tspan x="16" textLength="420" lengthAdjust="spacing"> * Management:     https://landscape.canonical.com</tspan></text>
+<text y="209" xml:space="preserve"><tspan x="16" textLength="344.4" lengthAdjust="spacing"> * Support:        https://ubuntu.com/pro</tspan></text>
+<text y="251" xml:space="preserve"><tspan x="16" textLength="453.6" lengthAdjust="spacing"> System information as of Fri Sep  4 17:36:26 UTC 2026</tspan></text>
+<text y="293" xml:space="preserve"><tspan x="16" textLength="504" lengthAdjust="spacing">  System load:  0.0               Processes:             138</tspan></text>
+<text y="314" xml:space="preserve"><tspan x="16" textLength="487.2" lengthAdjust="spacing">  Usage of /:   6.8% of 28.02GB   Users logged in:       0</tspan></text>
+<text y="335" xml:space="preserve"><tspan x="16" textLength="554.4" lengthAdjust="spacing">  Memory usage: 40%               IPv4 address for eth0: 10.36.1.4</tspan></text>
+<text y="356" xml:space="preserve"><tspan x="16" textLength="151.2" lengthAdjust="spacing">  Swap usage:   0%</tspan></text>
+<text y="398" xml:space="preserve"><tspan x="16" textLength="621.6" lengthAdjust="spacing"> * Canonical Workshop gives developers fast, composable, reproducible, and</tspan></text>
+<text y="419" xml:space="preserve"><tspan x="16" textLength="604.8" lengthAdjust="spacing">   secure developer environments that are perfect for agentic workflows.</tspan></text>
+<text y="461" xml:space="preserve"><tspan x="16" textLength="252" lengthAdjust="spacing">   https://ubuntu.com/workshop</tspan></text>
+<text y="503" xml:space="preserve"><tspan x="16" textLength="352.8" lengthAdjust="spacing">1 device has a firmware upgrade available.</tspan></text>
+<text y="524" xml:space="preserve"><tspan x="16" textLength="411.6" lengthAdjust="spacing">Run `fwupdmgr get-upgrades` for more information.</tspan></text>
+<text y="587" xml:space="preserve"><tspan x="16" textLength="520.8" lengthAdjust="spacing">Expanded Security Maintenance for Applications is not enabled.</tspan></text>
+<text y="629" xml:space="preserve"><tspan x="16" textLength="310.8" lengthAdjust="spacing">0 updates can be applied immediately.</tspan></text>
+<text y="671" xml:space="preserve"><tspan x="16" textLength="520.8" lengthAdjust="spacing">Enable ESM Apps to receive additional future security updates.</tspan></text>
+<text y="692" xml:space="preserve"><tspan x="16" textLength="420" lengthAdjust="spacing">See https://ubuntu.com/esm or run: sudo pro status</tspan></text>
+<text y="776" xml:space="preserve"><tspan x="16" textLength="352.8" lengthAdjust="spacing">1 device has a firmware upgrade available.</tspan></text>
+<text y="797" xml:space="preserve"><tspan x="16" textLength="411.6" lengthAdjust="spacing">Run `fwupdmgr get-upgrades` for more information.</tspan></text>
+<text y="839" xml:space="preserve"><tspan x="16" textLength="428.4" lengthAdjust="spacing">Last login: Fri Sep  4 17:15:40 2026 from 10.36.3.4</tspan></text>
+<text y="860" xml:space="preserve"><tspan x="16" textLength="588" lengthAdjust="spacing">To run a command as administrator (user &quot;root&quot;), use &quot;sudo &lt;command&gt;&quot;.</tspan></text>
+<text y="881" xml:space="preserve"><tspan x="16" textLength="268.8" lengthAdjust="spacing">See &quot;man sudo_root&quot; for details.</tspan></text>
+<text y="923" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#a6da95" font-weight="bold">azureuser@vm-novatrix-web</tspan><tspan x="226" textLength="8.4" lengthAdjust="spacing">:</tspan><tspan x="234.4" textLength="8.4" lengthAdjust="spacing" fill="#8aadf4" font-weight="bold">~</tspan><tspan x="242.8" textLength="50.4" lengthAdjust="spacing">$ exit</tspan></text>
+<text y="944" xml:space="preserve"><tspan x="16" textLength="50.4" lengthAdjust="spacing">logout</tspan></text>
+<text y="965" xml:space="preserve"><tspan x="16" textLength="260.4" lengthAdjust="spacing">Connection to 10.36.1.4 closed.</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 847.2 0 A 8 8 0 0 1 855.2 8 L 855.2 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="735.2" y1="16" x2="745.2" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="781.2" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M827.2 11 L837.2 21 M837.2 11 L827.2 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>

@@ -21,11 +21,11 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 - [x] Verifiera och dokumentera
 
 ### [v36 — Nätverk och säkerhet](v36/README.md)
-- [ ] Uppdatera README för v36
-- [ ] Bygg VNet med publikt/privat subnät
-- [ ] Säkra trafiken med NSG:er
-- [ ] Placera lösningen i nätverket
-- [ ] Verifiera och dokumentera
+- [x] Uppdatera README för v36
+- [x] Bygg VNet med publikt/privat subnät
+- [x] Säkra trafiken med NSG:er
+- [x] Placera lösningen i nätverket
+- [x] Verifiera och dokumentera
 
 ### [v37 — Storage](v37/README.md)
 - [ ] Uppdatera README för v37
