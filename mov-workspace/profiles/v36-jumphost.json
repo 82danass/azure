@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v36-jumphost",
   "extends": "v36",
-  "description": "v36 with administrative access through a hop. The form VM takes ssh only from the management subnet; the hop takes it only from admin.sshSource and serves nothing. `mov ssh v36-jumphost web` goes through the hop. Run `mov up v36-jumphost --set admin.sshSource=<your-ip>/32`.",
+  "description": "v36 with a jump host. The form VM takes ssh only from the management subnet; the hop takes it only from admin.sshSource, serves nothing, and holds the key for the form VM: log into the hop with `mov ssh v36-jumphost jump` and hop onward with `ssh web`. `mov ssh v36-jumphost web` reaches the form VM through the hop from here. Run `mov up v36-jumphost --set admin.sshSource=<your-ip>/32`.",
   "network": {
     "addressSpace": "10.36.0.0/16",
     "subnets": [
@@ -142,7 +142,8 @@
               "expect": "inactive"
             }
           ]
-        }
+        },
+        "holdsKeys": true
       }
     ]
   }
