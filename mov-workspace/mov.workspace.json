@@ -18,7 +18,9 @@
     "docs": "..",
     "naming": "naming.json",
     "defaults": "defaults.json",
-    "directory": "directory.json"
+    "directory": "directory.json",
+    "billing": "billing.json",
+    "subscription": "subscription.json"
   },
   "github": {
     "owner": "82danass",

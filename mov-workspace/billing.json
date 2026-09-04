@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/billing.schema.json",
+  "description": "Who may see the invoice, pay it, and change the card, the address and the company behind it. One identity per role, plus one holding nothing, so what each role actually permits is measured rather than described.",
+  "principals": [
+    {
+      "purpose": "norole",
+      "description": "Holds nothing. The control: whatever this one can still do, no billing role was needed for."
+    },
+    {
+      "purpose": "reader",
+      "role": "Billing account reader",
+      "scope": "account",
+      "description": "Read the whole agreement. Expected to see the invoice and not to pay it."
+    },
+    {
+      "purpose": "contrib",
+      "role": "Billing account contributor",
+      "scope": "account",
+      "description": "Everything except handing out billing roles."
+    },
+    {
+      "purpose": "owner",
+      "role": "Billing account owner",
+      "scope": "account",
+      "description": "The only role that can grant another billing role. What one person leaving takes with them."
+    },
+    {
+      "purpose": "invoice",
+      "role": "Invoice manager",
+      "scope": "profile",
+      "description": "Exists on the profile and nowhere else: view and manage invoices without any other profile permission."
+    }
+  ]
+}

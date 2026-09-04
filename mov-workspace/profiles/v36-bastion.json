@@ -1,0 +1,150 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
+  "env": "v36-bastion",
+  "extends": "v36",
+  "description": "v36 with administrative access through Azure Bastion. The form VM takes ssh only from the bastion subnet; nothing on the internet can open 22 anywhere. `mov ssh v36-bastion web` goes through the bastion with the workspace key, and verify asks the machine over run-command. Run `mov up v36-bastion --set admin.sshSource=<your-ip>/32`.",
+  "stages": [
+    "preflight",
+    "rg",
+    "network",
+    "cost",
+    "directory",
+    "identity",
+    "resources",
+    "rbac",
+    "compute",
+    "verify"
+  ],
+  "network": {
+    "addressSpace": "10.36.0.0/16",
+    "subnets": [
+      {
+        "purpose": "web",
+        "prefix": "10.36.1.0/24",
+        "nsg": "web"
+      },
+      {
+        "purpose": "data",
+        "prefix": "10.36.2.0/24",
+        "nsg": "data",
+        "private": true
+      },
+      {
+        "purpose": "bastion",
+        "prefix": "10.36.4.0/26",
+        "kind": "bastion"
+      }
+    ],
+    "nsg": {
+      "web": [
+        {
+          "name": "http",
+          "priority": 100,
+          "ports": [
+            "80"
+          ],
+          "description": "The errand form is public by design."
+        },
+        {
+          "name": "https",
+          "priority": 110,
+          "ports": [
+            "443"
+          ],
+          "description": "Reserved for TLS."
+        },
+        {
+          "name": "ssh",
+          "priority": 120,
+          "ports": [
+            "22"
+          ],
+          "source": "10.36.4.0/26",
+          "description": "Administrative access from the bastion subnet only. The bastion is the one door, and it is Azure's."
+        },
+        {
+          "name": "deny-all-inbound",
+          "priority": 4000,
+          "access": "Deny",
+          "protocol": "*",
+          "ports": [
+            "*"
+          ],
+          "description": "Everything not allowed above is refused explicitly."
+        }
+      ],
+      "data": [
+        {
+          "name": "allow-web-subnet",
+          "priority": 100,
+          "protocol": "*",
+          "ports": [
+            "*"
+          ],
+          "source": "10.36.1.0/24",
+          "description": "Only the web tier may reach the data tier."
+        },
+        {
+          "name": "deny-internet-inbound",
+          "priority": 4000,
+          "access": "Deny",
+          "protocol": "*",
+          "ports": [
+            "*"
+          ],
+          "source": "Internet",
+          "description": "The data subnet is never reachable from the internet."
+        }
+      ]
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2024-05-01",
+      "purpose": "bastionip",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
+    },
+    {
+      "type": "Microsoft.Network/bastionHosts",
+      "apiVersion": "2024-05-01",
+      "purpose": "bastion",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "enableTunneling": true,
+        "ipConfigurations": [
+          {
+            "name": "bastion",
+            "properties": {
+              "subnet": {
+                "id": "@output:network.subnets.bastion.id"
+              },
+              "publicIPAddress": {
+                "id": "@resourceId:bastionip"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "compute": {
+    "vms": [
+      {
+        "purpose": "web",
+        "subnet": "web",
+        "via": "bastion",
+        "source": {
+          "path": "v36/public"
+        }
+      }
+    ]
+  }
+}

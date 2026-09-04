@@ -17,7 +17,8 @@
     "storageAccount": "st{company}{user}{seq:02d}",
     "entraGroup": "grp-{company}-{purpose}",
     "entraUser": "usr-{company}-{purpose}",
-    "resource": "{purpose}-{company}-{env}"
+    "resource": "{purpose}-{company}-{env}",
+    "billingPrincipal": "spn-{company}-{purpose}"
   },
   "rules": {
     "default": {
