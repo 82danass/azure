@@ -23,6 +23,24 @@ Webbskiktet är publikt för att det ska vara det: kunder ska nå formuläret. D
 
 Adressrymden är densamma i alla tre miljöerna nedan. De ligger i var sin resursgrupp, i var sitt VNet, utan peering, så överlappet spelar ingen roll.
 
+```mermaid
+flowchart LR
+  NET([Internet])
+  subgraph VNET["vnet-novatrix &middot; 10.36.0.0/16"]
+    subgraph WEB["snet-novatrix-web &middot; 10.36.1.0/24 &middot; publikt"]
+      W["vm-novatrix-web<br/>Nginx + formulär"]
+    end
+    subgraph DATA["snet-novatrix-data &middot; 10.36.2.0/24 &middot; privat"]
+      D["tomt i v36<br/>lagringen i v37"]
+    end
+  end
+  NET -->|"80, 443"| W
+  NET -->|"22 från admin.sshSource"| W
+  W -->|"allt, prio 100"| D
+  NET -.->|"nekas, prio 4000"| D
+```
+
+
 ## Regler
 
 `nsg-novatrix-web`
@@ -76,6 +94,29 @@ Servern svarar på `10.36.1.4`, alltså inifrån webbsubnätet, och formuläret 
 
 Samma nätverk plus ett tredje subnät och en maskin som inte serverar något.
 
+```mermaid
+flowchart LR
+  NET([Internet])
+  subgraph VNET["vnet-novatrix &middot; 10.36.0.0/16"]
+    subgraph MGMT["snet-novatrix-mgmt &middot; 10.36.3.0/24"]
+      J["vm-novatrix-jump<br/>serverar ingenting"]
+    end
+    subgraph WEB["snet-novatrix-web &middot; 10.36.1.0/24"]
+      W["vm-novatrix-web"]
+    end
+    subgraph DATA["snet-novatrix-data &middot; 10.36.2.0/24 &middot; privat"]
+      D["tomt"]
+    end
+  end
+  NET -->|"80, 443"| W
+  NET -->|"22 från admin.sshSource"| J
+  NET -.->|"22 nekas"| W
+  J -->|"22"| W
+  W --> D
+  NET -.->|"nekas"| D
+```
+
+
 | Subnät | Prefix | NSG | Regel |
 | --- | --- | --- | --- |
 | `snet-novatrix-mgmt` | `10.36.3.0/24` | `nsg-novatrix-mgmt` | 22 från `admin.sshSource`, allt annat nekas |
@@ -124,6 +165,29 @@ Skillnaden mot v36 är att porten sitter på en maskin som inte gör något anna
 ### v36-bastion
 
 Sista varianten tar bort porten helt. `AzureBastionSubnet` på `10.36.4.0/26`, en Bastion Standard med tunneling, och SSH mot webbservern tillåts bara från `10.36.4.0/26`. Ingen regel i miljön är öppen mot internet på 22, och preflight säger det rakt ut:
+
+```mermaid
+flowchart LR
+  NET([Internet])
+  subgraph VNET["vnet-novatrix &middot; 10.36.0.0/16"]
+    subgraph BAS["AzureBastionSubnet &middot; 10.36.4.0/26"]
+      B["bastion-novatrix-v36-bastion<br/>Standard, tunneling"]
+    end
+    subgraph WEB["snet-novatrix-web &middot; 10.36.1.0/24"]
+      W["vm-novatrix-web"]
+    end
+    subgraph DATA["snet-novatrix-data &middot; 10.36.2.0/24 &middot; privat"]
+      D["tomt"]
+    end
+  end
+  NET -->|"80, 443"| W
+  NET -->|"443, RBAC på resurs-id"| B
+  NET -.->|"22 nekas överallt"| W
+  B -->|"22"| W
+  W --> D
+  NET -.->|"nekas"| D
+```
+
 
 ```shell
      OK   subnet bastion: AzureBastionSubnet, 10.36.4.0/26
