@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v37",
   "extends": "v36",
-  "description": "Storage. Errands and attachments land in a blob container, reached by the application's managed identity. Shared keys are switched off, so no secret can end up in the repo.",
+  "description": "Storage. Errands and attachments land in a blob container, reached by the application's managed identity. Shared keys are switched off, so no secret can end up in the repo, and the account answers only from the web subnet, where the application runs.",
   "stages": [
     "preflight",
     "rg",
@@ -21,16 +21,16 @@
       {
         "purpose": "web",
         "prefix": "10.37.1.0/24",
-        "nsg": "web"
+        "nsg": "web",
+        "serviceEndpoints": [
+          "Microsoft.Storage"
+        ]
       },
       {
         "purpose": "data",
         "prefix": "10.37.2.0/24",
         "nsg": "data",
-        "private": true,
-        "serviceEndpoints": [
-          "Microsoft.Storage"
-        ]
+        "private": true
       }
     ],
     "nsg": {
@@ -103,7 +103,16 @@
         "name": "arenden",
         "publicAccess": "None"
       }
-    ]
+    ],
+    "network": {
+      "defaultAction": "Deny",
+      "subnets": [
+        "web"
+      ],
+      "bypass": [
+        "AzureServices"
+      ]
+    }
   },
   "rbac": {
     "assignments": [
