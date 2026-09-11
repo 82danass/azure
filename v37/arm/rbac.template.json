@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Role assignments. Two loops, because an assignment on the resource group and an assignment narrowed to one resource inside it are different shapes: the second carries a scope. Assignment names come from guid() over the scope, principal and role, so redeploying converges instead of failing as a duplicate."
+  },
+
+  "parameters": {
+    "groupAssignments": {
+      "type": "array",
+      "metadata": { "description": "Assignments over the whole resource group: { roleDefinitionId, principalId, principalType, description }." }
+    },
+    "scopedAssignments": {
+      "type": "array",
+      "metadata": { "description": "Assignments narrowed to one resource, adding { scope } as a relative resource id. This is what keeps least privilege honest -- write to one container, not to the group." }
+    }
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, parameters('groupAssignments')[copyIndex()].principalId, parameters('groupAssignments')[copyIndex()].roleDefinitionId)]",
+      "copy": {
+        "name": "groupScoped",
+        "count": "[length(parameters('groupAssignments'))]"
+      },
+      "properties": {
+        "roleDefinitionId": "[parameters('groupAssignments')[copyIndex()].roleDefinitionId]",
+        "principalId": "[parameters('groupAssignments')[copyIndex()].principalId]",
+        "principalType": "[parameters('groupAssignments')[copyIndex()].principalType]",
+        "description": "[parameters('groupAssignments')[copyIndex()].description]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[parameters('scopedAssignments')[copyIndex()].scope]",
+      "name": "[guid(parameters('scopedAssignments')[copyIndex()].scope, parameters('scopedAssignments')[copyIndex()].principalId, parameters('scopedAssignments')[copyIndex()].roleDefinitionId)]",
+      "copy": {
+        "name": "resourceScoped",
+        "count": "[length(parameters('scopedAssignments'))]"
+      },
+      "properties": {
+        "roleDefinitionId": "[parameters('scopedAssignments')[copyIndex()].roleDefinitionId]",
+        "principalId": "[parameters('scopedAssignments')[copyIndex()].principalId]",
+        "principalType": "[parameters('scopedAssignments')[copyIndex()].principalType]",
+        "description": "[parameters('scopedAssignments')[copyIndex()].description]"
+      }
+    }
+  ],
+
+  "outputs": {
+    "groupAssignments": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('groupAssignments'))]",
+        "input": {
+          "principalId": "[parameters('groupAssignments')[copyIndex()].principalId]",
+          "roleDefinitionId": "[parameters('groupAssignments')[copyIndex()].roleDefinitionId]",
+          "scope": "[resourceGroup().id]"
+        }
+      }
+    },
+    "scopedAssignments": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('scopedAssignments'))]",
+        "input": {
+          "principalId": "[parameters('scopedAssignments')[copyIndex()].principalId]",
+          "roleDefinitionId": "[parameters('scopedAssignments')[copyIndex()].roleDefinitionId]",
+          "scope": "[parameters('scopedAssignments')[copyIndex()].scope]"
+        }
+      }
+    }
+  }
+}

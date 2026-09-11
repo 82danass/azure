@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v37",
+        "managedBy": "mov"
+      }
+    },
+    "accountName": {
+      "value": "stnovatrix82danass01"
+    },
+    "sku": {
+      "value": "Standard_LRS"
+    },
+    "kind": {
+      "value": "StorageV2"
+    },
+    "accessTier": {
+      "value": "Hot"
+    },
+    "allowBlobPublicAccess": {
+      "value": false
+    },
+    "allowSharedKeyAccess": {
+      "value": false
+    },
+    "minimumTlsVersion": {
+      "value": "TLS1_2"
+    },
+    "containers": {
+      "value": [
+        {
+          "name": "arenden",
+          "publicAccess": "None"
+        }
+      ]
+    },
+    "networkAcls": {
+      "value": {
+        "defaultAction": "Deny",
+        "bypass": "AzureServices",
+        "virtualNetworkRules": [
+          {
+            "id": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/resourceGroups/rg-novatrix-v37/providers/Microsoft.Network/virtualNetworks/vnet-novatrix/subnets/snet-novatrix-web"
+          }
+        ],
+        "ipRules": []
+      }
+    }
+  }
+}

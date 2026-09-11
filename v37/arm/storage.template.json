@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Storage account and blob containers for Novatrix errands and attachments. Shared-key access is off by default: the application reaches storage through its managed identity, so no key ever needs to exist in the code or the repository."
+  },
+
+  "parameters": {
+    "location": { "type": "string" },
+    "tags": { "type": "object" },
+    "accountName": { "type": "string", "minLength": 3, "maxLength": 24 },
+    "sku": { "type": "string" },
+    "kind": { "type": "string" },
+    "accessTier": { "type": "string" },
+    "allowBlobPublicAccess": { "type": "bool" },
+    "allowSharedKeyAccess": { "type": "bool" },
+    "minimumTlsVersion": { "type": "string" },
+    "containers": {
+      "type": "array",
+      "metadata": { "description": "One entry per container: { name, publicAccess }." }
+    },
+    "networkAcls": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": { "description": "Which networks the account answers from. Empty means any network, and authentication alone decides." }
+    }
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2026-04-01",
+      "name": "[parameters('accountName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": { "name": "[parameters('sku')]" },
+      "kind": "[parameters('kind')]",
+      "properties": {
+        "accessTier": "[parameters('accessTier')]",
+        "allowBlobPublicAccess": "[parameters('allowBlobPublicAccess')]",
+        "allowSharedKeyAccess": "[parameters('allowSharedKeyAccess')]",
+        "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+        "supportsHttpsTrafficOnly": true,
+        "networkAcls": "[if(empty(parameters('networkAcls')), json('null'), parameters('networkAcls'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2026-04-01",
+      "name": "[concat(parameters('accountName'), '/default/', parameters('containers')[copyIndex()].name)]",
+      "copy": {
+        "name": "containers",
+        "count": "[length(parameters('containers'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('accountName'))]"
+      ],
+      "properties": {
+        "publicAccess": "[parameters('containers')[copyIndex()].publicAccess]"
+      }
+    }
+  ],
+
+  "outputs": {
+    "accountName": {
+      "type": "string",
+      "value": "[parameters('accountName')]"
+    },
+    "accountId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('accountName'))]"
+    },
+    "blobEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('accountName')), '2026-04-01').primaryEndpoints.blob]"
+    },
+    "containers": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('containers'))]",
+        "input": {
+          "name": "[parameters('containers')[copyIndex()].name]",
+          "id": "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('accountName'), 'default', parameters('containers')[copyIndex()].name)]"
+        }
+      }
+    }
+  }
+}

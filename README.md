@@ -28,11 +28,11 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 - [x] Verifiera och dokumentera
 
 ### [v37 — Storage](v37/README.md)
-- [ ] Uppdatera README för v37
-- [ ] Skapa storage account + Blob container
-- [ ] Koppla formuläret till lagringen
-- [ ] Säkra åtkomsten (managed identity, least privilege)
-- [ ] Verifiera och dokumentera
+- [x] Uppdatera README för v37
+- [x] Skapa storage account + Blob container
+- [x] Koppla formuläret till lagringen
+- [x] Säkra åtkomsten (managed identity, least privilege)
+- [x] Verifiera och dokumentera
 
 ### [v38 — IaC med ARM-templates](v38/README.md)
 - [ ] Uppdatera README för v38

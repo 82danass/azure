@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "swedencentral"
+    },
+    "tags": {
+      "value": {
+        "course": "MOV25",
+        "company": "Novatrix AB",
+        "env": "v37",
+        "managedBy": "mov"
+      }
+    },
+    "vmName": {
+      "value": "vm-novatrix-web"
+    },
+    "nicName": {
+      "value": "nic-novatrix-web"
+    },
+    "publicIpName": {
+      "value": "pip-novatrix-web"
+    },
+    "createPublicIp": {
+      "value": true
+    },
+    "publicIpSku": {
+      "value": "Standard"
+    },
+    "publicIpAllocationMethod": {
+      "value": "Static"
+    },
+    "subnetId": {
+      "value": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/resourceGroups/rg-novatrix-v37/providers/Microsoft.Network/virtualNetworks/vnet-novatrix/subnets/snet-novatrix-web"
+    },
+    "vmSize": {
+      "value": "Standard_B2ts_v2"
+    },
+    "imageReference": {
+      "value": {
+        "publisher": "Canonical",
+        "offer": "ubuntu-24_04-lts",
+        "sku": "server",
+        "version": "latest"
+      }
+    },
+    "osDiskSku": {
+      "value": "Standard_LRS"
+    },
+    "osDiskSizeGb": {
+      "value": 0
+    },
+    "adminUsername": {
+      "value": "azureuser"
+    },
+    "sshPublicKey": {
+      "value": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMkeDPz9HD8rdNjxEqCy01AjyESBhZ+01M/k7USvuMTL mov-mov-v37"
+    },
+    "customData": {
+      "value": "I2Nsb3VkLWNvbmZpZwojIFJlbmRlcmVkIGJ5IG1vdiBmcm9tIHRoZSBlbnYncyBwcm9maWxlLiBUaGUgc2l0ZSBpcyBuZXZlciB1cGxvYWRlZCBmcm9tIHRoZQojIHdvcmtzdGF0aW9uOiB0aGUgaG9zdCBjbG9uZXMgaXQgZnJvbSBHaXRIdWIsIHNvIHRoZSBtYWNoaW5lIGlzIHJlcHJvZHVjaWJsZQojIGZyb20gdGhlIHJlcG9zaXRvcnkgYWxvbmUuCnBhY2thZ2VfdXBkYXRlOiB0cnVlCnBhY2thZ2VfdXBncmFkZTogdHJ1ZQpwYWNrYWdlX3JlYm9vdF9pZl9yZXF1aXJlZDogZmFsc2UKCnBhY2thZ2VzOgogIC0gZ2l0CiAgLSBuZ2lueAogIC0gcHl0aG9uMy1mbGFzawogIC0gZ3VuaWNvcm4KCndyaXRlX2ZpbGVzOgogIC0gcGF0aDogL2V0Yy9tb3YvZGVwbG95LmVudgogICAgcGVybWlzc2lvbnM6ICcwNjQ0JwogICAgY29udGVudDogfAogICAgICBNT1ZfRU5WPXYzNwogICAgICBNT1ZfUkVQTz04MmRhbmFzcy9henVyZQogICAgICBNT1ZfUkVGPW1hc3RlcgogICAgICBNT1ZfUEFUSD12MzcKICAgICAgTU9WX0FQUF9ESVI9L29wdC9tb3YvYXBwCiAgICAgIE5PVkFUUklYX1NUT1JBR0VfQUNDT1VOVD1zdG5vdmF0cml4ODJkYW5hc3MwMQogICAgICBOT1ZBVFJJWF9CTE9CX0VORFBPSU5UPWh0dHBzOi8vc3Rub3ZhdHJpeDgyZGFuYXNzMDEuYmxvYi5jb3JlLndpbmRvd3MubmV0LwogICAgICBOT1ZBVFJJWF9DT05UQUlORVI9YXJlbmRlbgoKcnVuY21kOgogIC0gWyBta2RpciwgLXAsICcvb3B0L21vdi9hcHAnIF0KICAtIFsgZ2l0LCBjbG9uZSwgLS1kZXB0aCwgJzEnLCAtLWJyYW5jaCwgJ21hc3RlcicsICdodHRwczovL2dpdGh1Yi5jb20vODJkYW5hc3MvYXp1cmUuZ2l0JywgJy9vcHQvbW92L2FwcCcgXQogIC0gWyBiYXNoLCAnL29wdC9tb3YvYXBwL3NjcmlwdHMvYm9vdHN0cmFwLXYzNy5zaCcgXQoKZmluYWxfbWVzc2FnZTogIm1vdjogdjM3IGJvb3RzdHJhcCBmaW5pc2hlZCIK"
+    },
+    "userAssignedIdentities": {
+      "value": {
+        "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/resourceGroups/rg-novatrix-v37/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-novatrix-app": {}
+      }
+    }
+  }
+}

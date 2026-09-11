@@ -1,0 +1,100 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Virtual network, subnets and network security groups for the Novatrix customer-service environment. Every value is a parameter; mov renders the parameter file from the env's profile."
+  },
+
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": { "description": "Azure region for every resource in this template." }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": { "description": "Tags applied to every resource." }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": { "description": "Name of the virtual network." }
+    },
+    "addressSpace": {
+      "type": "string",
+      "metadata": { "description": "CIDR of the virtual network, e.g. 10.34.0.0/16." }
+    },
+    "networkSecurityGroups": {
+      "type": "array",
+      "metadata": { "description": "One entry per NSG: { name, rules } where rules are ARM securityRules." }
+    },
+    "subnets": {
+      "type": "array",
+      "metadata": { "description": "One entry per subnet: { name, purpose, prefix, nsgName, serviceEndpoints }. An empty nsgName means no NSG is attached." }
+    }
+  },
+
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2026-01-01",
+      "name": "[parameters('networkSecurityGroups')[copyIndex()].name]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "copy": {
+        "name": "securityGroups",
+        "count": "[length(parameters('networkSecurityGroups'))]"
+      },
+      "properties": {
+        "securityRules": "[parameters('networkSecurityGroups')[copyIndex()].rules]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2026-01-01",
+      "name": "[parameters('vnetName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "dependsOn": ["securityGroups"],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": ["[parameters('addressSpace')]"]
+        },
+        "copy": [
+          {
+            "name": "subnets",
+            "count": "[length(parameters('subnets'))]",
+            "input": {
+              "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+              "properties": {
+                "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].prefix]",
+                "networkSecurityGroup": "[if(equals(parameters('subnets')[copyIndex('subnets')].nsgName, ''), json('null'), createObject('id', resourceId('Microsoft.Network/networkSecurityGroups', parameters('subnets')[copyIndex('subnets')].nsgName)))]",
+                "serviceEndpoints": "[parameters('subnets')[copyIndex('subnets')].serviceEndpoints]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+
+  "outputs": {
+    "vnetName": {
+      "type": "string",
+      "value": "[parameters('vnetName')]"
+    },
+    "vnetId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+    },
+    "subnets": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('subnets'))]",
+        "input": {
+          "purpose": "[parameters('subnets')[copyIndex()].purpose]",
+          "name": "[parameters('subnets')[copyIndex()].name]",
+          "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnets')[copyIndex()].name)]"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "groupAssignments": {
+      "value": [
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+          "principalId": "37583679-fc7e-42e8-ba51-3cc3b01b3bf3",
+          "principalType": "Group",
+          "description": "Operations must start, stop, resize and rebuild the VM, but not alter the network or hand out roles."
+        },
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "principalId": "5a369680-dadb-491d-92dc-69361227bb76",
+          "principalType": "Group",
+          "description": "Developers diagnose from the portal and change the environment through the pipeline."
+        },
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "principalId": "0b86bcbd-ba61-4dd4-95c2-1d04f71ebd33",
+          "principalType": "Group",
+          "description": "A security review reads the environment and changes nothing. Read is all it gets, and the account has a date."
+        }
+      ]
+    },
+    "scopedAssignments": {
+      "value": [
+        {
+          "roleDefinitionId": "/subscriptions/fb5e8372-fcd5-4ab5-ac1a-b155e805eb42/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+          "principalId": "7a8e6487-5747-4113-8ba3-2e536ebbbf00",
+          "principalType": "ServicePrincipal",
+          "description": "The form writes errands and attachments. Scoped to the storage account rather than the resource group, and granted to the identity rather than to a key, so nothing secret exists to leak.",
+          "scope": "Microsoft.Storage/storageAccounts/stnovatrix82danass01"
+        }
+      ]
+    }
+  }
+}
