@@ -62,13 +62,12 @@ Owner ger rättigheter på kontrollplanet, inte på data, och nätverksregeln st
 
 Samma sida som tidigare veckor, med `action="/arenden"` och ett filfält. Bakom nginx står en liten tjänst i Python, [`app/form.py`](app/form.py), som tar emot POST:en, hämtar en token för maskinens identitet och skriver blobarna med ett HTTPS PUT per fil. Inget SDK, inget pip: Flask och gunicorn kommer från apt, och anropen mot Blob-API:t är vanlig `urllib`.
 
-```
-webbläsare ──POST /arenden──▶ nginx :80 ──▶ gunicorn 127.0.0.1:8080 ──▶ form.py
-                                                                        │
-                                              169.254.169.254 (token) ◀─┤
-                                                                        ▼
-                                          https://stnovatrix82danass01.blob.core.windows.net/arenden/<id>/arende.json
-                                                                                                  /<id>/<bilaga>
+```mermaid
+flowchart LR
+    B[webbläsare] -- "POST /arenden" --> N["nginx :80"]
+    N --> G["gunicorn 127.0.0.1:8080<br>form.py"]
+    G -- token --> I["169.254.169.254<br>managed identity"]
+    G -- "PUT arende.json<br>PUT bilaga" --> S["stnovatrix82danass01<br>/arenden/&lt;id&gt;/"]
 ```
 
 Kärnan i tjänsten, token och skrivning:
