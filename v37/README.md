@@ -160,9 +160,17 @@ WARN web reboot: exited -1: no answer over ssh within 60s
 
 De tre sista OK-raderna är veckans. `form service` är systemd-enheten, `form reaches storage` är `/health` sett från maskinen, och `an errand lands` är ett riktigt ärende som verifieringen skickar genom nginx till tjänsten och vidare till containern. Varningen på slutet är att kärnan uppgraderades under cloud-init och maskinen vill starta om; `rebootIfRequired` är `false` i [`defaults.json`](../mov-workspace/defaults.json), så den väntar på mig.
 
-Sedan skickade jag ett ärende via formuläret i webbläsaren, med en bilaga. Beviset att det hamnade rätt hämtade jag inifrån maskinen, med maskinens egen identitet, eftersom det är den enda som får:
+Sedan skickade jag ett ärende via formuläret i webbläsaren, med en bilaga:
+
+![Formuläret ifyllt: Kalle Anka, e-post, meddelande och en JPG som bilaga](img/form.png)
+
+![Svaret efter Skicka ärende: Tack, ärende 20260914T155845Z-11a8d7 är sparat](img/form_stored.png)
+
+Beviset att det hamnade rätt hämtade jag inifrån maskinen, med maskinens egen identitet, eftersom det är den enda som får:
 
 `mov ssh v37`
+
+![mov ssh v37, sedan token från metadata-endpointen och containern listad: två ärenden, det senare med sin bilaga](img/mov_ssh_v37.svg)
 
 ```shell
 azureuser@vm-novatrix-web:~$ TOKEN=$(curl -s -H Metadata:true "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fstorage.azure.com%2F" | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')

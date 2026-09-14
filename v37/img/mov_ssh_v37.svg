@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1592" height="634" viewBox="0 0 1592 634" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="1592" height="634" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="1592" height="602" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="18" lengthAdjust="spacing" fill="#e1c682">mov</tspan><tspan x="34" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="40" textLength="18" lengthAdjust="spacing" fill="#a5adcb">ssh</tspan><tspan x="58" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="64" textLength="18" lengthAdjust="spacing" fill="#a5adcb">v37</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="66" lengthAdjust="spacing" fill="#8bd5ca">mov25-azure</tspan><tspan x="82" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="88" textLength="6" lengthAdjust="spacing" opacity="0.5">·</tspan><tspan x="94" textLength="264" lengthAdjust="spacing"> tenant 82danassgafemolndal.onmicrosoft.com </tspan><tspan x="358" textLength="6" lengthAdjust="spacing" opacity="0.5">·</tspan><tspan x="364" textLength="240" lengthAdjust="spacing"> subscription MOV25 - Azure subscription</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="408" lengthAdjust="spacing" opacity="0.5">ssh -F &quot;D:/MOV25/GitHub/azure/mov-workspace/keys/ssh_config&quot; v37-web</tspan></text>
+<text y="103" xml:space="preserve"><tspan x="16" textLength="396" lengthAdjust="spacing">Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 6.17.0-1022-azure x86_64)</tspan></text>
+<text y="133" xml:space="preserve"><tspan x="16" textLength="252" lengthAdjust="spacing"> * Documentation:  https://help.ubuntu.com</tspan></text>
+<text y="148" xml:space="preserve"><tspan x="16" textLength="300" lengthAdjust="spacing"> * Management:     https://landscape.canonical.com</tspan></text>
+<text y="163" xml:space="preserve"><tspan x="16" textLength="246" lengthAdjust="spacing"> * Support:        https://ubuntu.com/pro</tspan></text>
+<text y="193" xml:space="preserve"><tspan x="16" textLength="324" lengthAdjust="spacing"> System information as of Mon Sep 14 16:00:02 UTC 2026</tspan></text>
+<text y="223" xml:space="preserve"><tspan x="16" textLength="360" lengthAdjust="spacing">  System load:  0.0               Processes:             136</tspan></text>
+<text y="238" xml:space="preserve"><tspan x="16" textLength="348" lengthAdjust="spacing">  Usage of /:   6.8% of 28.02GB   Users logged in:       0</tspan></text>
+<text y="253" xml:space="preserve"><tspan x="16" textLength="396" lengthAdjust="spacing">  Memory usage: 43%               IPv4 address for eth0: 10.37.1.4</tspan></text>
+<text y="268" xml:space="preserve"><tspan x="16" textLength="108" lengthAdjust="spacing">  Swap usage:   0%</tspan></text>
+<text y="313" xml:space="preserve"><tspan x="16" textLength="372" lengthAdjust="spacing">Expanded Security Maintenance for Applications is not enabled.</tspan></text>
+<text y="343" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing">0 updates can be applied immediately.</tspan></text>
+<text y="373" xml:space="preserve"><tspan x="16" textLength="372" lengthAdjust="spacing">Enable ESM Apps to receive additional future security updates.</tspan></text>
+<text y="388" xml:space="preserve"><tspan x="16" textLength="300" lengthAdjust="spacing">See https://ubuntu.com/esm or run: sudo pro status</tspan></text>
+<text y="433" xml:space="preserve"><tspan x="16" textLength="186" lengthAdjust="spacing">*** System restart required ***</tspan></text>
+<text y="448" xml:space="preserve"><tspan x="16" textLength="324" lengthAdjust="spacing">Last login: Mon Sep 14 15:36:44 2026 from 80.217.168.6</tspan></text>
+<text y="463" xml:space="preserve"><tspan x="16" textLength="420" lengthAdjust="spacing">To run a command as administrator (user &quot;root&quot;), use &quot;sudo &lt;command&gt;&quot;.</tspan></text>
+<text y="478" xml:space="preserve"><tspan x="16" textLength="192" lengthAdjust="spacing">See &quot;man sudo_root&quot; for details.</tspan></text>
+<text y="508" xml:space="preserve"><tspan x="16" textLength="150" lengthAdjust="spacing" fill="#a6da95" font-weight="bold">azureuser@vm-novatrix-web</tspan><tspan x="166" textLength="6" lengthAdjust="spacing">:</tspan><tspan x="172" textLength="6" lengthAdjust="spacing" fill="#8aadf4" font-weight="bold">~</tspan><tspan x="178" textLength="1398" lengthAdjust="spacing">$ TOKEN=$(curl -s -H Metadata:true &quot;http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=https%3A%2F%2Fstorage.azure.com%2F&quot; | python3 -c 'import sys,json;print(json.load(sys.stdin)[&quot;access_token&quot;])')</tspan></text>
+<text y="523" xml:space="preserve"><tspan x="16" textLength="1194" lengthAdjust="spacing">curl -s -H &quot;Authorization: Bearer $TOKEN&quot; -H &quot;x-ms-version: 2023-11-03&quot; &quot;https://stnovatrix82danass01.blob.core.windows.net/arenden?restype=container&amp;comp=list&quot; | tr '&gt;' '&gt;\n' | grep -o '&lt;Name&gt;[^&lt;]*'</tspan></text>
+<text y="538" xml:space="preserve"><tspan x="16" textLength="246" lengthAdjust="spacing" fill="#ed8796" font-weight="bold">&lt;Name&gt;20260914T152710Z-540f7b/arende.json</tspan></text>
+<text y="553" xml:space="preserve"><tspan x="16" textLength="312" lengthAdjust="spacing" fill="#ed8796" font-weight="bold">&lt;Name&gt;20260914T155845Z-11a8d7/Figurer-Kalle-Anka.jpg</tspan></text>
+<text y="568" xml:space="preserve"><tspan x="16" textLength="246" lengthAdjust="spacing" fill="#ed8796" font-weight="bold">&lt;Name&gt;20260914T155845Z-11a8d7/arende.json</tspan></text>
+<text y="583" xml:space="preserve"><tspan x="16" textLength="150" lengthAdjust="spacing" fill="#a6da95" font-weight="bold">azureuser@vm-novatrix-web</tspan><tspan x="166" textLength="6" lengthAdjust="spacing">:</tspan><tspan x="172" textLength="6" lengthAdjust="spacing" fill="#8aadf4" font-weight="bold">~</tspan><tspan x="178" textLength="36" lengthAdjust="spacing">$ exit</tspan></text>
+<text y="598" xml:space="preserve"><tspan x="16" textLength="36" lengthAdjust="spacing">logout</tspan></text>
+<text y="613" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing">Connection to 135.225.108.239 closed.</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 1584 0 A 8 8 0 0 1 1592 8 L 1592 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="1472" y1="16" x2="1482" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="1518" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M1564 11 L1574 21 M1574 11 L1564 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>
