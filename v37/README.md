@@ -114,6 +114,8 @@ Tjänsten körs som `www-data` under systemd ([`app/novatrix-form.service`](app/
 
 `mov up v37 --set admin.sshSource=80.217.168.6/32`
 
+![mov up v37: tio steg, storage-steget bygger kontot och containern, och verifieringen skickar ett ärende genom formuläret till containern](img/mov_up_v37.svg)
+
 ```shell
 up v37 -> rg-novatrix-v37 in swedencentral
 
