@@ -46,9 +46,13 @@ Tilldelningen som Azure fick, ur [`arm/rbac.parameters.json`](arm/rbac.parameter
 
 **Nätverket.** Kontot har `defaultAction: Deny` och en enda regel: webbsubnätet `10.37.1.0/24`, som bär en service endpoint för `Microsoft.Storage`. Trafik från webbservern går den vägen in i Azures nät och når kontot; allt annat, portalen från min laptop inklusive, stoppas i nätverksregeln innan någon token kontrolleras. Det är v36:s defense in depth fortsatt in i lagringen: även om någon fick tag i en giltig token skulle den inte gå att använda utifrån.
 
+![Storage-kontots Networking-blad i portalen: publik åtkomst enbart från valda nätverk, ett virtuellt nätverk, inga IP-adresser](img/portal_storage_networking.png)
+
 **Inga nycklar.** Med delade nycklar avstängda finns det ingen connection string att läcka, inte i koden, inte i repot, inte i `deploy.env` på maskinen. Kontots namn står där, och det är allt som behövs.
 
 Det här är också varför jag själv, som Owner på prenumerationen, inte kan lista containern från min laptop:
+
+![az storage blob list från laptopen nekas av kontots nätverksregler](img/az_blob_list_refused.svg)
 
 ```shell
 az storage blob list --account-name stnovatrix82danass01 --container-name arenden --auth-mode login
