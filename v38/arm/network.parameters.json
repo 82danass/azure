@@ -39,20 +39,6 @@
               }
             },
             {
-              "name": "https",
-              "properties": {
-                "description": "",
-                "priority": 110,
-                "direction": "Inbound",
-                "access": "Allow",
-                "protocol": "Tcp",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "sourcePortRange": "*",
-                "destinationPortRange": "443"
-              }
-            },
-            {
               "name": "ssh",
               "properties": {
                 "description": "",
