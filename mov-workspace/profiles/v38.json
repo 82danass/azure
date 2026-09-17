@@ -31,13 +31,6 @@
           ]
         },
         {
-          "name": "https",
-          "priority": 110,
-          "ports": [
-            "443"
-          ]
-        },
-        {
           "name": "ssh",
           "priority": 120,
           "ports": [
