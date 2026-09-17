@@ -75,12 +75,6 @@
         "run": "apt-get -s upgrade | grep -c '^Inst' || true",
         "expect": "0",
         "optional": true
-      },
-      {
-        "name": "reboot",
-        "run": "test ! -f /var/run/reboot-required && echo clean",
-        "expect": "clean",
-        "optional": true
       }
     ]
   },
@@ -140,7 +134,7 @@
         ],
         "updatePackages": true,
         "upgradePackages": true,
-        "rebootIfRequired": false
+        "rebootIfRequired": true
       }
     },
     "storage.containers": {
