@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="229" viewBox="0 0 950 229" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="950" height="229" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="950" height="197" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="300" lengthAdjust="spacing">[master 19768df] v38: port 443 closed, as deployed</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="192" lengthAdjust="spacing"> 1 file changed, 14 deletions(-)</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="174" lengthAdjust="spacing">Enumerating objects: 9, done.</tspan></text>
+<text y="103" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing">Counting objects: 100% (9/9), done.</tspan></text>
+<text y="118" xml:space="preserve"><tspan x="16" textLength="240" lengthAdjust="spacing">Delta compression using up to 24 threads</tspan></text>
+<text y="133" xml:space="preserve"><tspan x="16" textLength="228" lengthAdjust="spacing">Compressing objects: 100% (5/5), done.</tspan></text>
+<text y="148" xml:space="preserve"><tspan x="16" textLength="360" lengthAdjust="spacing">Writing objects: 100% (5/5), 445 bytes | 445.00 KiB/s, done.</tspan></text>
+<text y="163" xml:space="preserve"><tspan x="16" textLength="366" lengthAdjust="spacing">Total 5 (delta 4), reused 0 (delta 0), pack-reused 0 (from 0)</tspan></text>
+<text y="178" xml:space="preserve"><tspan x="16" textLength="414" lengthAdjust="spacing">remote: Resolving deltas: 100% (4/4), completed with 4 local objects.</tspan></text>
+<text y="193" xml:space="preserve"><tspan x="16" textLength="246" lengthAdjust="spacing">To github.com-82danass:82danass/azure.git</tspan></text>
+<text y="208" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing">   462d505..19768df  master -&gt; master</tspan></text>
+<line x1="830" y1="16" x2="840" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="876" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M922 11 L932 21 M932 11 L922 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>

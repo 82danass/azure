@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="94" viewBox="0 0 950 94" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="950" height="94" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="950" height="62" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="54" lengthAdjust="spacing" fill="#eed49f">19768df (</tspan><tspan x="70" textLength="24" lengthAdjust="spacing" fill="#8bd5ca" font-weight="bold">HEAD</tspan><tspan x="94" textLength="24" lengthAdjust="spacing" fill="#eed49f"> -&gt; </tspan><tspan x="118" textLength="36" lengthAdjust="spacing" fill="#a6da95" font-weight="bold">master</tspan><tspan x="154" textLength="12" lengthAdjust="spacing" fill="#eed49f">, </tspan><tspan x="166" textLength="78" lengthAdjust="spacing" fill="#ed8796" font-weight="bold">origin/master</tspan><tspan x="244" textLength="12" lengthAdjust="spacing" fill="#eed49f">, </tspan><tspan x="256" textLength="66" lengthAdjust="spacing" fill="#ed8796" font-weight="bold">origin/HEAD</tspan><tspan x="322" textLength="6" lengthAdjust="spacing" fill="#eed49f">)</tspan><tspan x="328" textLength="204" lengthAdjust="spacing"> v38: port 443 closed, as deployed</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="42" lengthAdjust="spacing" fill="#eed49f">ca55e6a</tspan><tspan x="58" textLength="468" lengthAdjust="spacing"> v38: the templates and parameters as deployed, and the captures of the deploy</tspan></text>
+<line x1="830" y1="16" x2="840" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="876" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M922 11 L932 21 M932 11 L922 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>
