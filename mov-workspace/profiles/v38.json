@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v38",
   "extends": "v37",
-  "description": "Infrastructure as code. The v37 environment, deployed from the profile and recorded as the ARM templates and parameters Azure received, so the week's history is the templates' history. Run `mov up v38 --set admin.sshSource=<your-ip>/32`, then `mov templates export v38`.",
+  "description": "Infrastructure as code. The v37 environment, deployed from the profile and recorded as the ARM templates and parameters Azure received, so the week's history is the templates' history. Run `mov up v38`, then `mov templates export v38`; admin.sshSource is `@caller`, so the ssh rule follows wherever mov is run from.",
   "network": {
     "addressSpace": "10.38.0.0/16",
     "subnets": [

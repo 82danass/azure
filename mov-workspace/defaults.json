@@ -13,7 +13,7 @@
     "cost"
   ],
   "admin": {
-    "sshSource": "*"
+    "sshSource": "@caller"
   },
   "cost": {
     "amount": 200,
