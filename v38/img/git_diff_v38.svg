@@ -1,32 +1,33 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="950" height="439" viewBox="0 0 950 439" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
-<defs><clipPath id="win"><rect width="950" height="439" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
-<rect y="32" width="950" height="407" fill="#24273a"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="488" height="454" viewBox="0 0 488 454" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="488" height="454" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="488" height="422" fill="#24273a"/>
 
-<text y="58" xml:space="preserve"><tspan x="16" textLength="468" lengthAdjust="spacing" font-weight="bold">diff --git a/v38/arm/network.parameters.json b/v38/arm/network.parameters.json</tspan></text>
-<text y="73" xml:space="preserve"><tspan x="16" textLength="174" lengthAdjust="spacing" font-weight="bold">index b4b1f7f..0b15a58 100644</tspan></text>
-<text y="88" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing" font-weight="bold">--- a/v38/arm/network.parameters.json</tspan></text>
-<text y="103" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing" font-weight="bold">+++ b/v38/arm/network.parameters.json</tspan></text>
-<text y="118" xml:space="preserve"><tspan x="16" textLength="108" lengthAdjust="spacing" fill="#8bd5ca">@@ -38,20 +38,6 @@</tspan></text>
-<text y="133" xml:space="preserve"><tspan x="16" textLength="270" lengthAdjust="spacing">                 &quot;destinationPortRange&quot;: &quot;80&quot;</tspan></text>
-<text y="148" xml:space="preserve"><tspan x="16" textLength="96" lengthAdjust="spacing">               }</tspan></text>
-<text y="163" xml:space="preserve"><tspan x="16" textLength="90" lengthAdjust="spacing">             },</tspan></text>
-<text y="178" xml:space="preserve"><tspan x="16" textLength="84" lengthAdjust="spacing" fill="#ed8796">-            {</tspan></text>
-<text y="193" xml:space="preserve"><tspan x="16" textLength="186" lengthAdjust="spacing" fill="#ed8796">-              &quot;name&quot;: &quot;https&quot;,</tspan></text>
-<text y="208" xml:space="preserve"><tspan x="16" textLength="180" lengthAdjust="spacing" fill="#ed8796">-              &quot;properties&quot;: {</tspan></text>
-<text y="223" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#ed8796">-                &quot;description&quot;: &quot;&quot;,</tspan></text>
-<text y="238" xml:space="preserve"><tspan x="16" textLength="198" lengthAdjust="spacing" fill="#ed8796">-                &quot;priority&quot;: 110,</tspan></text>
-<text y="253" xml:space="preserve"><tspan x="16" textLength="240" lengthAdjust="spacing" fill="#ed8796">-                &quot;direction&quot;: &quot;Inbound&quot;,</tspan></text>
-<text y="268" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#ed8796">-                &quot;access&quot;: &quot;Allow&quot;,</tspan></text>
-<text y="283" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#ed8796">-                &quot;protocol&quot;: &quot;Tcp&quot;,</tspan></text>
-<text y="298" xml:space="preserve"><tspan x="16" textLength="264" lengthAdjust="spacing" fill="#ed8796">-                &quot;sourceAddressPrefix&quot;: &quot;*&quot;,</tspan></text>
-<text y="313" xml:space="preserve"><tspan x="16" textLength="294" lengthAdjust="spacing" fill="#ed8796">-                &quot;destinationAddressPrefix&quot;: &quot;*&quot;,</tspan></text>
-<text y="328" xml:space="preserve"><tspan x="16" textLength="240" lengthAdjust="spacing" fill="#ed8796">-                &quot;sourcePortRange&quot;: &quot;*&quot;,</tspan></text>
-<text y="343" xml:space="preserve"><tspan x="16" textLength="276" lengthAdjust="spacing" fill="#ed8796">-                &quot;destinationPortRange&quot;: &quot;443&quot;</tspan></text>
-<text y="358" xml:space="preserve"><tspan x="16" textLength="96" lengthAdjust="spacing" fill="#ed8796">-              }</tspan></text>
-<text y="373" xml:space="preserve"><tspan x="16" textLength="90" lengthAdjust="spacing" fill="#ed8796">-            },</tspan></text>
-<text y="388" xml:space="preserve"><tspan x="16" textLength="84" lengthAdjust="spacing">             {</tspan></text>
-<text y="403" xml:space="preserve"><tspan x="16" textLength="174" lengthAdjust="spacing">               &quot;name&quot;: &quot;ssh&quot;,</tspan></text>
-<text y="418" xml:space="preserve"><tspan x="16" textLength="180" lengthAdjust="spacing">               &quot;properties&quot;: {</tspan></text>
-<line x1="830" y1="16" x2="840" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="876" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M922 11 L932 21 M932 11 L922 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+<text y="58" xml:space="preserve"><tspan x="16" textLength="18" lengthAdjust="spacing" fill="#e1c682">git</tspan><tspan x="34" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="40" textLength="24" lengthAdjust="spacing" fill="#a5adcb">diff</tspan><tspan x="64" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="70" textLength="36" lengthAdjust="spacing" fill="#a5adcb">HEAD~1</tspan><tspan x="106" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="112" textLength="12" lengthAdjust="spacing" fill="#a5adcb">--</tspan><tspan x="124" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="130" textLength="186" lengthAdjust="spacing" fill="#a5adcb">v38/arm/network.parameters.json</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="468" lengthAdjust="spacing" font-weight="bold">diff --git a/v38/arm/network.parameters.json b/v38/arm/network.parameters.json</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="174" lengthAdjust="spacing" font-weight="bold">index b4b1f7f..0b15a58 100644</tspan></text>
+<text y="103" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing" font-weight="bold">--- a/v38/arm/network.parameters.json</tspan></text>
+<text y="118" xml:space="preserve"><tspan x="16" textLength="222" lengthAdjust="spacing" font-weight="bold">+++ b/v38/arm/network.parameters.json</tspan></text>
+<text y="133" xml:space="preserve"><tspan x="16" textLength="108" lengthAdjust="spacing" fill="#8bd5ca">@@ -38,20 +38,6 @@</tspan></text>
+<text y="148" xml:space="preserve"><tspan x="16" textLength="270" lengthAdjust="spacing">                 &quot;destinationPortRange&quot;: &quot;80&quot;</tspan></text>
+<text y="163" xml:space="preserve"><tspan x="16" textLength="96" lengthAdjust="spacing">               }</tspan></text>
+<text y="178" xml:space="preserve"><tspan x="16" textLength="90" lengthAdjust="spacing">             },</tspan></text>
+<text y="193" xml:space="preserve"><tspan x="16" textLength="84" lengthAdjust="spacing" fill="#ed8796">-            {</tspan></text>
+<text y="208" xml:space="preserve"><tspan x="16" textLength="186" lengthAdjust="spacing" fill="#ed8796">-              &quot;name&quot;: &quot;https&quot;,</tspan></text>
+<text y="223" xml:space="preserve"><tspan x="16" textLength="180" lengthAdjust="spacing" fill="#ed8796">-              &quot;properties&quot;: {</tspan></text>
+<text y="238" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#ed8796">-                &quot;description&quot;: &quot;&quot;,</tspan></text>
+<text y="253" xml:space="preserve"><tspan x="16" textLength="198" lengthAdjust="spacing" fill="#ed8796">-                &quot;priority&quot;: 110,</tspan></text>
+<text y="268" xml:space="preserve"><tspan x="16" textLength="240" lengthAdjust="spacing" fill="#ed8796">-                &quot;direction&quot;: &quot;Inbound&quot;,</tspan></text>
+<text y="283" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#ed8796">-                &quot;access&quot;: &quot;Allow&quot;,</tspan></text>
+<text y="298" xml:space="preserve"><tspan x="16" textLength="210" lengthAdjust="spacing" fill="#ed8796">-                &quot;protocol&quot;: &quot;Tcp&quot;,</tspan></text>
+<text y="313" xml:space="preserve"><tspan x="16" textLength="264" lengthAdjust="spacing" fill="#ed8796">-                &quot;sourceAddressPrefix&quot;: &quot;*&quot;,</tspan></text>
+<text y="328" xml:space="preserve"><tspan x="16" textLength="294" lengthAdjust="spacing" fill="#ed8796">-                &quot;destinationAddressPrefix&quot;: &quot;*&quot;,</tspan></text>
+<text y="343" xml:space="preserve"><tspan x="16" textLength="240" lengthAdjust="spacing" fill="#ed8796">-                &quot;sourcePortRange&quot;: &quot;*&quot;,</tspan></text>
+<text y="358" xml:space="preserve"><tspan x="16" textLength="276" lengthAdjust="spacing" fill="#ed8796">-                &quot;destinationPortRange&quot;: &quot;443&quot;</tspan></text>
+<text y="373" xml:space="preserve"><tspan x="16" textLength="96" lengthAdjust="spacing" fill="#ed8796">-              }</tspan></text>
+<text y="388" xml:space="preserve"><tspan x="16" textLength="90" lengthAdjust="spacing" fill="#ed8796">-            },</tspan></text>
+<text y="403" xml:space="preserve"><tspan x="16" textLength="84" lengthAdjust="spacing">             {</tspan></text>
+<text y="418" xml:space="preserve"><tspan x="16" textLength="174" lengthAdjust="spacing">               &quot;name&quot;: &quot;ssh&quot;,</tspan></text>
+<text y="433" xml:space="preserve"><tspan x="16" textLength="180" lengthAdjust="spacing">               &quot;properties&quot;: {</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 942 0 A 8 8 0 0 1 950 8 L 950 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="368" y1="16" x2="378" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="414" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M460 11 L470 21 M470 11 L460 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
 </g>
 </svg>

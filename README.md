@@ -35,11 +35,11 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 - [x] Verifiera och dokumentera
 
 ### [v38 — IaC med ARM-templates](v38/README.md)
-- [ ] Uppdatera README för v38
-- [ ] Skriv ARM-template(s) för VM, nätverk, storage
-- [ ] Deploya miljön från kod
-- [ ] Visa versionshantering (ändring + historik)
-- [ ] Dokumentera hur miljön återskapas
+- [x] Uppdatera README för v38
+- [x] Skriv ARM-template(s) för VM, nätverk, storage
+- [x] Deploya miljön från kod
+- [x] Visa versionshantering (ändring + historik)
+- [x] Dokumentera hur miljön återskapas
 
 ### [v39 — Automation och integration](v39/README.md)
 - [ ] Uppdatera README för v39
