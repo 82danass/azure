@@ -86,6 +86,7 @@
       {
         "purpose": "web",
         "subnet": "web",
+        "size": "Standard_B1s",
         "identities": [
           "app"
         ],
