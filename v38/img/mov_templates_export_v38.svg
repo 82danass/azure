@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="289" viewBox="0 0 620 289" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="620" height="289" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="620" height="257" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="18" lengthAdjust="spacing" fill="#e1c682">mov</tspan><tspan x="34" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="40" textLength="54" lengthAdjust="spacing" fill="#a5adcb">templates</tspan><tspan x="94" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="100" textLength="36" lengthAdjust="spacing" fill="#a5adcb">export</tspan><tspan x="136" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="142" textLength="18" lengthAdjust="spacing" fill="#a5adcb">v38</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="66" lengthAdjust="spacing" fill="#8bd5ca">mov25-azure</tspan><tspan x="82" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="88" textLength="6" lengthAdjust="spacing" opacity="0.5">·</tspan><tspan x="94" textLength="264" lengthAdjust="spacing"> tenant 82danassgafemolndal.onmicrosoft.com </tspan><tspan x="358" textLength="6" lengthAdjust="spacing" opacity="0.5">·</tspan><tspan x="364" textLength="240" lengthAdjust="spacing"> subscription MOV25 - Azure subscription</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="12" lengthAdjust="spacing" fill="#a6da95" font-weight="bold">OK</tspan><tspan x="28" textLength="330" lengthAdjust="spacing">   12 file(s) exported to D:\MOV25\GitHub\azure\v38\arm</tspan></text>
+<text y="103" xml:space="preserve"><tspan x="16" textLength="174" lengthAdjust="spacing">  compute-web.parameters.json</tspan></text>
+<text y="118" xml:space="preserve"><tspan x="16" textLength="162" lengthAdjust="spacing">  compute-web.template.json</tspan></text>
+<text y="133" xml:space="preserve"><tspan x="16" textLength="132" lengthAdjust="spacing">  cost.parameters.json</tspan></text>
+<text y="148" xml:space="preserve"><tspan x="16" textLength="120" lengthAdjust="spacing">  cost.template.json</tspan></text>
+<text y="163" xml:space="preserve"><tspan x="16" textLength="156" lengthAdjust="spacing">  identity.parameters.json</tspan></text>
+<text y="178" xml:space="preserve"><tspan x="16" textLength="144" lengthAdjust="spacing">  identity.template.json</tspan></text>
+<text y="193" xml:space="preserve"><tspan x="16" textLength="150" lengthAdjust="spacing">  network.parameters.json</tspan></text>
+<text y="208" xml:space="preserve"><tspan x="16" textLength="138" lengthAdjust="spacing">  network.template.json</tspan></text>
+<text y="223" xml:space="preserve"><tspan x="16" textLength="132" lengthAdjust="spacing">  rbac.parameters.json</tspan></text>
+<text y="238" xml:space="preserve"><tspan x="16" textLength="120" lengthAdjust="spacing">  rbac.template.json</tspan></text>
+<text y="253" xml:space="preserve"><tspan x="16" textLength="150" lengthAdjust="spacing">  storage.parameters.json</tspan></text>
+<text y="268" xml:space="preserve"><tspan x="16" textLength="138" lengthAdjust="spacing">  storage.template.json</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 612 0 A 8 8 0 0 1 620 8 L 620 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">mov</text><line x1="500" y1="16" x2="510" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="546" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M592 11 L602 21 M602 11 L592 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>

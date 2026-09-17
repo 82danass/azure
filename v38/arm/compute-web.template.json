@@ -1,0 +1,154 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "One Linux VM with its NIC and optional public IP. The web page and its errand form are not copied here: cloud-init clones them from GitHub on first boot, so the host is rebuilt from the repository rather than from a workstation."
+  },
+
+  "parameters": {
+    "location": { "type": "string" },
+    "tags": { "type": "object" },
+    "vmName": { "type": "string" },
+    "nicName": { "type": "string" },
+    "publicIpName": { "type": "string" },
+    "createPublicIp": {
+      "type": "bool",
+      "metadata": { "description": "When false, the VM is reachable only from inside the virtual network." }
+    },
+    "publicIpSku": { "type": "string" },
+    "publicIpAllocationMethod": { "type": "string" },
+    "subnetId": { "type": "string" },
+    "vmSize": { "type": "string" },
+    "imageReference": {
+      "type": "object",
+      "metadata": { "description": "publisher / offer / sku / version, resolved from the image alias in the profile." }
+    },
+    "osDiskSku": { "type": "string" },
+    "osDiskSizeGb": {
+      "type": "int",
+      "metadata": { "description": "0 keeps the size that comes with the image." }
+    },
+    "adminUsername": { "type": "string" },
+    "sshPublicKey": {
+      "type": "string",
+      "metadata": { "description": "Public half only. Password authentication is disabled outright." }
+    },
+    "customData": {
+      "type": "string",
+      "metadata": { "description": "Base64 cloud-init document." }
+    },
+    "userAssignedIdentities": {
+      "type": "object",
+      "metadata": { "description": "Map of managed identity resource id to an empty object. Empty means no identity is attached." }
+    }
+  },
+
+  "variables": {
+    "sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+  },
+
+  "resources": [
+    {
+      "condition": "[parameters('createPublicIp')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2026-01-01",
+      "name": "[parameters('publicIpName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": { "name": "[parameters('publicIpSku')]" },
+      "properties": {
+        "publicIPAllocationMethod": "[parameters('publicIpAllocationMethod')]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2026-01-01",
+      "name": "[parameters('nicName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": { "id": "[parameters('subnetId')]" },
+              "publicIPAddress": "[if(parameters('createPublicIp'), createObject('id', resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))), json('null'))]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2026-04-01",
+      "name": "[parameters('vmName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": "[if(empty(parameters('userAssignedIdentities')), json('null'), createObject('type', 'UserAssigned', 'userAssignedIdentities', parameters('userAssignedIdentities')))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": "[parameters('imageReference')]",
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "[parameters('osDiskSku')]"
+            },
+            "diskSizeGB": "[if(equals(parameters('osDiskSizeGb'), 0), json('null'), parameters('osDiskSizeGb'))]"
+          }
+        },
+        "osProfile": {
+          "computerName": "[parameters('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "customData": "[parameters('customData')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": true,
+            "ssh": {
+              "publicKeys": [
+                {
+                  "path": "[variables('sshKeyPath')]",
+                  "keyData": "[parameters('sshPublicKey')]"
+                }
+              ]
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[parameters('vmName')]"
+    },
+    "vmId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+    },
+    "privateIp": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/networkInterfaces', parameters('nicName'))).ipConfigurations[0].properties.privateIPAddress]"
+    },
+    "publicIp": {
+      "type": "string",
+      "value": "[if(parameters('createPublicIp'), reference(resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIpName'))).ipAddress, '')]"
+    }
+  }
+}
