@@ -325,7 +325,7 @@ Resursgruppen, identiteten, rolltilldelningarna, budgeten och SSH-nyckeln försv
 ```powershell
 mov docs v35                # varje kommando som kördes, med svar
 mov templates export v35    # mallarna och parametrarna Azure fick
-mov audit -f md -o audit.md # tenanten läst tillbaka
+mov audit --full -f md -o audit.md # tenanten läst tillbaka
 ```
 
-`mov docs` skrev 40 kommandon och `mov audit` läste hela tenanten. Ingen av de utskrifterna ligger i repot: transkriptet innehåller startlösenorden, auditen fakturerings- och kontouppgifter. Utdraget under *Managed identity* ovan är den del av auditen som hör till uppgiften. [`arm/`](arm/) ligger i repot, det är mallarna och parametrarna Azure fick.
+`mov docs` skrev 40 kommandon och `mov audit --full` läste hela tenanten. Ingen av de utskrifterna ligger i repot: transkriptet innehåller startlösenorden, auditen fakturerings- och kontouppgifter. Utdraget under *Managed identity* ovan är den del av auditen som hör till uppgiften. [`arm/`](arm/) ligger i repot, det är mallarna och parametrarna Azure fick.
