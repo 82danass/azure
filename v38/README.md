@@ -90,6 +90,9 @@ Storleken är `Standard_D2als_v6` och inte `Standard_B2ts_v2` som tidigare vecko
 
 ![mov up v38: tio steg från tom resursgrupp till verifierad miljö](img/mov_up_v38.svg)
 
+Samma körning som text, att kopiera ur. Verktygskontrollerna i preflight är utelämnade, de är
+desamma varje vecka:
+
 ```shell
 up v38 -> rg-novatrix-v38 in swedencentral
 caller address 185.195.233.177/32, agreed by ipify, icanhazip, checkip
@@ -104,6 +107,9 @@ caller address 185.195.233.177/32, agreed by ipify, icanhazip, checkip
      mov-v38-network-047827e4
 4/10 cost Budget and spend alerts
      mov-v38-cost-19570d6f
+5/10 directory Entra ID users and groups (tenant scope)
+     group grp-novatrix-drift already exists
+     user usr-novatrix-drift@82danassgafemolndal.onmicrosoft.com already exists
 6/10 identity User-assigned managed identities
      mov-v38-identity-6ea2dc53
 7/10 storage Storage account and blob containers
@@ -115,14 +121,24 @@ caller address 185.195.233.177/32, agreed by ipify, icanhazip, checkip
 10/10 verify Prove the deployment answers
      OK   web: http://135.225.112.87/ -> 200 in 52s
      OK   web cloud-init: status: done
+     OK   web bootstrap: present
      OK   web nginx: active
      OK   web form service: active
      OK   web form reaches storage: "status":"ok"
      OK   web an errand lands: "status":"stored"
      OK   web pending upgrades: 0
      web reboot: the upgrade asks for one; restarting vm-novatrix-web (this takes a minute)
-     ...
+     OK   web cloud-init: status: done
+     OK   web bootstrap: present
+     OK   web nginx: active
+     OK   web form service: active
+     OK   web form reaches storage: "status":"ok"
+     OK   web an errand lands: "status":"stored"
+     OK   web pending upgrades: 0
      OK   web reboot: restarted, back in 86s, checks re-run
+
+OK   web: http://135.225.112.87
+     mov ssh v38
 ```
 
 Formuläret nåbart och lagringen på plats är de två sista OK-raderna före omstarten: `/health` svarar från tjänsten, och ett ärende skickat genom nginx till tjänsten hamnar i containern. `caller address` är den adress ssh-regeln låses till; profilen säger `@caller` och mov tar reda på den vid varje körning i stället för att jag skriver in den.
