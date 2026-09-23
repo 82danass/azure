@@ -19,7 +19,8 @@
     "entraUser": "usr-{company}-{purpose}",
     "resource": "{purpose}-{company}-{env}",
     "billingPrincipal": "spn-{company}-{purpose}",
-    "entraApplication": "app-{company}-{env}-{purpose}"
+    "entraApplication": "app-{company}-{env}-{purpose}",
+    "tunnel": "{company}-{env}"
   },
   "rules": {
     "default": {

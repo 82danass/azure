@@ -21,7 +21,8 @@
     "directory": "directory.json",
     "billing": "billing.json",
     "subscription": "subscription.json",
-    "secrets": "secrets"
+    "secrets": "secrets",
+    "cloudflare": "cloudflare.json"
   },
   "github": {
     "owner": "82danass",

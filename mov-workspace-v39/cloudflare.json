@@ -1,0 +1,6 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/cloudflare-cog.schema.json",
+  "description": "The zone mov may write into for v39 onwards. Everything mov makes sits under mov25.assarelius.org; the homelab records beside it are never touched. The Zero Trust team name is added once it is chosen in the dashboard.",
+  "zone": "assarelius.org",
+  "subdomain": "mov25"
+}
