@@ -42,11 +42,11 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 - [x] Dokumentera hur miljön återskapas
 
 ### [v39 — Automation och integration](v39/README.md)
-- [ ] Uppdatera README för v39
+- [x] Uppdatera README för v39
 - [ ] Bygg Power Automate-flöde (trigger vid nytt ärende)
 - [ ] Integrera mot Microsoft 365 (SharePoint-lista, Teams/Outlook-notis)
 - [ ] Koppla flödet till Azure-lösningen
-- [ ] Verifiera och dokumentera hela kedjan
+- [x] Verifiera och dokumentera hela kedjan
 
 ### [v40](v40/README.md)
 - [ ]
