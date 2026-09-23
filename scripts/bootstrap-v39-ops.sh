@@ -26,6 +26,14 @@ readonly SOURCE_DIR="${MOV_APP_DIR%/}/${MOV_PATH#/}"
 [[ -f $SOURCE_DIR/ops/on-secrets.sh ]] || fail "$SOURCE_DIR/ops has no on-secrets.sh"
 log "env=$MOV_ENV host=$NOVATRIX_TICKET_HOST"
 
+# --- swap first: Docker, NocoDB and a pip install together wedged a 1 GiB machine ---
+
+if ! swapon --show | grep -q /swapfile; then
+    fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile >/dev/null && swapon /swapfile
+    grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    log "2 GiB swap on"
+fi
+
 # --- packages, the tunnel connector, the images ---------------------------------------
 
 export DEBIAN_FRONTEND=noninteractive

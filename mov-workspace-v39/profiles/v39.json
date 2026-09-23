@@ -88,6 +88,7 @@
       {
         "purpose": "ops",
         "subnet": "ops",
+        "size": "Standard_B2ls_v2",
         "identities": ["notify"],
         "source": { "path": "v39", "bootstrap": "scripts/bootstrap-v39-ops.sh" },
         "host": { "packages": ["git", "docker.io", "python3-venv", "jq", "curl"],
