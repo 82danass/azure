@@ -1,52 +1,52 @@
 #!/usr/bin/env bash
-# v39, ops: the ticket registry (NocoDB), the sign-in door in front of it
-# (oauth2-proxy against Entra ID, nginx with TLS), and the notifier that turns
-# a new ticket into a mail and a Teams notice. Runs as root from cloud-init.
+# v39, ops: the ticket registry (NocoDB), the tunnel that gives it a hostname
+# without opening a port, and the notifier that turns a new ticket into a mail
+# and a Teams notice. Runs as root from cloud-init, from the repository root.
 #
 # Everything is installed and pulled here. Nothing that needs a secret is
 # started here: mov delivers /etc/mov/secrets.env after boot, and
-# mov-secrets.service runs ops/on-secrets.sh the moment it lands.
+# mov-secrets.service runs ops/on-secrets.sh the moment it lands. The sign-in
+# in front of the registry is Cloudflare Access, made by mov's cloudflare stage;
+# nothing on this machine handles it.
 set -euo pipefail
 
 readonly ENV_FILE=/etc/mov/deploy.env
 readonly NOTIFY=/opt/novatrix-notify
-readonly ACME=/var/www/acme
-readonly IMDS_IP='http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2021-02-01&format=text'
+readonly KEYRING=/usr/share/keyrings/cloudflare-main.gpg
 
 log() { printf '[bootstrap] %s\n' "$*"; }
 fail() { printf '[bootstrap] error: %s\n' "$*" >&2; exit 1; }
 
 [[ -r $ENV_FILE ]] || fail "$ENV_FILE is missing."
 source "$ENV_FILE"
-for var in MOV_ENV MOV_PATH MOV_APP_DIR OAUTH_CLIENT_ID OAUTH_TENANT_ID NOVATRIX_ACS_ID NOVATRIX_MAIL_DOMAIN_ID NOVATRIX_SUPPORT_EMAIL; do
+for var in MOV_ENV MOV_PATH MOV_APP_DIR NOVATRIX_TICKET_HOST NOVATRIX_ACS_ID NOVATRIX_MAIL_DOMAIN_ID NOVATRIX_SUPPORT_EMAIL NC_ADMIN_EMAIL; do
     [[ -n ${!var:-} ]] || fail "$var is not set in $ENV_FILE"
 done
 readonly SOURCE_DIR="${MOV_APP_DIR%/}/${MOV_PATH#/}"
 [[ -f $SOURCE_DIR/ops/on-secrets.sh ]] || fail "$SOURCE_DIR/ops has no on-secrets.sh"
+log "env=$MOV_ENV host=$NOVATRIX_TICKET_HOST"
 
-# --- the machine's own address becomes its hostname -------------------------------
-
-PUBLIC_IP=$(curl -sf -H Metadata:true "$IMDS_IP" || true)
-[[ -n $PUBLIC_IP ]] || fail "could not read the public address from the instance metadata"
-readonly HOST="$PUBLIC_IP.sslip.io"
-grep -q '^NOVATRIX_TICKET_HOST=' "$ENV_FILE" || printf 'NOVATRIX_TICKET_HOST=%s\n' "$HOST" >> "$ENV_FILE"
-log "env=$MOV_ENV host=$HOST"
-
-# --- packages and images ---------------------------------------------------------
+# --- packages, the tunnel connector, the images ---------------------------------------
 
 export DEBIAN_FRONTEND=noninteractive
 missing=()
-for pkg in docker.io nginx certbot python3-venv jq curl openssl; do
+for pkg in docker.io python3-venv jq curl; do
     dpkg -s "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
 done
 if (( ${#missing[@]} )); then
     log "installing ${missing[*]}"
     apt-get update -qq && apt-get install -y -qq "${missing[@]}"
 fi
+if ! command -v cloudflared >/dev/null 2>&1; then
+    install -d -m 0755 /usr/share/keyrings
+    curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg -o "$KEYRING"
+    echo "deb [signed-by=$KEYRING] https://pkg.cloudflare.com/cloudflared any main" > /etc/apt/sources.list.d/cloudflared.list
+    apt-get update -qq && apt-get install -y -qq cloudflared
+    log "cloudflared installed"
+fi
 systemctl enable --now docker
 docker pull -q nocodb/nocodb:latest
-docker pull -q quay.io/oauth2-proxy/oauth2-proxy:v7.15.4
-log "images pulled"
+log "image pulled"
 
 # --- the notifier: a venv with the ACS SDK, started when the secrets land ------------
 
@@ -67,38 +67,6 @@ systemctl daemon-reload
 systemctl enable novatrix-notify >/dev/null
 systemctl enable --now mov-secrets.path
 
-# --- TLS: Let's Encrypt for the address's hostname, self-signed if it refuses -------
-
-install -d -m 0755 "$ACME/.well-known/acme-challenge"
-CERT=/etc/ssl/tickets.crt
-KEY=/etc/ssl/tickets.key
-render_site() {  # render_site CERT KEY
-    sed -e "s|__HOST__|$HOST|g" -e "s|__CERT__|$1|g" -e "s|__KEY__|$2|g" \
-        "$SOURCE_DIR/ops/tickets.nginx" > /etc/nginx/sites-available/tickets
-    ln -sf /etc/nginx/sites-available/tickets /etc/nginx/sites-enabled/tickets
-    rm -f /etc/nginx/sites-enabled/default
-}
-if [[ ! -s $CERT ]]; then
-    openssl req -x509 -nodes -newkey rsa:2048 -days 90 -subj "/CN=$HOST" -keyout "$KEY" -out "$CERT" 2>/dev/null
-    log "self-signed certificate for $HOST, until Let's Encrypt answers"
-fi
-render_site "$CERT" "$KEY"
-nginx -t && systemctl enable --now nginx && systemctl reload nginx
-
-LE_DIR=/etc/letsencrypt/live/$HOST
-if [[ ! -s $LE_DIR/fullchain.pem ]]; then
-    if timeout 120 certbot certonly --webroot -w "$ACME" -d "$HOST" --non-interactive --agree-tos \
-            --register-unsafely-without-email --quiet; then
-        log "Let's Encrypt issued a certificate for $HOST"
-    else
-        log "Let's Encrypt did not issue for $HOST (rate limit on sslip.io is shared); staying self-signed"
-    fi
-fi
-if [[ -s $LE_DIR/fullchain.pem ]]; then
-    render_site "$LE_DIR/fullchain.pem" "$LE_DIR/privkey.pem"
-    nginx -t && systemctl reload nginx
-fi
-
 # If the secrets are already there (a re-run), start straight away.
 [[ -f /etc/mov/secrets.env ]] && systemctl start mov-secrets.service || true
-log "ready for the secrets: https://$HOST"
+log "ready for the secrets: https://$NOVATRIX_TICKET_HOST through the tunnel"

@@ -1,23 +1,21 @@
 #!/usr/bin/env bash
-# ops, v39: körs av mov-secrets.service i samma sekund som mov levererat
-# /etc/mov/secrets.env. Startar ärenderegistret, ser till att bas, tabell och
-# webhook finns, skriver inloggningsproxyns konfiguration och startar
-# notifieringen. Idempotent: körs igen utan att göra om något som finns.
+# ops, v39: run by mov-secrets.service in the same second mov has delivered
+# /etc/mov/secrets.env. Starts the ticket registry, makes sure base, table and
+# webhook exist, connects the tunnel with its token, and starts the notifier.
+# Idempotent: runs again without redoing what exists.
 set -euo pipefail
 
 readonly ENV_FILE=/etc/mov/deploy.env
 readonly SECRETS_FILE=/etc/mov/secrets.env
 readonly NOCO_DATA=/srv/nocodb
 readonly NOCO=http://127.0.0.1:8080
-readonly PROXY_CFG=/etc/oauth2-proxy/oauth2-proxy.cfg
 
 log() { printf '[on-secrets] %s\n' "$*"; }
 fail() { printf '[on-secrets] error: %s\n' "$*" >&2; exit 1; }
 
 [[ -r $ENV_FILE && -r $SECRETS_FILE ]] || fail "$ENV_FILE or $SECRETS_FILE is missing"
 set -a; source "$ENV_FILE"; source "$SECRETS_FILE"; set +a
-for var in NOVATRIX_TICKET_HOST OAUTH_CLIENT_ID OAUTH_TENANT_ID NC_ADMIN_EMAIL \
-           OAUTH_CLIENT_SECRET NC_AUTH_JWT_SECRET NC_ADMIN_PASSWORD OAUTH2_PROXY_COOKIE_SECRET; do
+for var in NOVATRIX_TICKET_HOST NC_ADMIN_EMAIL TUNNEL_TOKEN NC_AUTH_JWT_SECRET NC_ADMIN_PASSWORD; do
     [[ -n ${!var:-} ]] || fail "$var is not set"
 done
 
@@ -80,36 +78,16 @@ if ! api GET "/api/v2/meta/tables/$TABLE_ID/hooks" | jq -e '.list[] | select(.ti
     log "created webhook notify -> 127.0.0.1:9000/ticket"
 fi
 
-# --- the sign-in door -----------------------------------------------------------
+# --- the tunnel: the hostname without a port ------------------------------------
 
-install -d -m 0750 "$(dirname "$PROXY_CFG")"
-cat > "$PROXY_CFG" <<CFG
-provider = "entra-id"
-oidc_issuer_url = "https://login.microsoftonline.com/$OAUTH_TENANT_ID/v2.0"
-client_id = "$OAUTH_CLIENT_ID"
-client_secret = "$OAUTH_CLIENT_SECRET"
-scope = "openid"
-redirect_url = "https://$NOVATRIX_TICKET_HOST/oauth2/callback"
-cookie_secret = "$OAUTH2_PROXY_COOKIE_SECRET"
-email_domains = ["*"]
-http_address = "0.0.0.0:4180"
-upstream = "static://202"
-reverse_proxy = true
-set_xauthrequest = true
-skip_provider_button = true
-cookie_secure = true
-CFG
-chmod 0600 "$PROXY_CFG"
-if docker inspect oauth2-proxy >/dev/null 2>&1; then
-    docker rm -f oauth2-proxy >/dev/null
+if systemctl list-unit-files cloudflared.service >/dev/null 2>&1 && systemctl is-enabled -q cloudflared 2>/dev/null; then
+    cloudflared service uninstall >/dev/null 2>&1 || true
 fi
-docker run -d --name oauth2-proxy --restart unless-stopped -p 127.0.0.1:4180:4180 \
-    -v "$PROXY_CFG":/etc/oauth2-proxy.cfg:ro \
-    quay.io/oauth2-proxy/oauth2-proxy:v7.15.4 --config=/etc/oauth2-proxy.cfg >/dev/null
-log "sign-in proxy up for https://$NOVATRIX_TICKET_HOST"
+cloudflared service install "$TUNNEL_TOKEN" >/dev/null
+systemctl restart cloudflared
+log "tunnel connected for https://$NOVATRIX_TICKET_HOST"
 
 # --- notifications ----------------------------------------------------------------
 
 systemctl restart novatrix-notify
-systemctl reload nginx || systemctl restart nginx
-log "done: registry, door and notifier are up"
+log "done: registry, tunnel and notifier are up"

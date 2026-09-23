@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v39",
-  "description": "Automation and integration, as code. The public form (web) writes each errand as a row in a ticket registry (NocoDB on ops), reachable for staff only through an Entra ID sign-in door; a webhook on every new row sends mail through Azure Communication Services and a notice to Teams. The Entra app registration, the mail service and every secret are part of the profile. Run `mov up v39`.",
-  "stages": ["preflight", "rg", "network", "cost", "directory", "identity", "applications", "resources", "rbac", "compute", "verify"],
+  "description": "Automation and integration, as code. The public form (web) writes each errand as a row in a ticket registry (NocoDB on ops). Staff reach the registry at tickets.mov25.assarelius.org through a Cloudflare tunnel, behind a Cloudflare Access sign-in with Entra ID as the identity provider; the ops machine has no open port. A webhook on every new row sends mail through Azure Communication Services and a notice to Teams. The Entra app registration, the tunnel, the records, the mail service and every secret are part of the profile. Run `mov up v39`.",
+  "stages": ["preflight", "rg", "network", "cost", "directory", "identity", "applications", "cloudflare", "resources", "rbac", "compute", "verify"],
   "network": {
     "addressSpace": "10.39.0.0/16",
     "subnets": [
@@ -16,10 +16,8 @@
         { "name": "deny-all-inbound", "priority": 4000, "access": "Deny", "protocol": "*", "ports": ["*"] }
       ],
       "ops": [
-        { "name": "https", "priority": 100, "ports": ["443"], "description": "The ticket queue, behind the Entra ID sign-in door." },
-        { "name": "http", "priority": 110, "ports": ["80"], "description": "Let's Encrypt's challenge, and a redirect to 443." },
-        { "name": "registry-from-web", "priority": 120, "ports": ["8080"], "source": "10.39.1.0/24", "description": "The form writes tickets over the private network, nothing else reaches the registry directly." },
-        { "name": "ssh", "priority": 130, "ports": ["22"], "source": "${admin.sshSource}" },
+        { "name": "registry-from-web", "priority": 100, "ports": ["8080"], "source": "10.39.1.0/24", "description": "The form writes tickets over the private network. Staff come in through the tunnel, which opens no port here." },
+        { "name": "ssh", "priority": 110, "ports": ["22"], "source": "${admin.sshSource}", "description": "Administrative access, and the channel the secrets arrive on." },
         { "name": "deny-all-inbound", "priority": 4000, "access": "Deny", "protocol": "*", "ports": ["*"] }
       ]
     }
@@ -31,11 +29,21 @@
     "applications": [
       {
         "purpose": "signin",
-        "description": "The sign-in door in front of the ticket queue: oauth2-proxy signs staff in with Entra ID through this registration.",
-        "redirectUris": ["https://@output:compute.ops.publicIp.sslip.io/oauth2/callback"],
+        "description": "The sign-in in front of the ticket registry: Cloudflare Access signs staff in with Entra ID through this registration.",
         "claims": { "email": true, "groups": true },
         "secret": "OAUTH_CLIENT_SECRET"
       }
+    ]
+  },
+  "cloudflare": {
+    "records": [ { "name": "form", "host": "web" } ],
+    "tunnel": {
+      "host": "ops",
+      "secret": "TUNNEL_TOKEN",
+      "routes": [ { "name": "tickets", "service": "http://127.0.0.1:8080" } ]
+    },
+    "access": [
+      { "name": "tickets", "idp": "signin", "allow": { "everyone": true } }
     ]
   },
   "resources": [
@@ -68,7 +76,7 @@
       { "role": "Virtual Machine Contributor", "principal": { "kind": "group", "purpose": "drift" }, "scope": "resourceGroup",
         "justification": "Operations start, stop and rebuild the machines, and change neither network nor roles." },
       { "role": "Reader", "principal": { "kind": "group", "purpose": "support" }, "scope": "resourceGroup",
-        "justification": "Support works in the ticket queue, not in Azure; read is for seeing that the environment stands." },
+        "justification": "Support works in the ticket registry, not in Azure; read is for seeing that the environment stands." },
       { "role": "Reader", "principal": { "kind": "group", "purpose": "granskning" }, "scope": "resourceGroup",
         "justification": "A review reads and changes nothing." },
       { "role": "Communication and Email Service Owner", "principal": { "kind": "managedIdentity", "purpose": "notify" }, "scope": "resourceGroup",
@@ -82,26 +90,25 @@
         "subnet": "ops",
         "identities": ["notify"],
         "source": { "path": "v39", "bootstrap": "scripts/bootstrap-v39-ops.sh" },
-        "host": { "packages": ["git", "nginx", "docker.io", "certbot", "python3-venv", "jq", "curl", "openssl"],
+        "host": { "packages": ["git", "docker.io", "python3-venv", "jq", "curl"],
                   "updatePackages": true, "upgradePackages": true, "rebootIfRequired": true },
         "environment": {
-          "OAUTH_CLIENT_ID": "@output:applications.applications.signin.appId",
-          "OAUTH_TENANT_ID": "@output:applications.applications.signin.tenantId",
+          "NOVATRIX_TICKET_HOST": "@output:cloudflare.hosts.tickets",
           "AZURE_CLIENT_ID": "@output:identity.identities.notify.clientId",
           "NOVATRIX_ACS_ID": "@output:resources.acsId",
           "NOVATRIX_MAIL_DOMAIN_ID": "@output:resources.maildomainId",
           "NOVATRIX_SUPPORT_EMAIL": "assarelius@icloud.com",
           "NC_ADMIN_EMAIL": "admin@novatrix.se"
         },
-        "secrets": ["OAUTH_CLIENT_SECRET", "NC_AUTH_JWT_SECRET", "NC_ADMIN_PASSWORD", "OAUTH2_PROXY_COOKIE_SECRET", "TEAMS_WEBHOOK_URL"],
+        "secrets": ["TUNNEL_TOKEN", "NC_AUTH_JWT_SECRET", "NC_ADMIN_PASSWORD"],
         "verify": {
           "http": false,
           "host": [
             { "name": "cloud-init", "run": "cloud-init status --wait", "expect": "status: done" },
             { "name": "secrets landed", "run": "timeout 240 bash -c 'until systemctl is-active -q novatrix-notify; do sleep 5; done' && echo started", "expect": "started" },
             { "name": "registry", "run": "docker inspect -f '{{.State.Status}}' noco", "expect": "running" },
-            { "name": "sign-in door", "run": "docker inspect -f '{{.State.Status}}' oauth2-proxy", "expect": "running" },
-            { "name": "door closed to anonymous", "run": "curl -sk -o /dev/null -w '%{http_code}' https://127.0.0.1/", "expect": "302" },
+            { "name": "tunnel", "run": "systemctl is-active cloudflared", "expect": "active" },
+            { "name": "door closed to anonymous", "run": "timeout 120 bash -c 'until [ \"$(curl -s -o /dev/null -w %{http_code} https://tickets.mov25.assarelius.org/)\" = 302 ]; do sleep 5; done' && echo 302", "expect": "302" },
             { "name": "notifier reaches mail", "run": "curl -sf http://127.0.0.1:9000/health | grep -o '\"status\":\"ok\"'", "expect": "\"status\":\"ok\"" },
             { "name": "pending upgrades", "run": "apt-get -s upgrade | grep -c '^Inst' || true", "expect": "0", "optional": true }
           ]
@@ -122,7 +129,7 @@
           "host": [
             { "name": "cloud-init", "run": "cloud-init status --wait", "expect": "status: done" },
             { "name": "form service", "run": "timeout 120 bash -c 'until systemctl is-active -q novatrix-form; do sleep 5; done' && systemctl is-active novatrix-form", "expect": "active" },
-            { "name": "form reaches registry", "run": "timeout 240 bash -c 'until curl -sf http://127.0.0.1:8080/health | grep -q ok; do sleep 5; done' && echo ok", "expect": "ok" },
+            { "name": "form reaches registry", "run": "timeout 300 bash -c 'until curl -sf http://127.0.0.1:8080/health | grep -q ok; do sleep 5; done' && echo ok", "expect": "ok" },
             { "name": "an errand lands", "run": "curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering 'http://127.0.0.1/arenden?format=json' | grep -o '\"status\":\"stored\"'", "expect": "\"status\":\"stored\"" },
             { "name": "pending upgrades", "run": "apt-get -s upgrade | grep -c '^Inst' || true", "expect": "0", "optional": true }
           ]
