@@ -105,7 +105,7 @@
         "verify": {
           "http": false,
           "host": [
-            { "name": "cloud-init", "run": "cloud-init status --wait", "expect": "status: done", "timeoutSeconds": 900 },
+            { "name": "cloud-init", "run": "cloud-init status --wait >/dev/null; cloud-init status", "expect": "status: done", "timeoutSeconds": 900 },
             { "name": "secrets landed", "run": "timeout 300 bash -c 'until systemctl is-active -q novatrix-notify; do sleep 5; done' && echo started", "expect": "started", "timeoutSeconds": 330 },
             { "name": "registry", "run": "sudo docker inspect -f '{{.State.Status}}' noco", "expect": "running" },
             { "name": "tunnel", "run": "systemctl is-active cloudflared", "expect": "active" },
@@ -128,7 +128,7 @@
         "secrets": ["NC_ADMIN_PASSWORD"],
         "verify": {
           "host": [
-            { "name": "cloud-init", "run": "cloud-init status --wait", "expect": "status: done", "timeoutSeconds": 300 },
+            { "name": "cloud-init", "run": "cloud-init status --wait >/dev/null; cloud-init status", "expect": "status: done", "timeoutSeconds": 300 },
             { "name": "form service", "run": "timeout 120 bash -c 'until systemctl is-active -q novatrix-form; do sleep 5; done' && systemctl is-active novatrix-form", "expect": "active", "timeoutSeconds": 150 },
             { "name": "form reaches registry", "run": "timeout 300 bash -c 'until curl -sf http://127.0.0.1:8080/health | grep -q ok; do sleep 5; done' && echo ok", "expect": "ok", "timeoutSeconds": 330 },
             { "name": "an errand lands", "run": "curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering 'http://127.0.0.1/arenden?format=json' | grep -o '\"status\":\"stored\"'", "expect": "\"status\":\"stored\"" },
