@@ -11,3 +11,6 @@ v*/audit.md
 
 # The subscription cog names the address budget alerts go to.
 mov-workspace/subscription.json
+
+# Which accounts sign in where, tenant ids, trials and their end dates.
+v39/accounts.md
