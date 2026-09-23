@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/directory.schema.json",
-  "domain": "82danassgafemolndal.onmicrosoft.com",
+  "domain": "mov25danielassareliusoutloo.onmicrosoft.com",
   "groups": [
     {
       "purpose": "drift",
@@ -16,6 +16,11 @@
       "purpose": "granskning",
       "displayName": "Novatrix Granskning",
       "description": "Reviewers: read everything, change nothing."
+    },
+    {
+      "purpose": "support",
+      "displayName": "Novatrix Support",
+      "description": "Customer service: signs in to the ticket queue, takes and closes tickets."
     }
   ],
   "users": [
@@ -55,6 +60,15 @@
       "expires": "2026-10-31",
       "groups": [
         "granskning"
+      ]
+    },
+    {
+      "purpose": "support",
+      "displayName": "Andreas Svenberg (support)",
+      "origin": "external",
+      "expires": "2026-12-31",
+      "groups": [
+        "support"
       ]
     }
   ]

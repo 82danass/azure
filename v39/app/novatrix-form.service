@@ -1,0 +1,24 @@
+[Unit]
+Description=Novatrix ärendeformulär (skriver till ärenderegistret)
+After=network-online.target
+Wants=network-online.target
+# Startas av mov-secrets.service när /etc/mov/secrets.env har levererats.
+ConditionPathExists=/etc/mov/secrets.env
+
+[Service]
+User=www-data
+Group=www-data
+# Läses av systemd som root innan privilegierna släpps: secrets.env är 0600 root.
+EnvironmentFile=/etc/mov/deploy.env
+EnvironmentFile=/etc/mov/secrets.env
+WorkingDirectory=/opt/novatrix-form
+ExecStart=/usr/bin/gunicorn --bind 127.0.0.1:8080 --workers 2 --timeout 60 form:app
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

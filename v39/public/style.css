@@ -1,0 +1,60 @@
+:root {
+    --bg-base: oklch(0.976 0.026 92.4);
+    --bg-surface: oklch(0.949 0.03 92.3);
+    --bg-input: oklch(0.985 0.018 92.4);
+    --text-primary: oklch(0.267 0.019 84.5);
+    --border: oklch(0.267 0.019 84.5 / 0.12);
+    --accent: oklch(0.643 0.055 81.4);
+    --accent-hover: oklch(0.579 0.053 81.1);
+    --on-accent: oklch(0.2 0.015 84.5);
+    --shadow-color: oklch(0 0 0 / 0.06);
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-base);
+    margin: 50px;
+}
+
+.container {
+    background-color: var(--bg-surface);
+    padding: 30px;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 0.125rem 0.5rem var(--shadow-color);
+}
+
+h1 {
+    color: var(--text-primary);
+}
+
+label {
+    font-weight: bold;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 15px 0;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-sizing: border-box; /* Ser till att padding inte spräcker bredden */
+}
+
+button {
+    background-color: var(--accent);
+    color: var(--on-accent);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: var(--accent-hover);
+}

@@ -1,0 +1,22 @@
+[Unit]
+Description=Novatrix notifiering (nytt ärende -> mejl, Teams, Slack)
+After=network-online.target docker.service
+Wants=network-online.target
+ConditionPathExists=/etc/mov/secrets.env
+
+[Service]
+User=www-data
+Group=www-data
+EnvironmentFile=/etc/mov/deploy.env
+EnvironmentFile=/etc/mov/secrets.env
+WorkingDirectory=/opt/novatrix-notify
+ExecStart=/opt/novatrix-notify/venv/bin/gunicorn --bind 127.0.0.1:9000 --workers 2 --timeout 90 notify:app
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
