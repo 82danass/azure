@@ -1,7 +1,8 @@
 # mov writes these. Private keys, initial passwords and deployment state are
 # never public; the configuration that produces them is.
-mov-workspace/keys/
-mov-workspace/state/
+mov-workspace*/keys/
+mov-workspace*/state/
+mov-workspace*/secrets/
 
 # mov docs transcripts carry the initial passwords from `az ad user create`.
 v*/commands*.md
@@ -10,7 +11,7 @@ v*/commands*.md
 v*/audit.md
 
 # The subscription cog names the address budget alerts go to.
-mov-workspace/subscription.json
+mov-workspace*/subscription.json
 
 # Which accounts sign in where, tenant ids, trials and their end dates.
 v39/accounts.md
