@@ -22,9 +22,11 @@ done
 # --- the ticket registry ------------------------------------------------------
 
 install -d -m 0750 "$NOCO_DATA"
+# On the host's network: the webhook's 127.0.0.1:9000 then means this machine,
+# where the notifier listens, and not the container's own loopback.
 if ! docker inspect noco >/dev/null 2>&1; then
     log "starting NocoDB"
-    docker run -d --name noco --restart unless-stopped -p 8080:8080 \
+    docker run -d --name noco --restart unless-stopped --network host \
         -v "$NOCO_DATA":/usr/app/data/ \
         -e NC_AUTH_JWT_SECRET="$NC_AUTH_JWT_SECRET" \
         -e NC_ADMIN_EMAIL="$NC_ADMIN_EMAIL" -e NC_ADMIN_PASSWORD="$NC_ADMIN_PASSWORD" \
@@ -40,13 +42,16 @@ for _ in $(seq 1 60); do
 done
 curl -sf "$NOCO/api/v1/health" >/dev/null || fail "NocoDB did not answer on $NOCO"
 
-api() {  # api METHOD PATH [JSON]
-    local method=$1 path=$2 body=${3:-}
+api() {  # api METHOD PATH [JSON]: the body on success; on anything else, what NocoDB said
+    local method=$1 path=$2 body=${3:-} answer code
     if [[ -n $body ]]; then
-        curl -sf -X "$method" "$NOCO$path" -H "xc-auth: $JWT" -H 'Content-Type: application/json' -d "$body"
+        answer=$(curl -s -w '\n%{http_code}' -X "$method" "$NOCO$path" -H "xc-auth: $JWT" -H 'Content-Type: application/json' -d "$body")
     else
-        curl -sf -X "$method" "$NOCO$path" -H "xc-auth: $JWT"
+        answer=$(curl -s -w '\n%{http_code}' -X "$method" "$NOCO$path" -H "xc-auth: $JWT")
     fi
+    code=${answer##*$'\n'}
+    [[ $code == 2* ]] || fail "$method $path answered $code: ${answer%$'\n'*}"
+    printf '%s' "${answer%$'\n'*}"
 }
 
 JWT=$(curl -sf -X POST "$NOCO/api/v2/auth/user/signin" -H 'Content-Type: application/json' \
@@ -71,10 +76,13 @@ if [[ -z $TABLE_ID ]]; then
         {"column_name":"handled_by","title":"HandledBy","uidt":"SingleLineText"}]}' | jq -r .id)
     log "created table Arenden ($TABLE_ID)"
 fi
+# A version-3 hook: the only kind this NocoDB takes. Without a body template
+# it sends an empty request; {{ json event }} is the whole event,
+# {"type":"records.after.insert","data":{"rows":[...]}}, which notify.py reads.
 if ! api GET "/api/v2/meta/tables/$TABLE_ID/hooks" | jq -e '.list[] | select(.title=="notify")' >/dev/null; then
     api POST "/api/v2/meta/tables/$TABLE_ID/hooks" '{
-      "title":"notify","event":"after","operation":"insert","type":"url","active":1,
-      "notification":{"type":"URL","payload":{"method":"POST","path":"http://127.0.0.1:9000/ticket","body":"{{ json data }}","headers":[{}],"parameters":[{}],"auth":""}}}' >/dev/null
+      "title":"notify","version":"v3","event":"after","operation":["insert"],"active":true,
+      "notification":{"type":"URL","payload":{"method":"POST","path":"http://127.0.0.1:9000/ticket","body":"{{ json event }}","headers":[],"parameters":[],"auth":""}}}' >/dev/null
     log "created webhook notify -> 127.0.0.1:9000/ticket"
 fi
 

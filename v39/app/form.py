@@ -43,15 +43,27 @@ def _call(method: str, path: str, body: dict | None = None, *, jwt: str | None =
     return json.loads(text) if text else {}
 
 
-def _jwt() -> str:
-    """Registrets adminsession, förnyad före utgång. NocoDB:s JWT lever 10 h."""
+def _jwt(fresh: bool = False) -> str:
+    """Registrets adminsession. Den dör inte bara av ålder: registret drar
+    tillbaka den när samma konto loggar in på nytt någon annanstans, så en
+    nekad session byts mot en ny (fresh=True) i stället för att svaret blir
+    502 resten av dagen."""
     with _lock:
-        if _session["jwt"] and time.monotonic() < float(_session["until"]):
+        if _session["jwt"] and not fresh:
             return str(_session["jwt"])
         answer = _call("POST", "/api/v2/auth/user/signin", {"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD})
         _session["jwt"] = answer["token"]
-        _session["until"] = time.monotonic() + 8 * 3600
         return str(_session["jwt"])
+
+
+def _registry(method: str, path: str, body: dict | None = None) -> dict:
+    """Ett anrop med adminsessionen; nekas det, en gång till med en ny."""
+    try:
+        return _call(method, path, body, jwt=_jwt())
+    except urllib.error.HTTPError as error:
+        if error.code != 401:
+            raise
+        return _call(method, path, body, jwt=_jwt(fresh=True))
 
 
 def _table_id() -> str:
@@ -59,12 +71,11 @@ def _table_id() -> str:
     ops-maskinens startskript; här hittas de bara."""
     if _session["table"]:
         return str(_session["table"])
-    jwt = _jwt()
-    bases = _call("GET", "/api/v1/db/meta/projects/", jwt=jwt).get("list", [])
+    bases = _registry("GET", "/api/v1/db/meta/projects/").get("list", [])
     base = next((b for b in bases if b.get("title") == BASE_TITLE), None)
     if base is None:
         raise LookupError(f"basen {BASE_TITLE!r} finns inte i registret")
-    tables = _call("GET", f"/api/v2/meta/bases/{base['id']}/tables", jwt=jwt).get("list", [])
+    tables = _registry("GET", f"/api/v2/meta/bases/{base['id']}/tables").get("list", [])
     table = next((t for t in tables if t.get("title") == TABLE_TITLE), None)
     if table is None:
         raise LookupError(f"tabellen {TABLE_TITLE!r} finns inte i basen {BASE_TITLE!r}")
@@ -77,7 +88,7 @@ def health():
     try:
         table = _table_id()
         where = urllib.parse.quote("(Status,eq,ny)")
-        found = _call("GET", f"/api/v2/tables/{table}/records?where={where}&limit=1", jwt=_jwt())
+        found = _registry("GET", f"/api/v2/tables/{table}/records?where={where}&limit=1")
         open_tickets = int((found.get("pageInfo") or {}).get("totalRows") or 0)
     except Exception as error:  # noqa: BLE001 -- svaret är diagnosen
         return jsonify(status="degraded", registry=TICKETS_URL, error=str(error)[:200]), 503
@@ -99,7 +110,7 @@ def submit():
         "Status": "ny",
         "Received": received,
     }
-    created = _call("POST", f"/api/v2/tables/{_table_id()}/records", row, jwt=_jwt())
+    created = _registry("POST", f"/api/v2/tables/{_table_id()}/records", row)
     ident = created[0]["Id"] if isinstance(created, list) else created.get("Id")
 
     if request.args.get("format") == "json":
