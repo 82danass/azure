@@ -233,7 +233,7 @@ Registret anropar webhooken, notifieraren mejlar och svarar; registrets egen log
 
 Dörren: `https://mov25-tickets.assarelius.org` utan session svarar `302` till Cloudflares inloggning, som visar Entra ID som enda alternativ. Andreas loggar in med sin användare och ser tabellen `Arenden`, med ärendet från formuläret som en rad med status `ny`.
 
-Fem fel hittades av verifieringen och inte av mig, och alla fem blev kod:
+Sex fel hittades av körningarna och inte av mig, och alla sex blev kod:
 
 | Fel | Vad som hände | Åtgärd |
 | --- | --- | --- |
@@ -241,9 +241,10 @@ Fem fel hittades av verifieringen och inte av mig, och alla fem blev kod:
 | `no answer over ssh within 60s` | mov väntade 60 sekunder på varje kontroll, en konstant; `cloud-init status --wait` på en maskin som drar en Docker-avbild och bygger en venv tar längre | `timeoutSeconds` per kontroll i mov 2.31.4; sedan 2.34.0 behövs det inte alls: kontrollen är `cloud-init status` och mov frågar om tills svaret är `done` |
 | `hook version is deprecated` | NocoDB 2026.09 tar bara webhooks i version 3, och `curl -f` gömde svaret som exit 22 | webhooken i version 3, och skriptet skriver ut vad registret svarade när något nekas |
 | `no answer over ssh within 150s` | väntesnurran `timeout 120 bash -c 'until systemctl is-active …'` satt fast fast tjänsten var uppe: bash tar emot `timeout`:s signal först när det pågående `systemctl`-anropet svarat, och ett anrop som blockerar (systemd upptagen strax efter cloud-init och uppgraderingen) håller hela snurran, och ssh-kanalen med den | väntandet flyttade in i mov (2.34.0): en kontroll är en fråga, `systemctl is-active novatrix-form`, och mov ställer den igen med verify-blockets intervall tills maskinen svarar som profilen säger eller dess tidsgräns gått. Snurror, `sleep` och sekunder försvann ur profilen |
+| `AADSTS650056: Misconfigured application` | första inloggningen vid dörren: Entra loggade in användaren, och Cloudflare fick inte läsa vem det var, för appregistreringen hade inga rättigheter mot Microsoft Graph och inget administratörssamtycke. Cloudflares egen lista är sju delegerade rättigheter (`openid`, `email`, `profile`, `offline_access`, `User.Read`, och för grupper `Directory.Read.All`, `GroupMember.Read.All`) och sedan samtycke | mov 2.38.0 ger registreringen exakt de rättigheterna och ger samtycket för tenanten; nästa `mov up` reparerar en registrering som saknar dem |
 | `expected 'status: done', got '......'` | `cloud-init status --wait` skriver en punkt i sekunden medan den väntar och statusen efter dem; på en maskin som fortfarande bootade var svaret punkter, och mov jämför hela svaret. Alla tidigare maskiner var klara innan verify frågade, så felet har legat i standardkontrollen sedan v34 | mov 2.31.5 rättade standardkontrollen; sedan 2.34.0 är frågan bara `cloud-init status`, och mov väntar |
 
-Och ett sjätte som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
+Och ett sjunde som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
 
 Formuläret nås på `https://mov25-form.assarelius.org`. Zonens TLS-läge är *Full*: Cloudflares kant tar besökarens TLS och kräver TLS av ursprunget också, så en webbserver som bara talar HTTP ger 522 på `https://`, vilket var första svaret. Certifikatet vid kanten var aldrig problemet; det är zonens och täcker namnet. Två vägar finns, och profilen väljer:
 
