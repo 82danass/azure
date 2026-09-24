@@ -123,7 +123,11 @@ Tre saker i profilen är nya för veckan och fanns inte i mov när den började:
 
 ## Deploy från kod
 
-`mov up v39`, från tom prenumeration till verifierad kedja. Samma körning som text, att kopiera ur; verktygskontrollerna i preflight är utelämnade:
+`mov up v39`
+
+![mov up v39: tolv steg från tom prenumeration till verifierad kedja, med regionvalet när Sweden Central sa nej](img/mov_up_v39.svg)
+
+Samma körning som text, att kopiera ur; verktygskontrollerna i preflight är utelämnade:
 
 ```shell
 up v39 -> rg-novatrix-v39 in swedencentral
