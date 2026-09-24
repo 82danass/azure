@@ -1,0 +1,16 @@
+[Unit]
+Description=Novatrix certifikat: formularets namn hos Let's Encrypt, sa snart namnet finns
+After=network-online.target nginx.service
+Wants=network-online.target
+# The record that gives the name is made after this machine; every attempt
+# before that fails on purpose, and the retries must not run out.
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/opt/novatrix/get-cert.sh
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

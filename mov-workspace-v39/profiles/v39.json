@@ -11,7 +11,8 @@
     ],
     "nsg": {
       "web": [
-        { "name": "http", "priority": 100, "ports": ["80"], "description": "The errand form is public by design." },
+        { "name": "http", "priority": 100, "ports": ["80"], "description": "The errand form is public by design, and Let's Encrypt proves the hostname over it." },
+        { "name": "https", "priority": 110, "ports": ["443"], "description": "The form over TLS: the machine's own certificate, which Cloudflare's edge connects to." },
         { "name": "ssh", "priority": 120, "ports": ["22"], "source": "${admin.sshSource}", "description": "Administrative access from where mov is run." },
         { "name": "deny-all-inbound", "priority": 4000, "access": "Deny", "protocol": "*", "ports": ["*"] }
       ],
@@ -36,7 +37,7 @@
     ]
   },
   "cloudflare": {
-    "records": [ { "name": "form", "host": "web", "tls": "edge" } ],
+    "records": [ { "name": "form", "host": "web" } ],
     "tunnel": {
       "host": "ops",
       "secret": "TUNNEL_TOKEN",
@@ -109,7 +110,7 @@
             { "name": "secrets landed", "run": "systemctl is-active novatrix-notify", "expect": "active" },
             { "name": "registry", "run": "sudo docker inspect -f '{{.State.Status}}' noco", "expect": "running" },
             { "name": "tunnel", "run": "systemctl is-active cloudflared", "expect": "active" },
-            { "name": "door closed to anonymous", "run": "curl -s -o /dev/null -w %{http_code} https://mov25-tickets.assarelius.org/", "expect": "302" },
+            { "name": "door closed to anonymous", "run": "bash -c '. /etc/mov/deploy.env; curl -s -o /dev/null -w %{http_code} https://$NOVATRIX_TICKET_HOST/'", "expect": "302" },
             { "name": "notifier reaches mail", "run": "curl -sf http://127.0.0.1:9000/health | grep -o '\"status\":\"ok\"'", "expect": "\"status\":\"ok\"" },
             { "name": "pending upgrades", "run": "apt-get -s upgrade | grep -c '^Inst' || true", "expect": "0", "optional": true }
           ]
@@ -119,10 +120,11 @@
         "purpose": "web",
         "subnet": "web",
         "source": { "path": "v39", "bootstrap": "scripts/bootstrap-v39-web.sh" },
-        "host": { "packages": ["git", "nginx", "python3-flask", "gunicorn"],
+        "host": { "packages": ["git", "nginx", "python3-flask", "gunicorn", "certbot"],
                   "updatePackages": true, "upgradePackages": true, "rebootIfRequired": true },
         "environment": {
           "NOVATRIX_TICKETS_URL": "http://vm-novatrix-ops:8080",
+          "NOVATRIX_FORM_HOST": "@output:cloudflare.hosts.form",
           "NC_ADMIN_EMAIL": "admin@novatrix.se"
         },
         "secrets": ["NC_ADMIN_PASSWORD"],
@@ -131,6 +133,7 @@
             { "name": "cloud-init", "run": "cloud-init status", "expect": "status: done" },
             { "name": "form service", "run": "systemctl is-active novatrix-form", "expect": "active" },
             { "name": "form reaches registry", "run": "curl -sf http://127.0.0.1:8080/health | grep -o '\"status\":\"ok\"'", "expect": "\"status\":\"ok\"" },
+            { "name": "certificate", "run": "bash -c '. /etc/mov/deploy.env; curl -s -o /dev/null -w %{http_code} https://$NOVATRIX_FORM_HOST/'", "expect": "200" },
             { "name": "an errand lands", "run": "curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering 'http://127.0.0.1/arenden?format=json' | grep -o '\"status\":\"stored\"'", "expect": "\"status\":\"stored\"" },
             { "name": "pending upgrades", "run": "apt-get -s upgrade | grep -c '^Inst' || true", "expect": "0", "optional": true }
           ]

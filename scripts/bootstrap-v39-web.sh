@@ -19,7 +19,7 @@ fail() { printf '[bootstrap] error: %s\n' "$*" >&2; exit 1; }
 
 [[ -r $ENV_FILE ]] || fail "$ENV_FILE is missing. cloud-init writes it; this script cannot run standalone."
 source "$ENV_FILE"
-for var in MOV_ENV MOV_REPO MOV_REF MOV_PATH MOV_APP_DIR NOVATRIX_TICKETS_URL NC_ADMIN_EMAIL; do
+for var in MOV_ENV MOV_REPO MOV_REF MOV_PATH MOV_APP_DIR NOVATRIX_TICKETS_URL NOVATRIX_FORM_HOST NC_ADMIN_EMAIL; do
     [[ -n ${!var:-} ]] || fail "$var is not set in $ENV_FILE"
 done
 
@@ -32,7 +32,7 @@ log "env=$MOV_ENV repo=$MOV_REPO ref=$MOV_REF serving=$SOURCE_DIR registry=$NOVA
 
 export DEBIAN_FRONTEND=noninteractive
 missing=()
-for pkg in nginx python3-flask gunicorn; do
+for pkg in nginx python3-flask gunicorn certbot; do
     dpkg -s "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
 done
 if (( ${#missing[@]} )); then
@@ -57,6 +57,8 @@ install -m 0644 "$SOURCE_DIR/app/form.py" "$APPROOT/form.py"
 install -m 0644 "$SOURCE_DIR/app/$SERVICE.service" "/etc/systemd/system/$SERVICE.service"
 install -m 0644 "$SOURCE_DIR/app/mov-secrets.path" /etc/systemd/system/mov-secrets.path
 install -m 0644 "$SOURCE_DIR/app/mov-secrets.service" /etc/systemd/system/mov-secrets.service
+install -m 0755 "$SOURCE_DIR/app/get-cert.sh" /opt/novatrix/get-cert.sh
+install -m 0644 "$SOURCE_DIR/app/novatrix-cert.service" /etc/systemd/system/novatrix-cert.service
 cat > /opt/novatrix/on-secrets.sh <<'ON'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -104,3 +106,10 @@ nginx -t
 systemctl enable --now nginx
 systemctl reload nginx
 log "nginx serves $DOCROOT and proxies /arenden to the form service"
+
+# --- the certificate, once the hostname exists --------------------------------
+# The record for $NOVATRIX_FORM_HOST is made after this machine is; the
+# service retries every half minute until Let's Encrypt has answered, then
+# serves 443. Nothing here waits for it.
+systemctl enable --now novatrix-cert.service || true
+log "novatrix-cert asks Let's Encrypt for $NOVATRIX_FORM_HOST as soon as the name reaches this machine"

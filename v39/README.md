@@ -75,7 +75,7 @@ Profilen [`mov-workspace-v39/profiles/v39.json`](../mov-workspace-v39/profiles/v
     "applications": [ { "purpose": "signin", "claims": { "email": true, "groups": true }, "secret": "OAUTH_CLIENT_SECRET" } ]
   },
   "cloudflare": {
-    "records": [ { "name": "form", "host": "web", "tls": "edge" } ],
+    "records": [ { "name": "form", "host": "web" } ],
     "tunnel": { "host": "ops", "secret": "TUNNEL_TOKEN", "routes": [ { "name": "tickets", "service": "http://127.0.0.1:8080" } ] },
     "access": [ { "name": "tickets", "idp": "signin", "allow": { "everyone": true } } ]
   },
@@ -245,7 +245,10 @@ Fem fel hittades av verifieringen och inte av mig, och alla fem blev kod:
 
 Och ett sjätte som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
 
-Formuläret nås på `https://mov25-form.assarelius.org`. Webbservern talar bara HTTP, och zonens TLS-läge (*Full*) kräver att ursprunget talar HTTPS, så första svaret på `https://` var Cloudflares 522. Certifikatet var aldrig problemet; det är zonens, en nivå, och täcker namnet. Lösningen är inte att ändra zonens läge, som fem andra tjänster delar, utan `"tls": "edge"` på posten: mov sätter TLS-läget för just det värdnamnet genom en konfigurationsregel hos Cloudflare (besökare till kant krypterat, kant till ursprung HTTP), och tar bort regeln vid `mov down`. Token behöver rättigheten *Config Rules*, och preflight säger till om den saknas.
+Formuläret nås på `https://mov25-form.assarelius.org`. Zonens TLS-läge är *Full*: Cloudflares kant tar besökarens TLS och kräver TLS av ursprunget också, så en webbserver som bara talar HTTP ger 522 på `https://`, vilket var första svaret. Certifikatet vid kanten var aldrig problemet; det är zonens och täcker namnet. Två vägar finns, och profilen väljer:
+
+- **Maskinens eget certifikat**, vägen som används här. Webbmaskinen ber Let's Encrypt om ett certifikat för sitt namn så snart namnet finns och når maskinen genom kanten (beviset är HTTP-01 över port 80, som Cloudflare vidarebefordrar), och serverar 443 med det. [`app/get-cert.sh`](app/get-cert.sh) och [`app/novatrix-cert.service`](app/novatrix-cert.service); tjänsten försöker igen varje halvminut tills namnet finns, för posten skapas efter maskinen. Let's Encrypt utfärdar fem certifikat i veckan för ett och samma namn; en vecka med många `mov up` når taket, och skriptet säger det i stället för att fortsätta.
+- **TLS vid kanten**, `"tls": "edge"` på posten: mov sätter TLS-läget för just det värdnamnet genom en konfigurationsregel hos Cloudflare (kant till ursprung HTTP) och tar bort regeln vid `mov down`. Zonens läge rörs inte. Token behöver rättigheten *Config Rules*, och preflight säger till om den saknas.
 
 ## Återskapa miljön
 
