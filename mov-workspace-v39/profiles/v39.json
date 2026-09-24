@@ -36,7 +36,7 @@
     ]
   },
   "cloudflare": {
-    "records": [ { "name": "form", "host": "web" } ],
+    "records": [ { "name": "form", "host": "web", "tls": "edge" } ],
     "tunnel": {
       "host": "ops",
       "secret": "TUNNEL_TOKEN",

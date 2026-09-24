@@ -75,7 +75,7 @@ Profilen [`mov-workspace-v39/profiles/v39.json`](../mov-workspace-v39/profiles/v
     "applications": [ { "purpose": "signin", "claims": { "email": true, "groups": true }, "secret": "OAUTH_CLIENT_SECRET" } ]
   },
   "cloudflare": {
-    "records": [ { "name": "form", "host": "web" } ],
+    "records": [ { "name": "form", "host": "web", "tls": "edge" } ],
     "tunnel": { "host": "ops", "secret": "TUNNEL_TOKEN", "routes": [ { "name": "tickets", "service": "http://127.0.0.1:8080" } ] },
     "access": [ { "name": "tickets", "idp": "signin", "allow": { "everyone": true } } ]
   },
@@ -219,7 +219,7 @@ Verifieringen ovan är från `mov up v39 --stage verify` direkt efter körningen
 Kedjan, med ett ärende genom formuläret:
 
 ```shell
-curl -sF name=Kedjetest -F email=kund@example.org -F "message=Provbiljett" "http://mov25-form.assarelius.org/arenden?format=json"
+curl -sF name=Kedjetest -F email=kund@example.org -F "message=Provbiljett" "https://mov25-form.assarelius.org/arenden?format=json"
 {"id":4,"status":"stored"}
 ```
 
@@ -245,7 +245,7 @@ Fem fel hittades av verifieringen och inte av mig, och alla fem blev kod:
 
 Och ett sjätte som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
 
-Formuläret nås på `http://mov25-form.assarelius.org`, genom Cloudflare, utan TLS: webbservern talar bara HTTP, och zonens TLS-läge kräver att ursprunget talar HTTPS för att `https://` ska fungera. Nästa steg där är ett ursprungscertifikat från Cloudflare på webbmaskinen, inte en ändring av zonen, som fem andra tjänster delar.
+Formuläret nås på `https://mov25-form.assarelius.org`. Webbservern talar bara HTTP, och zonens TLS-läge (*Full*) kräver att ursprunget talar HTTPS, så första svaret på `https://` var Cloudflares 522. Certifikatet var aldrig problemet; det är zonens, en nivå, och täcker namnet. Lösningen är inte att ändra zonens läge, som fem andra tjänster delar, utan `"tls": "edge"` på posten: mov sätter TLS-läget för just det värdnamnet genom en konfigurationsregel hos Cloudflare (besökare till kant krypterat, kant till ursprung HTTP), och tar bort regeln vid `mov down`. Token behöver rättigheten *Config Rules*, och preflight säger till om den saknas.
 
 ## Återskapa miljön
 
