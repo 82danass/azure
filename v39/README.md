@@ -229,16 +229,17 @@ Registret anropar webhooken, notifieraren mejlar och svarar; registrets egen log
 
 Dörren: `https://mov25-tickets.assarelius.org` utan session svarar `302` till Cloudflares inloggning, som visar Entra ID som enda alternativ. Andreas loggar in med sin användare och ser tabellen `Arenden`, med ärendet från formuläret som en rad med status `ny`.
 
-Fyra fel hittades av verifieringen och inte av mig, och alla fyra blev kod:
+Fem fel hittades av verifieringen och inte av mig, och alla fem blev kod:
 
 | Fel | Vad som hände | Åtgärd |
 | --- | --- | --- |
 | `permission denied ... docker.sock` | kontrollen `registry` körs som `azureuser`, och Docker svarar bara root | `sudo docker inspect` i profilen |
 | `no answer over ssh within 60s` | mov väntade 60 sekunder på varje kontroll, en konstant; `cloud-init status --wait` på en maskin som drar en Docker-avbild och bygger en venv tar längre | `timeoutSeconds` per kontroll i mov 2.31.4, och profilen sätter det på de kontroller som väntar |
 | `hook version is deprecated` | NocoDB 2026.09 tar bara webhooks i version 3, och `curl -f` gömde svaret som exit 22 | webhooken i version 3, och skriptet skriver ut vad registret svarade när något nekas |
+| `no answer over ssh within 150s` | väntesnurran `timeout 120 bash -c 'until systemctl is-active …'` satt fast fast tjänsten var uppe: bash tar emot `timeout`:s signal först när det pågående `systemctl`-anropet svarat, och ett anrop som blockerar (systemd upptagen strax efter cloud-init och uppgraderingen) håller hela snurran, och ssh-kanalen med den | varje anrop inne i en snurra har sin egen `timeout`, snurran dödas efter en frist (`timeout -k 5`), och inget inne i den ärver kanalens stdout |
 | `expected 'status: done', got '......'` | `cloud-init status --wait` skriver en punkt i sekunden medan den väntar och statusen efter dem; på en maskin som fortfarande bootade var svaret punkter, och mov jämför hela svaret. Alla tidigare maskiner var klara innan verify frågade, så felet har legat i standardkontrollen sedan v34 | kontrollen väntar tyst och frågar sedan: `cloud-init status --wait >/dev/null; cloud-init status`, i profilen, i workspacens standardvärden och i mov 2.31.5 |
 
-Och ett femte som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
+Och ett sjätte som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
 
 Formuläret nås på `http://mov25-form.assarelius.org`, genom Cloudflare, utan TLS: webbservern talar bara HTTP, och zonens TLS-läge kräver att ursprunget talar HTTPS för att `https://` ska fungera. Nästa steg där är ett ursprungscertifikat från Cloudflare på webbmaskinen, inte en ändring av zonen, som fem andra tjänster delar.
 

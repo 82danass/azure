@@ -106,9 +106,9 @@
           "http": false,
           "host": [
             { "name": "cloud-init", "run": "cloud-init status --wait >/dev/null; cloud-init status", "expect": "status: done", "timeoutSeconds": 900 },
-            { "name": "secrets landed", "run": "timeout 300 bash -c 'until systemctl is-active -q novatrix-notify; do sleep 5; done' && echo started", "expect": "started", "timeoutSeconds": 330 },
-            { "name": "registry", "run": "sudo docker inspect -f '{{.State.Status}}' noco", "expect": "running" },
-            { "name": "tunnel", "run": "systemctl is-active cloudflared", "expect": "active" },
+            { "name": "secrets landed", "run": "timeout -k 5 300 bash -c 'until timeout 15 systemctl is-active -q novatrix-notify >/dev/null 2>&1; do sleep 5; done' && echo started", "expect": "started", "timeoutSeconds": 330 },
+            { "name": "registry", "run": "timeout 20 sudo docker inspect -f '{{.State.Status}}' noco", "expect": "running" },
+            { "name": "tunnel", "run": "timeout 15 systemctl is-active cloudflared", "expect": "active" },
             { "name": "door closed to anonymous", "run": "timeout 120 bash -c 'until [ \"$(curl -s -o /dev/null -w %{http_code} https://mov25-tickets.assarelius.org/)\" = 302 ]; do sleep 5; done' && echo 302", "expect": "302", "timeoutSeconds": 150 },
             { "name": "notifier reaches mail", "run": "curl -sf http://127.0.0.1:9000/health | grep -o '\"status\":\"ok\"'", "expect": "\"status\":\"ok\"" },
             { "name": "pending upgrades", "run": "apt-get -s upgrade | grep -c '^Inst' || true", "expect": "0", "optional": true }
@@ -129,7 +129,7 @@
         "verify": {
           "host": [
             { "name": "cloud-init", "run": "cloud-init status --wait >/dev/null; cloud-init status", "expect": "status: done", "timeoutSeconds": 300 },
-            { "name": "form service", "run": "timeout 120 bash -c 'until systemctl is-active -q novatrix-form; do sleep 5; done' && systemctl is-active novatrix-form", "expect": "active", "timeoutSeconds": 150 },
+            { "name": "form service", "run": "timeout -k 5 120 bash -c 'until timeout 15 systemctl is-active -q novatrix-form >/dev/null 2>&1; do sleep 5; done' && timeout 15 systemctl is-active novatrix-form", "expect": "active", "timeoutSeconds": 150 },
             { "name": "form reaches registry", "run": "timeout 300 bash -c 'until curl -sf http://127.0.0.1:8080/health | grep -q ok; do sleep 5; done' && echo ok", "expect": "ok", "timeoutSeconds": 330 },
             { "name": "an errand lands", "run": "curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering 'http://127.0.0.1/arenden?format=json' | grep -o '\"status\":\"stored\"'", "expect": "\"status\":\"stored\"" },
             { "name": "pending upgrades", "run": "apt-get -s upgrade | grep -c '^Inst' || true", "expect": "0", "optional": true }
