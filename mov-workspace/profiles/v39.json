@@ -186,6 +186,7 @@
     "vms": [
       {
         "purpose": "ops",
+        "endpoints": [{ "name": "registry", "port": 8080 }],
         "subnet": "ops",
         "size": "Standard_B2ls_v2",
         "identities": [
