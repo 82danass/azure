@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v39",
-  "description": "v39 without Cloudflare: the same form, ticket registry, webhook and mail through Azure Communication Services, and nothing at Cloudflare. The registry is reached on the ops machine's own address, port 8080, from where mov is run; the form on the web machine's address. Run `mov up v39-plain`.",
+  "description": "v39 without Cloudflare: the same form, ticket registry, webhook and mail through Azure Communication Services, and nothing at Cloudflare. The registry is reached on the ops machine's own address, port 8080, from where mov is run; the form on the web machine's address. Run `mov up v39`.",
   "stages": [
     "preflight",
     "rg",

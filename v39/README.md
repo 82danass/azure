@@ -149,92 +149,35 @@ På web-maskinen kör formulärtjänsten, och `/health` svarar att registret nå
 
 `mov up v39-cf`
 
-Cloudflare-kedjan som text, från en körning innan profilen fick namnet `v39-cf` (då hette den `v39`); verktygskontrollerna i preflight är utelämnade:
+![mov up v39-cf: tolv steg från tom prenumeration till verifierad kedja, med regionvalet när Sweden Central sa nej, appregistreringen, tunneln och dörren hos Cloudflare, och båda maskinernas omstart](img/mov_up_v39-cf.svg)
 
-```shell
-up v39 -> rg-novatrix-v39 in swedencentral
-caller address 80.217.168.6/32, agreed by ipify, icanhazip, checkip
+Sweden Central sa nej igen: två av fyra kärnor räknades som använda fast ingen maskin fanns i prenumerationen. mov frågade de närmaste regionerna (West Europe hade plats men tar inte emot nya kunder) och körningen gick i Denmark East. Steg 7 registrerar appen som dörren loggar in genom, med Cloudflares sju rättigheter mot Microsoft Graph. Raden säger att samtycket gavs, och det stämde inte: se `AADSTS650056` i tabellen under *Verifiering*. Steg 8 gör tunneln, dörren framför `mov25-tickets.assarelius.org` och formulärets post. Verifieringen väntade in ops-maskinens cloud-init, nio frågor, och båda maskinerna fick den omstart uppgraderingen bad om, varefter varje kontroll kördes igen på maskinen som faktiskt kör.
 
-1/12 preflight Verify tooling, identity and providers
-     OK   signed in as: mov25-daniel.assarelius@outlook.com
-     OK   subscription: Azure subscription 1 (Enabled)
-     OK   spending limit: On (FreeTrial_2014-09-01) -- Azure stops the subscription when the credit runs out, so budget alerts are advisory rather than a hard stop
-     OK   resource providers: 5 registered
-     WARN billing access: one person can pay the bill -- add a second billing owner, and prefer a group over a person: `mov billing up` grants it, and one resignation is otherwise unrecoverable
-     OK   subscription budget: MOV25-Budget on the subscription
-     OK   secrets: NC_ADMIN_PASSWORD from v39.env, NC_AUTH_JWT_SECRET from v39.env
-     OK   cloudflare: token active, zone assarelius.org, names prefixed mov25-
-     OK   vm size Standard_B2ls_v2: available in swedencentral
-     OK   vm size Standard_B2ts_v2: available in swedencentral
-     OK   capacity cores: needs 4 more, 4 of 4 free in swedencentral
-     OK   capacity public addresses: needs 2 more, 3 of 3 free in swedencentral
-     OK   capacity family standardBsv2Family: needs 4 more, 4 of 4 free in swedencentral
-     OK   admin exposure: no administrative rule is open to the internet
-2/12 rg Create the resource group
-     resource group rg-novatrix-v39 created in swedencentral
-3/12 network Virtual network, subnets and NSGs
-     mov-v39-network-ab78460a
-4/12 cost Budget and spend alerts
-     mov-v39-cost-f76f3967
-5/12 directory Entra ID users and groups (tenant scope)
-     group grp-novatrix-drift already exists
-     group grp-novatrix-utveckling already exists
-     group grp-novatrix-granskning already exists
-     group grp-novatrix-support already exists
-     user usr-novatrix-drift@mov25danielassareliusoutloo.onmicrosoft.com already exists
-     user usr-novatrix-utveckling@mov25danielassareliusoutloo.onmicrosoft.com already exists
-     user usr-novatrix-konsult@mov25danielassareliusoutloo.onmicrosoft.com already exists
-     user usr-novatrix-granskning@mov25danielassareliusoutloo.onmicrosoft.com already exists
-     user usr-novatrix-support@mov25danielassareliusoutloo.onmicrosoft.com already exists
-6/12 identity User-assigned managed identities
-     mov-v39-identity-951afbe7
-7/12 applications Entra app registrations
-     OK   registered app-novatrix-v39-signin
-     app-novatrix-v39-signin: OAUTH_CLIENT_SECRET already held, not rotated
-8/12 cloudflare Records, tunnel and sign-in door at Cloudflare
-     OK   tunnel novatrix-v39 made
-     OK   tunnel token stored as TUNNEL_TOKEN, for ops
-     OK   sign-in in front of mov25-tickets.assarelius.org: mov-v39-signin
-     OK   mov25-tickets.assarelius.org -> tunnel novatrix-v39
-9/12 resources Additional resources from the catalogue
-     mov-v39-resources-cf670733
-10/12 rbac Role assignments
-     mov-v39-rbac-2a1b2102
-11/12 compute Public IP, NIC and the VM
-     OK   generated SSH key D:\MOV25\GitHub\azure\mov-workspace-v39\keys\mov-v39
-     mov-v39-compute-ops-68fc48a0
-     mov-v39-compute-web-5b57157d
-     OK   ops: secrets delivered: TUNNEL_TOKEN, NC_AUTH_JWT_SECRET, NC_ADMIN_PASSWORD
-     OK   web: secrets delivered: NC_ADMIN_PASSWORD
-     OK   record set: mov25-form.assarelius.org -> 20.240.246.235
-12/12 verify Prove the deployment answers
-     ops: serves nothing, so no page is asked for
-     OK   ops cloud-init: status: done
-     OK   ops secrets landed: started
-     OK   ops registry: running
-     OK   ops tunnel: active
-     OK   ops door closed to anonymous: 302
-     OK   ops notifier reaches mail: "status":"ok"
-     OK   ops pending upgrades: 0
-     ops reboot: the upgrade asks for one; restarting vm-novatrix-ops (this takes a minute)
-     OK   ops cloud-init: status: done
-     OK   ops secrets landed: started
-     OK   ops registry: running
-     OK   ops tunnel: active
-     OK   ops door closed to anonymous: 302
-     OK   ops notifier reaches mail: "status":"ok"
-     OK   ops pending upgrades: 0
-     OK   ops reboot: restarted, back in 45s, checks re-run
-     OK   web: http://20.240.246.235/ -> 200 in 0s
-     OK   web cloud-init: status: done
-     OK   web form service: active
-     OK   web form reaches registry: ok
-     OK   web an errand lands: "status":"stored"
-     OK   web pending upgrades: 0
-     OK   web reboot: not required
-```
+Vad raderna bevisar, i ordning: på ops är cloud-init klar, hemligheterna landade och notifieraren startade, registret kör, tunneln är uppe, dörren svarar `302` till en anonym besökare, och notifieraren når mejltjänsten. På web är formulärtjänsten igång, den når registret över det privata nätet, formulärets namn svarar över HTTPS med maskinens eget certifikat, och ett ärende med bilaga skickat genom nginx hamnar som en rad.
 
-Verifieringen ovan är från `mov up v39 --stage verify` direkt efter körningen: den första verifieringen föll på ops-maskinens `cloud-init`-kontroll, det femte felet i tabellen under *Verifiering*, och när kontrollen rättats frågades maskinerna om utan att något deployades om. Vad raderna bevisar, i ordning: ops-maskinens cloud-init är klar, hemligheterna landade och notifieraren startade, registret kör, tunneln är uppe, dörren svarar `302` till en anonym besökare, notifieraren når mejltjänsten. På web: formulärtjänsten är igång, den når registret över det privata nätet, och ett ärende skickat genom nginx hamnar som en rad. Omstarten som uppgraderingen begärde fick ops, och varje kontroll kördes en gång till på den maskin som faktiskt kör; web hade redan fått sin i den första körningen.
+`mov status v39-cf` efteråt: varje steg lyckades, och varje kontroll på båda maskinerna godkändes, också certifikatet och att ett ärende med bilaga landar.
+
+![mov status v39-cf: tolv steg lyckade, kontrollerna på båda maskinerna godkända, maskinerna igång och de femton resurserna i gruppen](img/mov_status_v39-cf.svg)
+
+Genom dörren på `mov25-tickets.assarelius.org`: inloggningen med Entra ID hos Cloudflare, sedan NocoDB:s egen inloggning, här som admin, och basen `Novatrix`.
+
+![NocoDB bakom dörren: basen Novatrix](img/nocodb_v39-cf_bases.png)
+
+Tabellen `Arenden` med tre rader: verifieringens två ärenden, vart och ett med sin textbilaga, och ett ärende från formuläret med en PDF.
+
+![Tabellen Arenden i NocoDB: tre ärenden med status ny, vart och ett med en bilaga](img/nocodb_v39-cf_arenden.png)
+
+Bilagan öppnas direkt från raden.
+
+![Bilagan till ärende 3 öppnad i NocoDB](img/nocodb_v39-cf_attachment.png)
+
+På ops-maskinen kör NocoDB i Docker, tunneln `cloudflared` är uppe, och notifieraren loggar att mejlet för ärende 3 gick iväg: `'mail': 'Succeeded'`. Registret frågat över sitt eget API visar samma tre rader och deras bilagor.
+
+![mov ssh v39-cf ops: NocoDB-containern, tunneln, notifieraren med mejlet levererat och de tre ärendena med bilagor ur registret](img/mov_ssh_v39-cf_ops.svg)
+
+På web-maskinen kör formulärtjänsten och nginx, `/health` svarar att registret nås och att tre ärenden är öppna, Let's Encrypt-certifikatet för `mov25-form.assarelius.org` gäller i 89 dagar till, och `https://` svarar `HTTP/2 200`.
+
+![mov ssh v39-cf web: formulärtjänsten och nginx, hälsosvaret mot registret, certifikatet och HTTPS-svaret](img/mov_ssh_v39-cf_web.svg)
 
 ## Verifiering
 
@@ -263,7 +206,7 @@ Nio fel hittades av körningarna och inte av mig, och alla nio blev kod:
 | `no answer over ssh within 60s` | mov väntade 60 sekunder på varje kontroll, en konstant; `cloud-init status --wait` på en maskin som drar en Docker-avbild och bygger en venv tar längre | `timeoutSeconds` per kontroll i mov 2.31.4; sedan 2.34.0 behövs det inte alls: kontrollen är `cloud-init status` och mov frågar om tills svaret är `done` |
 | `hook version is deprecated` | NocoDB 2026.09 tar bara webhooks i version 3, och `curl -f` gömde svaret som exit 22 | webhooken i version 3, och skriptet skriver ut vad registret svarade när något nekas |
 | `no answer over ssh within 150s` | väntesnurran `timeout 120 bash -c 'until systemctl is-active …'` satt fast fast tjänsten var uppe: bash tar emot `timeout`:s signal först när det pågående `systemctl`-anropet svarat, och ett anrop som blockerar (systemd upptagen strax efter cloud-init och uppgraderingen) håller hela snurran, och ssh-kanalen med den | väntandet flyttade in i mov (2.34.0): en kontroll är en fråga, `systemctl is-active novatrix-form`, och mov ställer den igen med verify-blockets intervall tills maskinen svarar som profilen säger eller dess tidsgräns gått. Snurror, `sleep` och sekunder försvann ur profilen |
-| `AADSTS650056: Misconfigured application` | första inloggningen vid dörren: Entra loggade in användaren, och Cloudflare fick inte läsa vem det var, för appregistreringen hade inga rättigheter mot Microsoft Graph och inget administratörssamtycke. Cloudflares egen lista är sju delegerade rättigheter (`openid`, `email`, `profile`, `offline_access`, `User.Read`, och för grupper `Directory.Read.All`, `GroupMember.Read.All`) och sedan samtycke | mov 2.38.0 ger registreringen exakt de rättigheterna och ger samtycket för tenanten; nästa `mov up` reparerar en registrering som saknar dem |
+| `AADSTS650056: Misconfigured application` | första inloggningen vid dörren: Entra loggade in användaren, och Cloudflare fick inte läsa vem det var, för appregistreringen hade inga rättigheter mot Microsoft Graph och inget administratörssamtycke. Cloudflares egen lista är sju delegerade rättigheter (`openid`, `email`, `profile`, `offline_access`, `User.Read`, och för grupper `Directory.Read.All`, `GroupMember.Read.All`) och sedan samtycke | mov 2.38.0 ger registreringen exakt de rättigheterna. Samtycket kom först med mov 3.2.4: `az ad app permission admin-consent` svarade utan fel och gav ingenting, så första inloggningen vid dörren fick `AADSTS90094: Admin consent is required`. Nu ges samtycket genom Microsoft Graph och läses tillbaka, och `mov up v39-cf --stage applications` reparerar en registrering som saknar det |
 | `expected 'status: done', got '......'` | `cloud-init status --wait` skriver en punkt i sekunden medan den väntar och statusen efter dem; på en maskin som fortfarande bootade var svaret punkter, och mov jämför hela svaret. Alla tidigare maskiner var klara innan verify frågade, så felet har legat i standardkontrollen sedan v34 | mov 2.31.5 rättade standardkontrollen; sedan 2.34.0 är frågan bara `cloud-init status`, och mov väntar |
 | `ops registry answers: expected '200', got '302'` | profilen utan Cloudflare frågade NocoDB om `/dashboard/`, som är webbsidan och svarar med en omdirigering. Registret fungerade hela tiden: formuläret nådde det och ett ärende sparades i samma körning | kontrollen frågar nu `/api/v1/health`, samma adress som `on-secrets.sh` väntar på; `mov up v39 --stage verify` kör om kontrollerna mot maskinerna som står |
 | `ops reboot: the question could not be asked after restarting: exited -1: no answer over ssh within 60s` | mov 3.0.0 gjorde en omstartsfråga som inte gick att ställa till ett fel, vilket var rätt, men ställde den bara en gång: ett enda ssh-anrop som inte fick svar inom sin minut fällde körningen, på maskiner där varje kontroll nyss svarat | mov 3.0.1 ställer frågan igen med verify-blockets intervall tills tidsgränsen gått, precis som en kontroll |
