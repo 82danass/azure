@@ -225,7 +225,7 @@
           "host": [
             {
               "name": "cloud-init",
-              "run": "cloud-init status",
+              "run": "cloud-init status | head -n 1",
               "expect": "status: done"
             },
             {
@@ -286,7 +286,7 @@
           "host": [
             {
               "name": "cloud-init",
-              "run": "cloud-init status",
+              "run": "cloud-init status | head -n 1",
               "expect": "status: done"
             },
             {
