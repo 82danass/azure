@@ -63,7 +63,7 @@ Kortet flödet postar är ett Adaptive Card med ärendenummer, avsändare, motta
 
 ## Koden
 
-Profilen [`mov-workspace/profiles/v39-cf.json`](../mov-workspace/profiles/v39-cf.json), med det som är veckans; [`v39.json`](../mov-workspace/profiles/v39.json) är samma kedja utan Cloudflare. Samma workspace som v34–v38: den nya tenanten och prenumerationen står i samma `mov.workspace.json`, med sin egen `tenantId`, och den prenumeration en körning riktas mot avgör i vilken tenant den körs. `mov subscription pin mov25` för veckorna 39–41, `mov subscription pin school` tillbaka.
+Profilen [`mov-workspace/profiles/v39-cf.json`](../mov-workspace/profiles/v39-cf.json), med det som är veckans; [`v39.json`](../mov-workspace/profiles/v39.json) är samma kedja utan Cloudflare. Samma workspace som v34–v38: den nya tenanten och prenumerationen står i samma `mov.workspace.json`, med sin egen `tenantId`, och den prenumeration en körning riktas mot avgör i vilken tenant den körs. `mov subscription pin "MOV25 - v39-v41"` för veckorna 39–41, `mov subscription pin "MOV25 - Azure subscription"` tillbaka.
 
 ```json
 {
@@ -259,7 +259,7 @@ Från repot, utan portal. Det som inte ligger i repot är hemligheterna och Clou
 git clone https://github.com/82danass/azure.git
 cd azure\mov-workspace
 az login --use-device-code               # tenanten är ny, och nya tenanter nekar device code från 1 juli 2026: logga in med webbläsaren om det nekas
-mov subscription pin mov25
+mov subscription pin "MOV25 - v39-v41"
 mov secrets set cloudflare CLOUDFLARE_API_TOKEN   # DNS Write, Tunnel Write, Access Write på zonen och kontot
 mov secrets set v39-cf NC_ADMIN_PASSWORD
 mov secrets set v39-cf NC_AUTH_JWT_SECRET
