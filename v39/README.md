@@ -16,7 +16,7 @@ Uppgiften är skriven för en organisation där Microsoft 365 och Azure ligger i
 
 Så veckan är byggd som en integration mellan två världar som inte delar identitet, vilket är det vanliga fallet mellan ett företag och dess leverantörer. Ärendekön ligger i Azure, som kod, i samma miljö som formuläret. Det enda som korsar gränsen till Microsoft 365 är det enda som kan korsa den: en webhook. Ett Workflows-flöde i Teams (Power Automate under huven) tar emot den och postar ärendet i kanalen. Avstämt med läraren: Teams ska vara med i processen, och det är den.
 
-Det som ersätter SharePoint-listan är ett ärenderegister, [NocoDB](https://github.com/nocodb/nocodb), på en egen maskin utan en enda öppen port. Kundtjänst når det på `https://mov25-tickets.assarelius.org` genom en Cloudflare-tunnel, bakom en inloggning där Entra ID i min tenant är identitetsleverantör. Den som ska prova kön får en användare i Entra, inte ett konto i NocoDB.
+Det som ersätter SharePoint-listan är ett ärenderegister, [NocoDB](https://github.com/nocodb/nocodb), på en egen maskin utan en enda öppen port. Kundtjänst når det på `https://mov25-tickets.assarelius.org` genom en Cloudflare-tunnel, bakom en inloggning där Entra ID i min tenant är identitetsleverantör. Dörren släpper bara fram den som loggat in med Entra ID; innanför den har NocoDB sin egen inbyggda inloggning och användarhantering, och där loggar man in med ett konto i NocoDB. Att bygga om NocoDB:s inloggning till Entra ID, med behörigheter därifrån, valde jag att lämna utanför uppgiften.
 
 ## Kedjan
 
@@ -46,7 +46,7 @@ Maskinen som kör det har ingen inkommande port från internet. Tunneln, `cloudf
 
 Värdnamnen är ett ord med bindestreck, `mov25-form` och `mov25-tickets`, i stället för en undernivå, `form.mov25`. Första körningen använde undernivån, och webbläsaren svarade `ERR_SSL_VERSION_OR_CIPHER_MISMATCH`: Cloudflares kostnadsfria certifikat täcker `*.assarelius.org`, en nivå, och erbjuder inget alls för en andra. mov fick ett `prefix` i sin Cloudflare-konfiguration för det, och preflight varnar numera om man väljer undernivån.
 
-Registrets superadmin är `admin@novatrix.se` med ett lösenord som ligger i workspace-hemligheterna, aldrig i repot. Formuläret skriver med den sessionen över det privata nätet. Kundtjänst loggar aldrig in i NocoDB som sådan: Access står framför.
+Registrets superadmin är `admin@novatrix.se` med ett lösenord som ligger i workspace-hemligheterna, aldrig i repot. Formuläret skriver med den sessionen över det privata nätet. Den som kommer igenom dörren loggar in i NocoDB med ett konto i NocoDB: Access avgör vem som når registret, NocoDB vem som gör vad i det.
 
 ## Notisen
 
@@ -196,7 +196,7 @@ Registret anropar webhooken, notifieraren mejlar och svarar; registrets egen log
 
 `mail: Succeeded` är Communication Services eget statusord för ett levererat mejl. `teams: no url` är läget tills Workflows-flödet finns.
 
-Dörren: `https://mov25-tickets.assarelius.org` utan session svarar `302` till Cloudflares inloggning, som visar Entra ID som enda alternativ. Andreas loggar in med sin användare och ser tabellen `Arenden`, med ärendet från formuläret som en rad med status `ny`.
+Dörren: `https://mov25-tickets.assarelius.org` utan session svarar `302` till Cloudflares inloggning, som visar Entra ID som enda alternativ.
 
 Nio fel hittades av körningarna och inte av mig, och alla nio blev kod:
 
