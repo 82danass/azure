@@ -86,6 +86,18 @@ def _post_json(url: str, payload: dict) -> int:
         return answer.status
 
 
+def attachment_names(ticket: dict) -> str:
+    """The attachment's file names, from the row the webhook carries: a list,
+    or the same list as JSON text."""
+    value = ticket.get("Attachment") or []
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            return value
+    return ", ".join(str(item.get("title") or "") for item in value if isinstance(item, dict))
+
+
 def teams_card(ticket: dict) -> dict:
     """Ett Adaptive Card, vad Workflows-flödet 'Post to a channel when a webhook request is received' tar emot."""
     link = f"https://{TICKET_HOST}/" if TICKET_HOST else ""
@@ -101,7 +113,7 @@ def teams_card(ticket: dict) -> dict:
                     {"type": "FactSet", "facts": [
                         {"title": "Från", "value": f"{ticket.get('Name', '')} <{ticket.get('Email', '')}>"},
                         {"title": "Mottaget", "value": str(ticket.get("Received", ""))},
-                    ]},
+                    ] + ([{"title": "Bilaga", "value": attachment_names(ticket)}] if attachment_names(ticket) else [])},
                     {"type": "TextBlock", "wrap": True, "text": str(ticket.get("Message", ""))[:1000]},
                 ],
                 "actions": [{"type": "Action.OpenUrl", "title": "Öppna kön", "url": link}] if link else [],
@@ -114,7 +126,9 @@ def notify(ticket: dict) -> dict:
     ident = ticket.get("Id")
     subject = f"Nytt ärende #{ident} från {ticket.get('Name', '')}"
     body = (f"Ärende #{ident}\nFrån: {ticket.get('Name', '')} <{ticket.get('Email', '')}>\n"
-            f"Mottaget: {ticket.get('Received', '')}\n\n{ticket.get('Message', '')}\n\n"
+            f"Mottaget: {ticket.get('Received', '')}\n"
+            + (f"Bilaga: {attachment_names(ticket)}\n" if attachment_names(ticket) else "")
+            + f"\n{ticket.get('Message', '')}\n\n"
             + (f"Kön: https://{TICKET_HOST}/\n" if TICKET_HOST else ""))
     outcome: dict[str, object] = {"id": ident}
     for name, call in (

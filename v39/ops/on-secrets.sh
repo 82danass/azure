@@ -75,8 +75,15 @@ if [[ -z $TABLE_ID ]]; then
         {"column_name":"message","title":"Message","uidt":"LongText"},
         {"column_name":"status","title":"Status","uidt":"SingleSelect","dtxp":"'"'"'ny'"'"','"'"'pagaende'"'"','"'"'klar'"'"'"},
         {"column_name":"received","title":"Received","uidt":"SingleLineText"},
-        {"column_name":"handled_by","title":"HandledBy","uidt":"SingleLineText"}]}' | jq -r .id)
+        {"column_name":"handled_by","title":"HandledBy","uidt":"SingleLineText"},
+        {"column_name":"attachment","title":"Attachment","uidt":"Attachment"}]}' | jq -r .id)
     log "created table Arenden ($TABLE_ID)"
+fi
+# The customer's attachment, as the form uploads it. A table made before the
+# column existed gets it here.
+if ! api GET "/api/v2/meta/tables/$TABLE_ID" | jq -e '.columns[] | select(.title=="Attachment")' >/dev/null; then
+    api POST "/api/v2/meta/tables/$TABLE_ID/columns" '{"column_name":"attachment","title":"Attachment","uidt":"Attachment"}' >/dev/null
+    log "added column Attachment to Arenden"
 fi
 # A version-3 hook: the only kind this NocoDB takes. Without a body template
 # it sends an empty request; {{ json event }} is the whole event,

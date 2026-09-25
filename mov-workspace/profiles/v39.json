@@ -36,7 +36,7 @@
           "ports": [
             "80"
           ],
-          "description": "The errand form is public by design."
+          "description": "The ticket form is public by design."
         },
         {
           "name": "ssh",
@@ -300,8 +300,8 @@
               "expect": "\"status\":\"ok\""
             },
             {
-              "name": "an errand lands",
-              "run": "curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering 'http://127.0.0.1/arenden?format=json' | grep -o '\"status\":\"stored\"'",
+              "name": "a ticket and its attachment land",
+              "run": "printf verify > /tmp/verify-bilaga.txt; curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering -F attachment=@/tmp/verify-bilaga.txt 'http://127.0.0.1/arenden?format=json' > /tmp/verify-arende.json && grep -q '\"name\":\"verify-bilaga.txt\"' /tmp/verify-arende.json && grep -o '\"status\":\"stored\"' /tmp/verify-arende.json",
               "expect": "\"status\":\"stored\""
             },
             {

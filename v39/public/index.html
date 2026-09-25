@@ -13,7 +13,7 @@
         <p>Välkommen till Novatrix. Använd formuläret nedan för att skapa ett ärende. Du får ett ärendenummer direkt, och kundtjänst ser ärendet i sin kö i samma sekund.</p>
         <br>
 
-        <form action="/arenden" method="POST">
+        <form action="/arenden" method="POST" enctype="multipart/form-data">
             <label for="name">Namn:</label><br>
             <input type="text" id="name" name="name" required>
             <br>
@@ -24,6 +24,10 @@
 
             <label for="message">Meddelande:</label><br>
             <textarea id="message" name="message" rows="5" required></textarea>
+            <br>
+
+            <label for="attachment">Bilaga (valfri, högst 10 MB):</label><br>
+            <input type="file" id="attachment" name="attachment">
             <br>
 
             <button type="submit">Skicka ärende</button>

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
   "env": "v39-cf",
-  "description": "Automation and integration, as code. The public form (web) writes each errand as a row in a ticket registry (NocoDB on ops). Staff reach the registry at tickets.mov25.assarelius.org through a Cloudflare tunnel, behind a Cloudflare Access sign-in with Entra ID as the identity provider; the ops machine has no open port. A webhook on every new row sends mail through Azure Communication Services and a notice to Teams. The Entra app registration, the tunnel, the records, the mail service and every secret are part of the profile. Run `mov up v39`.",
+  "description": "Automation and integration, as code. The public form (web) writes each ticket as a row in a ticket registry (NocoDB on ops). Staff reach the registry at tickets.mov25.assarelius.org through a Cloudflare tunnel, behind a Cloudflare Access sign-in with Entra ID as the identity provider; the ops machine has no open port. A webhook on every new row sends mail through Azure Communication Services and a notice to Teams. The Entra app registration, the tunnel, the records, the mail service and every secret are part of the profile. Run `mov up v39`.",
   "stages": [
     "preflight",
     "rg",
@@ -38,7 +38,7 @@
           "ports": [
             "80"
           ],
-          "description": "The errand form is public by design, and Let's Encrypt proves the hostname over it."
+          "description": "The ticket form is public by design, and Let's Encrypt proves the hostname over it."
         },
         {
           "name": "https",
@@ -351,8 +351,8 @@
               "expect": "200"
             },
             {
-              "name": "an errand lands",
-              "run": "curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering 'http://127.0.0.1/arenden?format=json' | grep -o '\"status\":\"stored\"'",
+              "name": "a ticket and its attachment land",
+              "run": "printf verify > /tmp/verify-bilaga.txt; curl -sf -F name=verify -F email=verify@novatrix.se -F message=verifiering -F attachment=@/tmp/verify-bilaga.txt 'http://127.0.0.1/arenden?format=json' > /tmp/verify-arende.json && grep -q '\"name\":\"verify-bilaga.txt\"' /tmp/verify-arende.json && grep -o '\"status\":\"stored\"' /tmp/verify-arende.json",
               "expect": "\"status\":\"stored\""
             },
             {

@@ -5,6 +5,9 @@ Tjänsten loggar in med registrets adminkonto (lösenordet kommer från
 /etc/mov/secrets.env, som mov levererar efter boot, aldrig via cloud-init),
 hittar basen och tabellen på namn, och skriver raden med registrets API.
 Ingen nyckel i koden, inget i repot.
+
+En bilaga, högst 10 MB som i v37 och v38, laddas upp till registrets egen
+lagring och läggs på raden i kolumnen Attachment, där kundtjänst ser den.
 """
 
 from __future__ import annotations
@@ -13,6 +16,7 @@ import json
 import os
 import threading
 import time
+import uuid
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -21,6 +25,9 @@ from datetime import datetime, timezone
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+
+MAX_ATTACHMENT = 10 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = MAX_ATTACHMENT + 64 * 1024
 
 TICKETS_URL = os.environ["NOVATRIX_TICKETS_URL"].rstrip("/")
 ADMIN_EMAIL = os.environ["NC_ADMIN_EMAIL"]
@@ -64,6 +71,38 @@ def _registry(method: str, path: str, body: dict | None = None) -> dict:
         if error.code != 401:
             raise
         return _call(method, path, body, jwt=_jwt(fresh=True))
+
+
+def _upload(name: str, data: bytes, content_type: str, *, jwt: str) -> list:
+    """En fil till registrets lagring, som multipart med fältet `files`.
+    Svaret är listan registret sedan tar som värde i en Attachment-kolumn."""
+    boundary = uuid.uuid4().hex
+    # As a browser sends it: the name's own UTF-8 bytes. A quote, a backslash
+    # or a line break would end the header, so those become underscores.
+    plain = "".join("_" if c in '"\\\r\n' else c for c in name)
+    head = (
+        f"--{boundary}\r\n"
+        f'Content-Disposition: form-data; name="files"; filename="{plain}"\r\n'
+        f"Content-Type: {content_type}\r\n\r\n"
+    ).encode("utf-8")
+    body = head + data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+    path = urllib.parse.quote(f"noco/{BASE_TITLE}/{TABLE_TITLE}/Attachment")
+    req = urllib.request.Request(
+        f"{TICKETS_URL}/api/v2/storage/upload?path={path}", data=body, method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "Accept": "application/json", "xc-auth": jwt},
+    )
+    with urllib.request.urlopen(req, timeout=60) as answer:
+        return json.loads(answer.read().decode("utf-8", errors="replace"))
+
+
+def _store_attachment(name: str, data: bytes, content_type: str) -> list:
+    """Med adminsessionen; nekas den, en gång till med en ny."""
+    try:
+        return _upload(name, data, content_type, jwt=_jwt())
+    except urllib.error.HTTPError as error:
+        if error.code != 401:
+            raise
+        return _upload(name, data, content_type, jwt=_jwt(fresh=True))
 
 
 def _table_id() -> str:
@@ -110,17 +149,32 @@ def submit():
         "Status": "ny",
         "Received": received,
     }
+    attachment = None
+    upload = request.files.get("attachment")
+    if upload is not None and upload.filename:
+        data = upload.read()
+        if len(data) > MAX_ATTACHMENT:
+            return jsonify(error="bilagan är större än 10 MB"), 413
+        safe = os.path.basename(upload.filename).replace(" ", "_")[:120] or "bilaga"
+        stored = _store_attachment(safe, data, upload.mimetype or "application/octet-stream")
+        row["Attachment"] = stored
+        attachment = {"name": safe, "bytes": len(data), "type": upload.mimetype}
     created = _registry("POST", f"/api/v2/tables/{_table_id()}/records", row)
     ident = created[0]["Id"] if isinstance(created, list) else created.get("Id")
 
     if request.args.get("format") == "json":
-        return jsonify(status="stored", id=ident)
+        return jsonify(status="stored", id=ident, attachment=attachment)
     return (
         "<!DOCTYPE html><html lang='sv'><head><meta charset='UTF-8'><title>Novatrix - Tack</title>"
         "<link rel='stylesheet' href='/style.css'></head><body><div class='container'>"
         f"<h1>Tack!</h1><p>Ärende <code>#{ident}</code> är registrerat. Kundtjänst ser det nu.</p>"
         "<p><a href='/'>Tillbaka</a></p></div></body></html>"
     )
+
+
+@app.errorhandler(413)
+def too_large(_error):
+    return jsonify(error="bilagan är större än 10 MB"), 413
 
 
 @app.errorhandler(urllib.error.HTTPError)

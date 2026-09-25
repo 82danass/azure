@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v39, web: nginx serves the form, and the POST behind it goes to a small
-# Python service that writes the errand as a row in the ticket registry on the
+# Python service that writes the ticket as a row in the ticket registry on the
 # ops machine. Runs as root from cloud-init, from the repository root.
 #
 # The service needs the registry's admin password, which mov delivers to
@@ -89,7 +89,7 @@ server {
 
     # The form posts here; the service behind it writes to the ticket registry.
     location = /arenden {
-        client_max_body_size 1m;
+        client_max_body_size 11m;
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-For \$remote_addr;

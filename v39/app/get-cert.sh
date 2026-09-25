@@ -39,7 +39,7 @@ server {
     }
 
     location = /arenden {
-        client_max_body_size 1m;
+        client_max_body_size 11m;
         proxy_pass http://127.0.0.1:8080;
         proxy_set_header Host \$host;
         proxy_set_header X-Forwarded-For \$remote_addr;
