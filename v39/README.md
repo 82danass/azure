@@ -32,8 +32,8 @@ flowchart LR
 
 | Del | Var | Vad |
 | --- | --- | --- |
-| Formuläret | `vm-novatrix-web`, publik | Samma sida som v34–v38. `POST /arenden` går till [`app/form.py`](app/form.py), som skriver ärendet som en rad i registret och svarar med ärendenumret. |
-| Registret | `vm-novatrix-ops`, ingen öppen port | NocoDB i Docker, basen `Novatrix`, tabellen `Arenden` med Name, Email, Message, Status (`ny`, `pagaende`, `klar`), Received, HandledBy. Bas, tabell och webhook skapas av [`ops/on-secrets.sh`](ops/on-secrets.sh) första gången maskinen får sina hemligheter. |
+| Formuläret | `vm-novatrix-web`, publik | Samma sida som v34–v38, med bilagan från v37 och v38 (valfri, högst 10 MB). `POST /arenden` går till [`app/form.py`](app/form.py), som laddar upp bilagan till registrets lagring, skriver ärendet som en rad i registret med bilagan på raden, och svarar med ärendenumret. |
+| Registret | `vm-novatrix-ops`, ingen öppen port | NocoDB i Docker, basen `Novatrix`, tabellen `Arenden` med Name, Email, Message, Status (`ny`, `pagaende`, `klar`), Received, HandledBy och Attachment, kundens bilaga. Bas, tabell och webhook skapas av [`ops/on-secrets.sh`](ops/on-secrets.sh) första gången maskinen får sina hemligheter. |
 | Dörren | Cloudflare | Tunneln ger registret ett värdnamn utan att öppna en port. Cloudflare Access framför värdnamnet kräver inloggning, och identitetsleverantören är en appregistrering i min Entra-tenant som mov skapar. NSG:n på ops släpper in 8080 från webbsubnätet och 22 från min adress, inget annat. |
 | Notisen | `vm-novatrix-ops` | [`ops/notify.py`](ops/notify.py) tar webhooken, skickar mejl genom Azure Communication Services med maskinens managed identity, och postar ett Adaptive Card i Teams genom Workflows-flödet. |
 | Kundtjänst | Entra ID | Gruppen `grp-novatrix-support` och användaren *Andreas Svenberg (support)*, `usr-novatrix-support@…onmicrosoft.com`, med ett utgångsdatum mov bevakar. Gruppen har *Reader* på resursgruppen: kundtjänst arbetar i kön, inte i Azure. |
@@ -123,11 +123,33 @@ Tre saker i profilen är nya för veckan och fanns inte i mov när den började:
 
 ## Deploy från kod
 
+Två miljöer ur samma kod: `v39` utan Cloudflare, och `v39-cf` med tunneln, dörren och formulärets eget värdnamn och certifikat. De är två profiler med var sitt namn på allt.
+
+### v39, utan Cloudflare
+
+`mov up v39`
+
+![mov up v39: tio steg från tom prenumeration till verifierad kedja, med regionvalet när Sweden Central sa nej och Denmark East tog emot](img/mov_up_v39.svg)
+
+Sweden Central räknade fortfarande två kärnor som använda efter förra rivningen, fast ingen maskin fanns. mov frågade de närmaste regionerna, visade vilka som hade plats, och körningen gick i Denmark East. Utan Cloudflare står ingen dörr framför registret: det nås på ops-maskinens adress, port 8080, bara från min adress, och NocoDB:s eget adminkonto är enda inloggningen.
+
+`mov status v39` efteråt: varje steg lyckades, och varje kontroll på båda maskinerna godkändes, också att ett ärende med bilaga landar som en rad i registret.
+
+![mov status v39: tio steg lyckade, kontrollerna på båda maskinerna godkända, maskinerna igång och de femton resurserna i gruppen](img/mov_status_v39.svg)
+
+På ops-maskinen kör NocoDB i Docker, och notifieraren loggar att mejlet för ärende 2 gick iväg: `'mail': 'Succeeded'`. `'teams': 'no url'` är läget tills Workflows-flödet finns.
+
+![mov ssh v39 ops: NocoDB-containern och notifieraren med mejlet levererat](img/mov_ssh_v39_ops.svg)
+
+På web-maskinen kör formulärtjänsten, och `/health` svarar att registret nås och att två ärenden är öppna.
+
+![mov ssh v39 web: formulärtjänsten och dess hälsosvar mot registret](img/mov_ssh_v39_web.svg)
+
+### v39-cf, med Cloudflare
+
 `mov up v39-cf`
 
-![mov up v39: tolv steg från tom prenumeration till verifierad kedja, med regionvalet när Sweden Central sa nej](img/mov_up_v39.svg)
-
-Samma körning som text, att kopiera ur; verktygskontrollerna i preflight är utelämnade:
+Cloudflare-kedjan som text, från en körning innan profilen fick namnet `v39-cf` (då hette den `v39`); verktygskontrollerna i preflight är utelämnade:
 
 ```shell
 up v39 -> rg-novatrix-v39 in swedencentral
@@ -233,7 +255,7 @@ Registret anropar webhooken, notifieraren mejlar och svarar; registrets egen log
 
 Dörren: `https://mov25-tickets.assarelius.org` utan session svarar `302` till Cloudflares inloggning, som visar Entra ID som enda alternativ. Andreas loggar in med sin användare och ser tabellen `Arenden`, med ärendet från formuläret som en rad med status `ny`.
 
-Sex fel hittades av körningarna och inte av mig, och alla sex blev kod:
+Nio fel hittades av körningarna och inte av mig, och alla nio blev kod:
 
 | Fel | Vad som hände | Åtgärd |
 | --- | --- | --- |
@@ -244,9 +266,10 @@ Sex fel hittades av körningarna och inte av mig, och alla sex blev kod:
 | `AADSTS650056: Misconfigured application` | första inloggningen vid dörren: Entra loggade in användaren, och Cloudflare fick inte läsa vem det var, för appregistreringen hade inga rättigheter mot Microsoft Graph och inget administratörssamtycke. Cloudflares egen lista är sju delegerade rättigheter (`openid`, `email`, `profile`, `offline_access`, `User.Read`, och för grupper `Directory.Read.All`, `GroupMember.Read.All`) och sedan samtycke | mov 2.38.0 ger registreringen exakt de rättigheterna och ger samtycket för tenanten; nästa `mov up` reparerar en registrering som saknar dem |
 | `expected 'status: done', got '......'` | `cloud-init status --wait` skriver en punkt i sekunden medan den väntar och statusen efter dem; på en maskin som fortfarande bootade var svaret punkter, och mov jämför hela svaret. Alla tidigare maskiner var klara innan verify frågade, så felet har legat i standardkontrollen sedan v34 | mov 2.31.5 rättade standardkontrollen; sedan 2.34.0 är frågan bara `cloud-init status`, och mov väntar |
 | `ops registry answers: expected '200', got '302'` | profilen utan Cloudflare frågade NocoDB om `/dashboard/`, som är webbsidan och svarar med en omdirigering. Registret fungerade hela tiden: formuläret nådde det och ett ärende sparades i samma körning | kontrollen frågar nu `/api/v1/health`, samma adress som `on-secrets.sh` väntar på; `mov up v39 --stage verify` kör om kontrollerna mot maskinerna som står |
+| `ops reboot: the question could not be asked after restarting: exited -1: no answer over ssh within 60s` | mov 3.0.0 gjorde en omstartsfråga som inte gick att ställa till ett fel, vilket var rätt, men ställde den bara en gång: ett enda ssh-anrop som inte fick svar inom sin minut fällde körningen, på maskiner där varje kontroll nyss svarat | mov 3.0.1 ställer frågan igen med verify-blockets intervall tills tidsgränsen gått, precis som en kontroll |
 | `ops cloud-init: exited 2: status: running` och sedan `status: done` med exit 2 | cloud-init var klar, men som `degraded done`: Azures agent loggade en varning när den frågade metadatatjänsten efter data för en förprovisionerad maskin och fick 404. Det händer bara på vissa maskiner, därför klarade de tidigare körningarna sig. Kontrollen krävde exit 0 | kontrollen är `cloud-init status | head -n 1`: statusraden avgör, så `status: done` godkänns även med varningar, och `status: error` underkänns fortfarande |
 
-Och ett sjunde som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
+Och ett till som verifieringen inte kunde se: webhooken pekade på `127.0.0.1:9000`, som inne i containern är containern. Registrets egen webhooklogg sa `ECONNREFUSED`. Registret kör nu på maskinens nät, och adressen betyder maskinen.
 
 Formuläret nås på `https://mov25-form.assarelius.org`. Zonens TLS-läge är *Full*: Cloudflares kant tar besökarens TLS och kräver TLS av ursprunget också, så en webbserver som bara talar HTTP ger 522 på `https://`, vilket var första svaret. Certifikatet vid kanten var aldrig problemet; det är zonens och täcker namnet. Två vägar finns, och profilen väljer:
 
@@ -273,4 +296,8 @@ mov up v39-cf
 
 ## Rivning
 
-`mov down v39-cf` efter dokumentationen. Nästa `mov up v39-cf` bygger samma kedja igen, med samma namn och samma dörr, för det är vad koden säger.
+`mov down v39 -y` efter dokumentationen: budgeten, resursgruppen med de femton resurserna, maskinernas ssh-poster och nyckeln.
+
+![mov down v39: budgeten och resursgruppen raderas, ssh-posterna och nyckeln tas bort](img/mov_down_v39.svg)
+
+`mov down v39-cf` river på samma sätt, och dessutom appregistreringen och exakt de Cloudflare-objekt körningen skapade. Nästa `mov up` av någon av dem bygger samma kedja igen, med samma namn, för det är vad koden säger.
