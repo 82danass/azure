@@ -56,7 +56,7 @@
     "host": [
       {
         "name": "cloud-init",
-        "run": "cloud-init status --wait",
+        "run": "cloud-init status",
         "expect": "status: done"
       },
       {

@@ -19,7 +19,7 @@ fail() { printf '[bootstrap] error: %s\n' "$*" >&2; exit 1; }
 
 [[ -r $ENV_FILE ]] || fail "$ENV_FILE is missing. cloud-init writes it; this script cannot run standalone."
 source "$ENV_FILE"
-for var in MOV_ENV MOV_REPO MOV_REF MOV_PATH MOV_APP_DIR NOVATRIX_TICKETS_URL NOVATRIX_FORM_HOST NC_ADMIN_EMAIL; do
+for var in MOV_ENV MOV_REPO MOV_REF MOV_PATH MOV_APP_DIR NOVATRIX_TICKETS_URL NC_ADMIN_EMAIL; do
     [[ -n ${!var:-} ]] || fail "$var is not set in $ENV_FILE"
 done
 
@@ -111,5 +111,8 @@ log "nginx serves $DOCROOT and proxies /arenden to the form service"
 # The record for $NOVATRIX_FORM_HOST is made after this machine is; the
 # service retries every half minute until Let's Encrypt has answered, then
 # serves 443. Nothing here waits for it.
-systemctl enable --now novatrix-cert.service || true
-log "novatrix-cert asks Let's Encrypt for $NOVATRIX_FORM_HOST as soon as the name reaches this machine"
+# Only the profile with a hostname for the form (v39-cf) has a certificate to ask for.
+if [[ -n ${NOVATRIX_FORM_HOST:-} ]]; then
+    systemctl enable --now novatrix-cert.service || true
+    log "novatrix-cert asks Let's Encrypt for $NOVATRIX_FORM_HOST as soon as the name reaches this machine"
+fi

@@ -7,9 +7,21 @@
     "subscriptions": [
       {
         "id": "fb5e8372-fcd5-4ab5-ac1a-b155e805eb42",
-        "name": "MOV25 - Azure subscription"
+        "name": "MOV25 - Azure subscription",
+        "alias": "school"
+      },
+      {
+        "id": "409a5c62-0fe5-4c23-b559-7e0e63ff8603",
+        "name": "MOV25 - v39-v41",
+        "alias": "mov25",
+        "tenantId": "65b3c448-4eb8-49ce-b0fb-f373ad166449",
+        "tenantDomain": "mov25danielassareliusoutloo.onmicrosoft.com",
+        "paths": {
+          "directory": "directory-mov25.json"
+        }
       }
-    ]
+    ],
+    "defaultSubscription": "mov25"
   },
   "paths": {
     "profiles": "profiles",
@@ -20,7 +32,9 @@
     "defaults": "defaults.json",
     "directory": "directory.json",
     "billing": "billing.json",
-    "subscription": "subscription.json"
+    "subscription": "subscription.json",
+    "secrets": "secrets",
+    "cloudflare": "cloudflare.json"
   },
   "github": {
     "owner": "82danass",

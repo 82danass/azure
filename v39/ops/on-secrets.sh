@@ -15,7 +15,9 @@ fail() { printf '[on-secrets] error: %s\n' "$*" >&2; exit 1; }
 
 [[ -r $ENV_FILE && -r $SECRETS_FILE ]] || fail "$ENV_FILE or $SECRETS_FILE is missing"
 set -a; source "$ENV_FILE"; source "$SECRETS_FILE"; set +a
-for var in NOVATRIX_TICKET_HOST NC_ADMIN_EMAIL TUNNEL_TOKEN NC_AUTH_JWT_SECRET NC_ADMIN_PASSWORD; do
+# TUNNEL_TOKEN only in the profile with Cloudflare (v39-cf); without it the
+# registry is reached on this machine's own address and no tunnel starts.
+for var in NOVATRIX_TICKET_HOST NC_ADMIN_EMAIL NC_AUTH_JWT_SECRET NC_ADMIN_PASSWORD; do
     [[ -n ${!var:-} ]] || fail "$var is not set"
 done
 
@@ -30,7 +32,7 @@ if ! docker inspect noco >/dev/null 2>&1; then
         -v "$NOCO_DATA":/usr/app/data/ \
         -e NC_AUTH_JWT_SECRET="$NC_AUTH_JWT_SECRET" \
         -e NC_ADMIN_EMAIL="$NC_ADMIN_EMAIL" -e NC_ADMIN_PASSWORD="$NC_ADMIN_PASSWORD" \
-        -e NC_SITE_URL="https://$NOVATRIX_TICKET_HOST" -e NC_INVITE_ONLY_SIGNUP=true -e NC_DISABLE_TELE=true \
+        -e NC_SITE_URL="${NOVATRIX_SITE_URL:-https://$NOVATRIX_TICKET_HOST}" -e NC_INVITE_ONLY_SIGNUP=true -e NC_DISABLE_TELE=true \
         -e NC_WEBHOOK_ALLOW_PRIVATE_NETWORK=true \
         nocodb/nocodb:latest >/dev/null
 else
@@ -88,12 +90,16 @@ fi
 
 # --- the tunnel: the hostname without a port ------------------------------------
 
-if systemctl list-unit-files cloudflared.service >/dev/null 2>&1 && systemctl is-enabled -q cloudflared 2>/dev/null; then
-    cloudflared service uninstall >/dev/null 2>&1 || true
+if [[ -n ${TUNNEL_TOKEN:-} ]]; then
+    if systemctl list-unit-files cloudflared.service >/dev/null 2>&1 && systemctl is-enabled -q cloudflared 2>/dev/null; then
+        cloudflared service uninstall >/dev/null 2>&1 || true
+    fi
+    cloudflared service install "$TUNNEL_TOKEN" >/dev/null
+    systemctl restart cloudflared
+    log "tunnel connected for https://$NOVATRIX_TICKET_HOST"
+else
+    log "no tunnel token delivered: the registry answers on this machine's address, port 8080"
 fi
-cloudflared service install "$TUNNEL_TOKEN" >/dev/null
-systemctl restart cloudflared
-log "tunnel connected for https://$NOVATRIX_TICKET_HOST"
 
 # --- notifications ----------------------------------------------------------------
 

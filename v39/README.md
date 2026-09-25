@@ -57,13 +57,13 @@ Registrets superadmin är `admin@novatrix.se` med ett lösenord som ligger i wor
 1. I Teams, i kanalen som ska ha notiserna: `⋯` på kanalnamnet → **Workflows**.
 2. Välj mallen **Post to a channel when a webhook request is received**.
 3. Ge flödet ett namn, välj team och kanal, **Add workflow**. Teams visar en URL; den är flödets trigger och ska behandlas som en hemlighet.
-4. `mov secrets set v39 TEAMS_WEBHOOK_URL`, klistra in adressen, och lägg `TEAMS_WEBHOOK_URL` sist i ops-maskinens `secrets` i profilen. Nästa `mov up v39` levererar den till maskinen, och notifieraren börjar posta.
+4. `mov secrets set v39-cf TEAMS_WEBHOOK_URL`, klistra in adressen, och lägg `TEAMS_WEBHOOK_URL` sist i ops-maskinens `secrets` i profilen. Nästa `mov up v39-cf` levererar den till maskinen, och notifieraren börjar posta.
 
 Kortet flödet postar är ett Adaptive Card med ärendenummer, avsändare, mottagningstid, meddelandet och en knapp *Öppna kön* som leder till registret. Utan URL:en skickas mejlet ändå; notifieraren svarar `teams: no url` och går vidare.
 
 ## Koden
 
-Profilen [`mov-workspace-v39/profiles/v39.json`](../mov-workspace-v39/profiles/v39.json), med det som är veckans. En ny workspace för veckan, för det är en ny tenant och en ny prenumeration; namnkonventionen och standardvärdena är kopierade från den gamla.
+Profilen [`mov-workspace/profiles/v39-cf.json`](../mov-workspace/profiles/v39-cf.json), med det som är veckans; [`v39.json`](../mov-workspace/profiles/v39.json) är samma kedja utan Cloudflare. Samma workspace som v34–v38: den nya tenanten och prenumerationen står i samma `mov.workspace.json`, med sin egen `tenantId`, och den prenumeration en körning riktas mot avgör i vilken tenant den körs. `mov subscription pin mov25` för veckorna 39–41, `mov subscription pin school` tillbaka.
 
 ```json
 {
@@ -123,7 +123,7 @@ Tre saker i profilen är nya för veckan och fanns inte i mov när den började:
 
 ## Deploy från kod
 
-`mov up v39`
+`mov up v39-cf`
 
 ![mov up v39: tolv steg från tom prenumeration till verifierad kedja, med regionvalet när Sweden Central sa nej](img/mov_up_v39.svg)
 
@@ -257,18 +257,18 @@ Från repot, utan portal. Det som inte ligger i repot är hemligheterna och Clou
 
 ```powershell
 git clone https://github.com/82danass/azure.git
-cd azure\mov-workspace-v39
+cd azure\mov-workspace
 az login --use-device-code               # tenanten är ny, och nya tenanter nekar device code från 1 juli 2026: logga in med webbläsaren om det nekas
-mov workspace use mov25-v39
+mov subscription pin mov25
 mov secrets set cloudflare CLOUDFLARE_API_TOKEN   # DNS Write, Tunnel Write, Access Write på zonen och kontot
-mov secrets set v39 NC_ADMIN_PASSWORD
-mov secrets set v39 NC_AUTH_JWT_SECRET
+mov secrets set v39-cf NC_ADMIN_PASSWORD
+mov secrets set v39-cf NC_AUTH_JWT_SECRET
 mov check
-mov up v39
+mov up v39-cf
 ```
 
-`TUNNEL_TOKEN` och `OAUTH_CLIENT_SECRET` skapar mov under körningen. `mov down v39` river resursgruppen, budgeten, appregistreringen och exakt de Cloudflare-objekt som skapades: tunneln, posterna, Access-appen, policyn och identitetsleverantören. De fem posterna som redan fanns i zonen har aldrig listats.
+`TUNNEL_TOKEN` och `OAUTH_CLIENT_SECRET` skapar mov under körningen. `mov down v39-cf` river resursgruppen, budgeten, appregistreringen och exakt de Cloudflare-objekt som skapades: tunneln, posterna, Access-appen, policyn och identitetsleverantören. De fem posterna som redan fanns i zonen har aldrig listats.
 
 ## Rivning
 
-`mov down v39` efter dokumentationen. Nästa `mov up v39` bygger samma kedja igen, med samma namn och samma dörr, för det är vad koden säger.
+`mov down v39-cf` efter dokumentationen. Nästa `mov up v39-cf` bygger samma kedja igen, med samma namn och samma dörr, för det är vad koden säger.
