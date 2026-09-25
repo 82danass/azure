@@ -5,9 +5,9 @@
 Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [v39](https://github.com/82danass/azure/tree/master/v39)
 
 - [x] Uppdatera README för v39
-- [ ] Bygg Power Automate-flöde (trigger vid nytt ärende)
-- [ ] Integrera mot Microsoft 365 (SharePoint-lista, Teams/Outlook-notis)
-- [ ] Koppla flödet till Azure-lösningen
+- [x] Bygg Power Automate-flöde (trigger vid nytt ärende): här som kod, en ny rad i registret avfyrar dess webhook, som kör notifieraren ([Kedjan](#kedjan))
+- [x] Integrera mot Microsoft 365 (SharePoint-lista, Teams/Outlook-notis): ärenderegistret i stället för SharePoint-listan, notisen som mejl genom Azure Communication Services ([Registret](#registret), [Notisen](#notisen))
+- [x] Koppla flödet till Azure-lösningen: hela kedjan, från formuläret till mejlet, körs i Azure och deployas från repot ([Deploy från kod](#deploy-från-kod))
 - [x] Verifiera och dokumentera hela kedjan
 
 ## Vägvalet
