@@ -55,6 +55,10 @@ Registrets superadmin är `admin@novatrix.se` med ett lösenord som ligger i wor
 
 **Mejlet.** Azure Communication Services med en Azure-hanterad domän, `DoNotReply@<id>.azurecomm.net`, och kundtjänstens adress som mottagare. Maskinens managed identity `id-novatrix-notify` har rollen *Communication and Email Service Owner* på resursgruppen; det är rollen tjänsten själv definierar, och den enda identiteten som kan skicka. Avsändaradressen och tjänstens värdnamn läser notifieraren ur resurserna vid start, med samma identitet. Ingen nyckel finns att läcka. Gratisnivån tar tio mejl i timmen, vilket räcker för en ärendekö på prov.
 
+Mejlen i kundtjänstens inkorg, ett per ärende, från Communication Services avsändare `DoNotReply`: ärendenummer, avsändare, mottagningstid, meddelandet och länken till kön.
+
+![Kundtjänstens inkorg: ett mejl per ärende från DoNotReply, med ärendet öppnat](img/mail_v39-cf_inbox.png)
+
 **Teams.** Office 365-connectorerna i Teams pensionerades i maj 2026, och det som finns kvar för en webhook in i en kanal är ett Workflows-flöde, alltså Power Automate. Flödet skapas i Teams, inte i kod:
 
 1. I Teams, i kanalen som ska ha notiserna: `⋯` på kanalnamnet → **Workflows**.
