@@ -1,0 +1,365 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
+  "env": "v40",
+  "description": "Virtualisation levels. The public ticket form runs as a container on Azure Container Apps, scaled from zero, its image built from v40/form by GitHub Actions and published to ghcr.io. The ticket registry (NocoDB) stays on the ops machine: state stays on a machine, the stateless form does not. The form reaches the registry by name over the private network, at mov25-form.assarelius.org with Azure's managed certificate. Staff reach the registry through the tunnel and the Access door as in v39-cf. Run `mov up v40`.",
+  "stages": [
+    "preflight",
+    "rg",
+    "network",
+    "cost",
+    "directory",
+    "identity",
+    "applications",
+    "cloudflare",
+    "resources",
+    "rbac",
+    "compute",
+    "apps",
+    "verify"
+  ],
+  "network": {
+    "addressSpace": "10.40.0.0/16",
+    "subnets": [
+      {
+        "purpose": "ops",
+        "prefix": "10.40.2.0/24",
+        "nsg": "ops"
+      },
+      {
+        "purpose": "apps",
+        "prefix": "10.40.4.0/27",
+        "kind": "containerApps",
+        "private": true
+      }
+    ],
+    "nsg": {
+      "ops": [
+        {
+          "name": "registry-from-apps",
+          "priority": 100,
+          "ports": [
+            "8080"
+          ],
+          "source": "10.40.4.0/27",
+          "description": "The form writes tickets over the private network from the Container Apps subnet. Staff come in through the tunnel, which opens no port here."
+        },
+        {
+          "name": "ssh",
+          "priority": 110,
+          "ports": [
+            "22"
+          ],
+          "source": "${admin.sshSource}",
+          "description": "Administrative access, and the channel the secrets arrive on."
+        },
+        {
+          "name": "deny-all-inbound",
+          "priority": 4000,
+          "access": "Deny",
+          "protocol": "*",
+          "ports": [
+            "*"
+          ]
+        }
+      ]
+    }
+  },
+  "identity": {
+    "userAssigned": [
+      {
+        "purpose": "notify",
+        "description": "The notifier's identity: sends mail through Communication Services, reads the mail domain's sender address."
+      }
+    ],
+    "applications": [
+      {
+        "purpose": "signin",
+        "description": "The sign-in in front of the ticket registry: Cloudflare Access signs staff in with Entra ID through this registration.",
+        "claims": {
+          "email": true,
+          "groups": true
+        },
+        "secret": "OAUTH_CLIENT_SECRET"
+      }
+    ]
+  },
+  "cloudflare": {
+    "records": [
+      {
+        "name": "form",
+        "type": "CNAME",
+        "value": "@output:apps.apps.form.fqdn",
+        "proxied": false
+      },
+      {
+        "name": "asuid",
+        "under": "form",
+        "type": "TXT",
+        "value": "@output:apps.apps.form.verificationId"
+      },
+      {
+        "name": "registry",
+        "type": "A",
+        "value": "@output:compute.ops.privateIp",
+        "proxied": false
+      }
+    ],
+    "tunnel": {
+      "host": "ops",
+      "secret": "TUNNEL_TOKEN",
+      "routes": [
+        {
+          "name": "tickets",
+          "service": "http://127.0.0.1:8080"
+        }
+      ]
+    },
+    "access": [
+      {
+        "name": "tickets",
+        "idp": "signin",
+        "allow": {
+          "everyone": true
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Communication/emailServices",
+      "apiVersion": "2023-04-01",
+      "purpose": "mail",
+      "location": "global",
+      "properties": {
+        "dataLocation": "Europe"
+      }
+    },
+    {
+      "type": "Microsoft.Communication/emailServices/domains",
+      "apiVersion": "2023-04-01",
+      "purpose": "maildomain",
+      "name": "mail-novatrix-v40/AzureManagedDomain",
+      "location": "global",
+      "dependsOn": [
+        "mail"
+      ],
+      "properties": {
+        "domainManagement": "AzureManaged",
+        "userEngagementTracking": "Disabled"
+      }
+    },
+    {
+      "type": "Microsoft.Communication/communicationServices",
+      "apiVersion": "2023-04-01",
+      "purpose": "acs",
+      "location": "global",
+      "properties": {
+        "dataLocation": "Europe",
+        "linkedDomains": [
+          "@resourceId:maildomain"
+        ]
+      }
+    }
+  ],
+  "rbac": {
+    "assignments": [
+      {
+        "role": "Virtual Machine Contributor",
+        "principal": {
+          "kind": "group",
+          "purpose": "drift"
+        },
+        "scope": "resourceGroup",
+        "justification": "Operations start, stop and rebuild the machines, and change neither network nor roles."
+      },
+      {
+        "role": "Reader",
+        "principal": {
+          "kind": "group",
+          "purpose": "support"
+        },
+        "scope": "resourceGroup",
+        "justification": "Support works in the ticket registry, not in Azure; read is for seeing that the environment stands."
+      },
+      {
+        "role": "Reader",
+        "principal": {
+          "kind": "group",
+          "purpose": "granskning"
+        },
+        "scope": "resourceGroup",
+        "justification": "A review reads and changes nothing."
+      },
+      {
+        "role": "Communication and Email Service Owner",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": "resourceGroup",
+        "justification": "The notifier sends mail with the machine's identity and reads the managed domain's sender address. The role is the Communication services' own, on the group that holds only this environment's; no key exists to leak."
+      }
+    ]
+  },
+  "compute": {
+    "vms": [
+      {
+        "purpose": "ops",
+        "subnet": "ops",
+        "size": "Standard_B2ls_v2",
+        "identities": [
+          "notify"
+        ],
+        "source": {
+          "path": "v39",
+          "bootstrap": "scripts/bootstrap-v39-ops.sh"
+        },
+        "host": {
+          "packages": [
+            "git",
+            "docker.io",
+            "python3-venv",
+            "jq",
+            "curl"
+          ],
+          "updatePackages": true,
+          "upgradePackages": true,
+          "rebootIfRequired": true
+        },
+        "environment": {
+          "NOVATRIX_TICKET_HOST": "@output:cloudflare.hosts.tickets",
+          "AZURE_CLIENT_ID": "@output:identity.identities.notify.clientId",
+          "NOVATRIX_ACS_ID": "@output:resources.acsId",
+          "NOVATRIX_MAIL_DOMAIN_ID": "@output:resources.maildomainId",
+          "NOVATRIX_SUPPORT_EMAIL": "assarelius@icloud.com",
+          "NC_ADMIN_EMAIL": "admin@novatrix.se"
+        },
+        "secrets": [
+          "TUNNEL_TOKEN",
+          "NC_AUTH_JWT_SECRET",
+          "NC_ADMIN_PASSWORD",
+          "TEAMS_WEBHOOK_URL"
+        ],
+        "verify": {
+          "http": false,
+          "host": [
+            {
+              "name": "cloud-init",
+              "run": "cloud-init status | head -n 1",
+              "expect": "status: done"
+            },
+            {
+              "name": "secrets landed",
+              "run": "systemctl is-active novatrix-notify",
+              "expect": "active"
+            },
+            {
+              "name": "registry",
+              "run": "sudo docker inspect -f '{{.State.Status}}' noco",
+              "expect": "running"
+            },
+            {
+              "name": "tunnel",
+              "run": "systemctl is-active cloudflared",
+              "expect": "active"
+            },
+            {
+              "name": "door closed to anonymous",
+              "run": "bash -c '. /etc/mov/deploy.env; curl -s -o /dev/null -w %{http_code} https://$NOVATRIX_TICKET_HOST/'",
+              "expect": "302"
+            },
+            {
+              "name": "notifier reaches mail",
+              "run": "curl -sf http://127.0.0.1:9000/health | grep -o '\"status\":\"ok\"'",
+              "expect": "\"status\":\"ok\""
+            },
+            {
+              "name": "pending upgrades",
+              "run": "apt-get -s upgrade | grep -c '^Inst' || true",
+              "expect": "0",
+              "optional": true
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "apps": {
+    "environment": {
+      "purpose": "env",
+      "properties": {
+        "workloadProfiles": [
+          {
+            "name": "Consumption",
+            "workloadProfileType": "Consumption"
+          }
+        ],
+        "vnetConfiguration": {
+          "infrastructureSubnetId": "@output:network.subnets.apps.id",
+          "internal": false
+        }
+      }
+    },
+    "apps": [
+      {
+        "purpose": "form",
+        "domains": [
+          {
+            "name": "@output:cloudflare.hosts.form",
+            "certificate": "managed"
+          }
+        ],
+        "verify": {
+          "httpPath": "/health",
+          "expectText": "\"status\":\"ok\""
+        },
+        "properties": {
+          "environmentId": "@resourceId:env",
+          "workloadProfileName": "Consumption",
+          "configuration": {
+            "ingress": {
+              "external": true,
+              "targetPort": 8080
+            },
+            "secrets": [
+              {
+                "name": "nc-admin-password",
+                "value": "@secret:NC_ADMIN_PASSWORD"
+              }
+            ]
+          },
+          "template": {
+            "containers": [
+              {
+                "name": "form",
+                "image": "ghcr.io/82danass/novatrix-form:sha-89c0722",
+                "resources": {
+                  "cpu": 0.25,
+                  "memory": "0.5Gi"
+                },
+                "env": [
+                  {
+                    "name": "NOVATRIX_TICKETS_URL",
+                    "value": "http://mov25-registry.assarelius.org:8080"
+                  },
+                  {
+                    "name": "NC_ADMIN_EMAIL",
+                    "value": "admin@novatrix.se"
+                  },
+                  {
+                    "name": "NC_ADMIN_PASSWORD",
+                    "secretRef": "nc-admin-password"
+                  }
+                ]
+              }
+            ],
+            "scale": {
+              "minReplicas": 0,
+              "maxReplicas": 2
+            }
+          }
+        }
+      }
+    ]
+  }
+}
