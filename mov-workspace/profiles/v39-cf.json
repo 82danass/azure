@@ -257,7 +257,8 @@
         "secrets": [
           "TUNNEL_TOKEN",
           "NC_AUTH_JWT_SECRET",
-          "NC_ADMIN_PASSWORD"
+          "NC_ADMIN_PASSWORD",
+          "TEAMS_WEBHOOK_URL"
         ],
         "verify": {
           "http": false,

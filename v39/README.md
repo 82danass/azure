@@ -5,8 +5,8 @@
 Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [v39](https://github.com/82danass/azure/tree/master/v39)
 
 - [x] Uppdatera README för v39
-- [x] Bygg Power Automate-flöde (trigger vid nytt ärende): här som kod, en ny rad i registret avfyrar dess webhook, som kör notifieraren ([Kedjan](#kedjan))
-- [x] Integrera mot Microsoft 365 (SharePoint-lista, Teams/Outlook-notis): ärenderegistret i stället för SharePoint-listan, notisen som mejl genom Azure Communication Services ([Registret](#registret), [Notisen](#notisen))
+- [x] Bygg Power Automate-flöde (trigger vid nytt ärende): en ny rad i registret avfyrar dess webhook, som kör notifieraren, och notifieraren triggar Workflows-flödet i Teams ([Kedjan](#kedjan), [Notisen](#notisen))
+- [x] Integrera mot Microsoft 365 (SharePoint-lista, Teams/Outlook-notis): ärenderegistret i stället för SharePoint-listan, notisen som mejl genom Azure Communication Services och som kort i en Teams-kanal ([Registret](#registret), [Notisen](#notisen))
 - [x] Koppla flödet till Azure-lösningen: hela kedjan, från formuläret till mejlet, körs i Azure och deployas från repot ([Deploy från kod](#deploy-från-kod))
 - [x] Verifiera och dokumentera hela kedjan
 
@@ -26,12 +26,12 @@ flowchart LR
     W -->|"ny rad, privat nät, 8080"| R[vm-novatrix-ops<br/>NocoDB, tabellen Arenden]
     R -->|"webhook vid ny rad"| N[notify.py<br/>samma maskin]
     N -->|"managed identity"| M[Azure Communication Services<br/>mejl till kundtjänst]
-    N -.->|"webhook, när flödet finns"| T[Teams-kanal<br/>Workflows-flöde]
+    N -->|"v39-cf: webhook"| T[Teams-kanal<br/>Workflows-flöde]
     S[Kundtjänst] -->|"v39: 8080, bara från min adress"| R
     S -->|"v39-cf: https, Cloudflare Access + Entra ID"| CF[Cloudflare-tunnel] --> R
 ```
 
-Kedjan är densamma i båda miljöerna: formuläret skriver en rad, raden avfyrar webhooken, notifieraren mejlar. Det som skiljer är hur formuläret och registret nås.
+Kedjan är densamma i båda miljöerna: formuläret skriver en rad, raden avfyrar webhooken, notifieraren mejlar. Det som skiljer är hur formuläret och registret nås, och att v39-cf också postar i Teams.
 
 | Del | Var | Vad |
 | --- | --- | --- |
@@ -58,11 +58,23 @@ Registrets superadmin är `admin@novatrix.se` med ett lösenord som ligger i wor
 **Teams.** Office 365-connectorerna i Teams pensionerades i maj 2026, och det som finns kvar för en webhook in i en kanal är ett Workflows-flöde, alltså Power Automate. Flödet skapas i Teams, inte i kod:
 
 1. I Teams, i kanalen som ska ha notiserna: `⋯` på kanalnamnet → **Workflows**.
-2. Välj mallen **Post to a channel when a webhook request is received**.
-3. Ge flödet ett namn, välj team och kanal, **Add workflow**. Teams visar en URL; den är flödets trigger och ska behandlas som en hemlighet.
-4. `mov secrets set v39-cf TEAMS_WEBHOOK_URL`, klistra in adressen, och lägg `TEAMS_WEBHOOK_URL` sist i ops-maskinens `secrets` i profilen. Nästa `mov up v39-cf` levererar den till maskinen, och notifieraren börjar posta.
+2. Välj mallen **Send webhook alerts to a channel**.
+3. Ge flödet ett namn, välj team och kanal, **Save**. Flödets sida visar dess URL; den är flödets trigger och ska behandlas som en hemlighet.
+4. Adressen blir en hemlighet i mov. Profilen har `TEAMS_WEBHOOK_URL` bland ops-maskinens `secrets`, så compute-steget levererar den till maskinen, och notifieraren läser den när den startar:
 
-Kortet flödet postar är ett Adaptive Card med ärendenummer, avsändare, mottagningstid, meddelandet och en knapp *Öppna kön* som leder till registret. Utan URL:en skickas mejlet ändå; notifieraren svarar `teams: no url` och går vidare.
+```powershell
+mov secrets set v39-cf TEAMS_WEBHOOK_URL
+mov up v39-cf --stage compute
+ssh -F mov-workspace/keys/ssh_config v39-cf-ops "sudo systemctl restart novatrix-notify"
+```
+
+![mov secrets set och mov up v39-cf --stage compute: flödets adress lagras och levereras till ops, och ett ärende skickas genom formuläret](img/mov_teams_v39-cf.svg)
+
+Ärende 4 i kanalen **General** i teamet **mov25-areslius**, postat av Workflows. Kortet är ett Adaptive Card med ärendenummer, avsändare, mottagningstid, meddelandet och knappen *Öppna kön*, som leder till registret. Notifieraren loggade `{'id': 4, 'mail': 'Succeeded', 'teams': 202}`: mejlet levererat, och flödet tog emot kortet.
+
+![Teams, mov25-areslius › General: kortet Nytt ärende #4 postat av Workflows](img/teams_v39-cf_card.png)
+
+Utan adressen skickas mejlet ändå; notifieraren svarar `teams: no url` och går vidare. Så är det i v39, som inte har någon Teams-adress.
 
 ## Koden
 
@@ -140,7 +152,7 @@ Sweden Central räknade fortfarande två kärnor som använda efter förra rivni
 
 ![mov status v39: tio steg lyckade, kontrollerna på båda maskinerna godkända, maskinerna igång och de femton resurserna i gruppen](img/mov_status_v39.svg)
 
-På ops-maskinen kör NocoDB i Docker, och notifieraren loggar att mejlet för ärende 2 gick iväg: `'mail': 'Succeeded'`. `'teams': 'no url'` är läget tills Workflows-flödet finns.
+På ops-maskinen kör NocoDB i Docker, och notifieraren loggar att mejlet för ärende 2 gick iväg: `'mail': 'Succeeded'`. `'teams': 'no url'`: v39 har ingen Teams-adress.
 
 ![mov ssh v39 ops: NocoDB-containern och notifieraren med mejlet levererat](img/mov_ssh_v39_ops.svg)
 
@@ -197,7 +209,7 @@ Registret anropar webhooken, notifieraren mejlar och svarar; registrets egen log
 {"handled":1,"outcomes":[{"id":4,"mail":"Succeeded","slack":"no url","teams":"no url"}]}
 ```
 
-`mail: Succeeded` är Communication Services eget statusord för ett levererat mejl. `teams: no url` är läget tills Workflows-flödet finns.
+`mail: Succeeded` är Communication Services eget statusord för ett levererat mejl. Den körningen var innan flödet fanns, därav `teams: no url`; kortet i Teams står under *Notisen*.
 
 Dörren: `https://mov25-tickets.assarelius.org` utan session svarar `302` till Cloudflares inloggning, som visar Entra ID som enda alternativ.
 
@@ -213,6 +225,7 @@ mov subscription pin "MOV25 - v39-v41"
 mov secrets set cloudflare CLOUDFLARE_API_TOKEN   # DNS Write, Tunnel Write, Access Write på zonen och kontot
 mov secrets set v39-cf NC_ADMIN_PASSWORD
 mov secrets set v39-cf NC_AUTH_JWT_SECRET
+mov secrets set v39-cf TEAMS_WEBHOOK_URL      # Workflows-flödets adress, se Notisen
 mov check
 mov up v39-cf
 ```
