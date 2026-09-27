@@ -15,3 +15,6 @@ mov-workspace*/subscription.json
 
 # Which accounts sign in where, tenant ids, trials and their end dates.
 v39/accounts.md
+
+# Python writes these when a script is run or imported; they are no source.
+__pycache__/
