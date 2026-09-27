@@ -332,7 +332,7 @@
             "containers": [
               {
                 "name": "form",
-                "image": "ghcr.io/82danass/novatrix-form:sha-89c0722",
+                "image": "ghcr.io/82danass/novatrix-form:sha-5ea8ac3",
                 "resources": {
                   "cpu": 0.25,
                   "memory": "0.5Gi"
