@@ -12,7 +12,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY form.py .
 COPY public/ public/
 
-# Nothing in the image is written at run time.
-USER nobody
+# Its own user, with a home: gunicorn writes its control socket there.
+RUN useradd --create-home --uid 10001 form
+USER form
 EXPOSE 8080
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--timeout", "60", "form:app"]
+# Threaded workers: a thread receives a slow upload while the worker keeps
+# reporting in, so an attachment arriving over a slow line is not cut off.
+# In v39 nginx took the whole upload before gunicorn saw it; here nothing does.
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--worker-class", "gthread", "--workers", "2", "--threads", "4", "form:app"]
