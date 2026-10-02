@@ -49,7 +49,10 @@ Repo: [github.com/82danass/azure](https://github.com/82danass/azure)
 - [x] Verifiera och dokumentera hela kedjan
 
 ### [v40](v40/README.md)
-- [ ]
+- [x] Skapa avsnitt för v40 och uppdatera README
+- [x] Paketera och kör en del av kundtjänsten som en container på Azure: ärendeformuläret på Azure Container Apps, med imagen byggd av GitHub Actions
+- [x] Beskriv och jämför VM, containers och serverless, med för- och nackdelar för just ärendemottagningen
+- [x] Visa att den alternativa lösningen fungerar och dokumentera jämförelsen: formuläret svarar på sitt eget namn över HTTPS och ett ärende med bilaga landar som en rad i ärenderegistret
 
 ### [v41](v41/README.md)
 - [ ]
