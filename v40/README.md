@@ -288,8 +288,8 @@ Imagen byggs av GitHub Actions när `v40/form/` ändras, och profilen namnger ta
 
 `mov down v40 --wait`
 
-![mov down v40: budgeten, appregistreringen och Cloudflare-posterna, sedan formulärets namn, certifikatet, appen och Container Apps-miljön i tur och ordning, resursgruppen och sist tunneln](img/mov_down_v40.svg)
+![mov down v40: appregistreringen och Cloudflare-posterna, sedan formulärets namn, certifikatet, appen och Container Apps-miljön i tur och ordning, resursgruppen och sist tunneln](img/mov_down_v40.svg)
 
-`mov down v40` river budgeten, appregistreringen och Cloudflare-objekten: dörren och posterna. Sedan river den Container Apps-delen baklänges mot hur den byggdes: namnet tas bort från appen, certifikatet raderas, sedan appen och sist miljön, och varje steg väntar tills Azure är klart. En radering av resursgruppen ordnar inte det själv, för ett certifikat som är bundet till ett namn går inte att radera, och miljön går inte att radera så länge den har certifikatet. Miljön tog drygt 22 minuter att radera. Azure tar också bort sin egen resursgrupp för miljön, `ME_env-novatrix-v40_rg-novatrix-v40_swedencentral`, med lastbalanseraren och dess adress.
+`mov down v40` river appregistreringen och Cloudflare-objekten: dörren och posterna. Sedan river den Container Apps-delen baklänges mot hur den byggdes: namnet tas bort från appen, certifikatet raderas, sedan appen och sist miljön, och varje steg väntar tills Azure är klart. En radering av resursgruppen ordnar inte det själv, för ett certifikat som är bundet till ett namn går inte att radera, och miljön går inte att radera så länge den har certifikatet. Miljön tog drygt 22 minuter att radera. Azure tar också bort sin egen resursgrupp för miljön, `ME_env-novatrix-v40_rg-novatrix-v40_swedencentral`, med lastbalanseraren och dess adress.
 
 Därefter raderas resursgruppen med ops-maskinen, nätet, adressen och e-posttjänsten, på tre minuter. Tunneln raderas sist, när maskinen som höll den uppe är borta.
