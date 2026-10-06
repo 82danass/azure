@@ -1,0 +1,46 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/naming.schema.json",
+  "tokens": {
+    "company": "nordvik",
+    "user": "82danass"
+  },
+  "patterns": {
+    "resourceGroup": "rg-{env}",
+    "budget": "budget-{env}",
+    "virtualNetwork": "vnet-{company}",
+    "subnet": "snet-{company}-{purpose}",
+    "networkSecurityGroup": "nsg-{company}-{purpose}",
+    "publicIPAddress": "pip-{company}-{purpose}",
+    "networkInterface": "nic-{company}-{purpose}",
+    "virtualMachine": "vm-{company}-{purpose}",
+    "userAssignedIdentity": "id-{company}-{purpose}",
+    "storageAccount": "st{company}{user}{seq:02d}",
+    "entraGroup": "grp-{company}-{purpose}",
+    "entraUser": "usr-{company}-{purpose}",
+    "resource": "{purpose}-{env}",
+    "billingPrincipal": "spn-{company}-{purpose}",
+    "entraApplication": "app-{env}-{purpose}",
+    "tunnel": "{env}",
+    "Microsoft.App/managedEnvironments": "cae-{env}",
+    "Microsoft.App/containerApps": "ca-{company}-{purpose}",
+    "Microsoft.Network/privateEndpoints": "pep-{company}-{purpose}",
+    "Microsoft.Web/serverfarms": "asp-{company}-{purpose}",
+    "Microsoft.Web/sites": "func-{env}-{purpose}",
+    "Microsoft.Communication/communicationServices": "acs-{env}",
+    "Microsoft.Communication/emailServices": "mail-{env}"
+  },
+  "rules": {
+    "default": {
+      "pattern": "^[a-z][a-z0-9-]{1,62}[a-z0-9]$",
+      "description": "typ-foretag-syfte, lower case, no spaces and no a-ring/a-umlaut/o-umlaut, per the brief's naming."
+    },
+    "storageAccount": {
+      "pattern": "^[a-z0-9]{3,24}$",
+      "transform": [
+        "lower",
+        "remove:-"
+      ],
+      "description": "Azure storage accounts: 3-24 chars, lower-case letters and digits only, globally unique. st + nordvik + the user name + a sequence number, as the brief sets it."
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Tavlan{% endblock %}
+{% block main %}
+<h1>Tavlan</h1>
+<nav class="tabs">
+  {% if user.role == 'forvaltare' %}
+    <a href="?visa=mina" class="{{ 'on' if view == 'mina' }}">Mina fastigheter ({{ mine }})</a>
+    <a href="?visa=otilldelade" class="{{ 'on' if view == 'otilldelade' }}">Otilldelade ({{ unassigned }})</a>
+  {% endif %}
+  <a href="?visa=alla" class="{{ 'on' if view == 'alla' }}">Alla</a>
+</nav>
+{% if user.role == 'ekonomi' %}<p class="note">Ekonomi läser. Inget här går att ändra.</p>{% endif %}
+{% if not incidents %}
+  <p>Inga anmälningar här.</p>
+{% endif %}
+{% for incident in incidents %}
+  {% set first = incident.reports[-1] %}
+  <section class="incident {{ 'urgent' if incident.urgent }} {{ 'closed' if not incident.open }}">
+    <h2>
+      {% if incident.urgent %}<span class="flag">AKUT</span>{% endif %}
+      {{ categories.get(incident.category, incident.category) }} i {{ incident.property.name or first.property_id }}
+      <span class="count">{{ incident.reports|length }} anmälning{{ 'ar' if incident.reports|length > 1 }}</span>
+    </h2>
+    <ul>
+      {% for entry in incident.reports %}
+        <li>
+          <a href="{{ url_for('detail', pk=entry.PartitionKey, rk=entry.RowKey) }}">{{ entry.title }}</a>
+          <span class="when">{{ entry.created[:16].replace('T', ' ') }}</span>
+          <span class="status {{ entry.status }}">{{ statuses.get(entry.status, entry.status) }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endfor %}
+{% endblock %}

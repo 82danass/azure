@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
+  "env": "nordvik-v41-test",
+  "extends": "nordvik-v41-prod",
+  "description": "Nordvik's test or demo environment: nordvik-v41-prod as it stands, in its own group rg-nordvik-v41-test (the naming pattern; a pinned group is never inherited), at the same addresses, with its own budget. Everything that differs follows the environment's name. The subscription allows one Container Apps environment, so test and prod are never up at the same time here; for the same reason they share the addresses and the globally unique storage names. With a raised quota, test would get its own sequence numbers. Run `mov up nordvik-v41-test` after `mov down nordvik-v41-prod`.",
+  "cost": {
+    "amount": 500
+  }
+}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Ingen behörighet{% endblock %}
+{% block main %}
+<h1>Ingen behörighet</h1>
+<p>Kontot är inte med i någon av personalens grupper. Hyresgäster gör felanmälan utan konto, på <a href="{{ url_for('form') }}">startsidan</a>.</p>
+{% endblock %}

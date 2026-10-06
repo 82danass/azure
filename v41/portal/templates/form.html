@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block main %}
+<h1>Felanmälan</h1>
+<p class="lead">Beskriv felet och lägg till en bild. Du behöver inget konto: en kod till din e-post bekräftar att adressen är din.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" action="{{ url_for('report') }}" enctype="multipart/form-data">
+  <label>Rubrik <input name="title" maxlength="120" required value="{{ fields.title or '' }}"></label>
+  <label>Beskrivning <textarea name="description" rows="5" maxlength="4000" required>{{ fields.description or '' }}</textarea></label>
+  <label>Vad är trasigt?
+    <select name="category" required>
+      <option value="">Välj</option>
+      {% for key, label in categories.items() %}
+        <option value="{{ key }}" {% if fields.category == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <div class="pair">
+    <label>Fastighet
+      <select name="property_id" required>
+        <option value="">Välj</option>
+        {% for entry in properties %}
+          <option value="{{ entry.RowKey }}" {% if fields.property_id == entry.RowKey %}selected{% endif %}>{{ entry.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Lägenhet <input name="apartment" maxlength="20" value="{{ fields.apartment or '' }}"></label>
+  </div>
+  <label>Bild på felet <input type="file" name="image" accept="image/jpeg,image/png,image/webp,image/heic" required></label>
+  <div class="pair">
+    <label>Din e-post <input type="email" name="email" id="email" required value="{{ fields.email or '' }}"></label>
+    <button type="button" id="send-code">Skicka kod</button>
+  </div>
+  <p id="code-status" class="note" aria-live="polite"></p>
+  <label>Kod från mejlet <input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label>
+  <button type="submit">Skicka anmälan</button>
+</form>
+<script>
+  document.getElementById("send-code").addEventListener("click", async () => {
+    const status = document.getElementById("code-status");
+    const body = new URLSearchParams({ email: document.getElementById("email").value });
+    const answer = await fetch("{{ url_for('code') }}", { method: "POST", body });
+    status.textContent = (await answer.json()).message;
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Mina anmälningar{% endblock %}
+{% block main %}
+<h1>Mina anmälningar</h1>
+{% if sent %}
+  <p>En ny länk är skickad till din e-post.</p>
+{% else %}
+  <p class="lead">Länken till dina anmälningar kommer med bekräftelsemejlet. Har du tappat den får du en ny här.</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post" action="{{ url_for('new_link') }}">
+    <div class="pair">
+      <label>Din e-post <input type="email" name="email" id="email" required></label>
+      <button type="button" id="send-code">Skicka kod</button>
+    </div>
+    <p id="code-status" class="note" aria-live="polite"></p>
+    <label>Kod från mejlet <input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label>
+    <button type="submit">Skicka mig en ny länk</button>
+  </form>
+  <script>
+    document.getElementById("send-code").addEventListener("click", async () => {
+      const status = document.getElementById("code-status");
+      const body = new URLSearchParams({ email: document.getElementById("email").value });
+      const answer = await fetch("{{ url_for('code') }}", { method: "POST", body });
+      status.textContent = (await answer.json()).message;
+    });
+  </script>
+{% endif %}
+{% endblock %}

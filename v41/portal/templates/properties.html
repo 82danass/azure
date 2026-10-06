@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Fastigheter{% endblock %}
+{% block main %}
+<h1>Fastigheter</h1>
+<p class="lead">Ta ansvar för dina fastigheter. Anmälningar till en fastighet som ingen har tagit hamnar under Otilldelade.</p>
+<table>
+  <thead><tr><th>Fastighet</th><th>Adress</th><th>Ansvarig</th><th></th></tr></thead>
+  <tbody>
+  {% for entry in properties %}
+    <tr>
+      <td>{{ entry.name }}</td>
+      <td>{{ entry.address }}</td>
+      <td>{{ names.get(entry.manager_oid, '') if entry.manager_oid else 'Ingen' }}</td>
+      <td class="actions">
+        {% if entry.manager_oid != user.oid %}
+          <form method="post" action="{{ url_for('change_building', key=entry.RowKey) }}">
+            <button name="action" value="ta">Ta ansvar</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('change_building', key=entry.RowKey) }}">
+            <button name="action" value="lamna">Lämna</button>
+          </form>
+          <form method="post" action="{{ url_for('change_building', key=entry.RowKey) }}">
+            <select name="to">
+              {% for other in managers if other.RowKey != user.oid %}
+                <option value="{{ other.RowKey }}">{{ other.name }}</option>
+              {% endfor %}
+            </select>
+            <button name="action" value="overlamna">Lämna över</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h2>Lägg till en fastighet</h2>
+<form method="post" action="{{ url_for('add_building') }}" class="pair">
+  <label>Namn <input name="name" required maxlength="80"></label>
+  <label>Adress <input name="address" maxlength="120"></label>
+  <button type="submit">Lägg till</button>
+</form>
+{% endblock %}

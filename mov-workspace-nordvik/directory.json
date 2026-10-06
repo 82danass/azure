@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/directory.schema.json",
+  "domain": "mov25danielassareliusoutloo.onmicrosoft.com",
+  "groups": [
+    {
+      "purpose": "forvaltare",
+      "displayName": "Nordvik Forvaltare",
+      "description": "Property managers: every report, on a board that opens on their own properties; they judge priority and set status."
+    },
+    {
+      "purpose": "ekonomi",
+      "displayName": "Nordvik Ekonomi",
+      "description": "Finance: reads reports and what hosting costs, changes nothing."
+    }
+  ],
+  "users": [
+    {
+      "purpose": "forvaltare1",
+      "displayName": "Karin Ek (forvaltare)",
+      "for": "82danass@gafe.molndal.se",
+      "origin": "internal",
+      "groups": [
+        "forvaltare"
+      ]
+    },
+    {
+      "purpose": "forvaltare2",
+      "displayName": "Johan Berg (forvaltare)",
+      "for": "82danass@gafe.molndal.se",
+      "origin": "internal",
+      "groups": [
+        "forvaltare"
+      ]
+    },
+    {
+      "purpose": "ekonomi1",
+      "displayName": "Maria Lund (ekonomi)",
+      "for": "82danass@gafe.molndal.se",
+      "origin": "internal",
+      "groups": [
+        "ekonomi"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Tack{% endblock %}
+{% block main %}
+<h1>Tack, anmälan är mottagen</h1>
+<p>Vi har tagit emot <strong>{{ report.title }}</strong>. Ett bekräftelsemejl med din personliga länk är på väg.</p>
+<p>Där följer du dina anmälningar: <a href="{{ link }}">Mina anmälningar</a></p>
+{% endblock %}

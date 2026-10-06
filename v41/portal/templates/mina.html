@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Mina anmälningar{% endblock %}
+{% block main %}
+<h1>Mina anmälningar</h1>
+{% if not reports %}
+  <p>Inga anmälningar än.</p>
+{% else %}
+<table>
+  <thead><tr><th>Mottagen</th><th>Rubrik</th><th>Fastighet</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for entry in reports %}
+    <tr>
+      <td>{{ entry.created[:16].replace('T', ' ') }}</td>
+      <td>{{ entry.title }}</td>
+      <td>{{ names.get(entry.property_id, entry.property_id) }}{% if entry.apartment %}, {{ entry.apartment }}{% endif %}</td>
+      <td><span class="status {{ entry.status }}">{{ statuses.get(entry.status, entry.status) }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+<p><a href="{{ url_for('form') }}">Gör en ny felanmälan</a></p>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }}{% endblock %}
+{% block main %}
+<p><a href="{{ url_for('board') }}">Tillbaka till tavlan</a></p>
+<h1>{% if report.priority == 'akut' %}<span class="flag">AKUT</span> {% endif %}{{ report.title }}</h1>
+<dl>
+  <dt>Kategori</dt><dd>{{ categories.get(report.category, report.category) }}</dd>
+  <dt>Fastighet</dt><dd>{{ building.name or report.property_id }}{% if report.apartment %}, lägenhet {{ report.apartment }}{% endif %}</dd>
+  <dt>Mottagen</dt><dd>{{ report.created[:16].replace('T', ' ') }}</dd>
+  <dt>Status</dt><dd>{{ statuses.get(report.status, report.status) }}</dd>
+  <dt>Händelse</dt><dd>{{ report.incident_id or 'ej samlad än' }}</dd>
+</dl>
+<p class="description">{{ report.description }}</p>
+<img class="photo" src="{{ url_for('picture', pk=report.PartitionKey, rk=report.RowKey) }}" alt="Bild på felet">
+{% if user.role == 'forvaltare' %}
+  <div class="actions">
+    <form method="post" action="{{ url_for('set_status', pk=report.PartitionKey, rk=report.RowKey) }}">
+      <label>Status
+        <select name="status">
+          {% for key, label in statuses.items() %}
+            <option value="{{ key }}" {% if report.status == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Spara status</button>
+    </form>
+    <form method="post" action="{{ url_for('set_priority', pk=report.PartitionKey, rk=report.RowKey) }}">
+      {% if report.priority == 'akut' %}
+        <input type="hidden" name="priority" value="normal">
+        <button type="submit">Sänk till normal</button>
+      {% else %}
+        <input type="hidden" name="priority" value="akut">
+        <button type="submit" class="warn">Höj till akut, mejla jouren</button>
+      {% endif %}
+    </form>
+  </div>
+{% endif %}
+{% endblock %}

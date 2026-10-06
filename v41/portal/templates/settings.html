@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Inställningar{% endblock %}
+{% block main %}
+<h1>Inställningar</h1>
+<form method="post">
+  <label>Notiser skickas till <input type="email" name="notify_email" required value="{{ notify_email }}"></label>
+  <button type="submit">Spara</button>
+</form>
+<p class="note">Du får ett mejl när en ny händelse kommer i en av dina fastigheter. Akuta går direkt, också till jouren.</p>
+{% endblock %}

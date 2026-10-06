@@ -1,0 +1,7 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/cloudflare-cog.schema.json",
+  "description": "The zone mov may write into, as for the course workspace. Every name mov makes is prefixed mov25-, one level deep so Cloudflare's free certificate covers it; the records beside them are never touched. Nordvik's sites use no Access door: they sign in through Entra ID themselves.",
+  "zone": "assarelius.org",
+  "team": "solitary-night-debf",
+  "prefix": "mov25"
+}

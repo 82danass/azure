@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1130" height="499" viewBox="0 0 1130 499" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="1130" height="499" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="1130" height="467" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="204" lengthAdjust="spacing" fill="#e1c682">.\GitHub\azure\v41\setup\setup.ps1</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="72" lengthAdjust="spacing" fill="#63cbc0">Azure tenant</tspan></text>
+<text y="103" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="330" lengthAdjust="spacing">az on subscription 409a5c62-0fe5-4c23-b559-7e0e63ff8603</tspan></text>
+<text y="133" xml:space="preserve"><tspan x="16" textLength="678" lengthAdjust="spacing" fill="#63cbc0">Microsoft 365 tenant, mov25areslius.onmicrosoft.com: signing in as DanielAssarelius@mov25areslius.onmicrosoft.com</tspan></text>
+<text y="148" xml:space="preserve"><tspan x="16" textLength="546" lengthAdjust="spacing">     the sign-in window opens with that account filled in; it may open behind this terminal</tspan></text>
+<text y="163" xml:space="preserve"><tspan x="16" textLength="1098" lengthAdjust="spacing" fill="#eed49f" font-weight="bold">WARNING: Note: Sign in by Web Account Manager (WAM) is enabled by default on Windows. If using an embedded terminal, the interactive browser window may be hidden behind other windows.</tspan></text>
+<text y="178" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="354" lengthAdjust="spacing">signed in as DanielAssarelius@mov25areslius.onmicrosoft.com</tspan></text>
+<text y="208" xml:space="preserve"><tspan x="16" textLength="168" lengthAdjust="spacing" fill="#63cbc0">Azure tenant: apps and roles</tspan></text>
+<text y="223" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="354" lengthAdjust="spacing">app-nordvik-m365 registered, AzureADMultipleOrgs, no secret</tspan></text>
+<text y="238" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="252" lengthAdjust="spacing">app-nordvik-m365 has its service principal</tspan></text>
+<text y="253" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="330" lengthAdjust="spacing">app-nordvik-kostnad registered, AzureADMyOrg, no secret</tspan></text>
+<text y="268" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="270" lengthAdjust="spacing">app-nordvik-kostnad has its service principal</tspan></text>
+<text y="283" xml:space="preserve"><tspan x="16" textLength="774" lengthAdjust="spacing">WARNING: Argument '--description' is in preview and under development. Reference and support levels: https://aka.ms/CLI_refstatus</tspan></text>
+<text y="298" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="378" lengthAdjust="spacing">app-nordvik-kostnad: Cost Management Reader on the subscription</tspan></text>
+<text y="313" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="396" lengthAdjust="spacing">app-nordvik-kostnad: Billing profile reader on the billing profile</tspan></text>
+<text y="343" xml:space="preserve"><tspan x="16" textLength="450" lengthAdjust="spacing" fill="#63cbc0">Microsoft 365 tenant, mov25areslius.onmicrosoft.com: the list and its grant</tspan></text>
+<text y="358" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="198" lengthAdjust="spacing">app-nordvik-m365 provisioned here</tspan></text>
+<text y="373" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="474" lengthAdjust="spacing">app-nordvik-m365 consented: Lists.SelectedOperations.Selected, and nothing else</tspan></text>
+<text y="388" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="408" lengthAdjust="spacing">the list Felanmalningar made on https://mov25areslius.sharepoint.com</tspan></text>
+<text y="403" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="426" lengthAdjust="spacing">app-nordvik-m365 may write Felanmalningar, and nothing else on the site</tspan></text>
+<text y="433" xml:space="preserve"><tspan x="16" textLength="42" lengthAdjust="spacing" fill="#63cbc0">Profile</tspan></text>
+<text y="448" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="444" lengthAdjust="spacing">app ids, site, list and on-call address written into nordvik-v41-prod.json</tspan></text>
+<text y="478" xml:space="preserve"><tspan x="16" textLength="528" lengthAdjust="spacing" fill="#63cbc0">Done. Next: mov up nordvik-v41-prod, then pwsh D:\MOV25\GitHub\azure\v41\setup\trust.ps1</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 1122 0 A 8 8 0 0 1 1130 8 L 1130 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="1010" y1="16" x2="1020" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="1056" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M1102 11 L1112 21 M1112 11 L1102 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>

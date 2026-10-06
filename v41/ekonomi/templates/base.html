@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Ekonomi{% endblock %} · Nordvik Fastigheter</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <span class="brand">Nordvik Fastigheter · Ekonomi</span>
+    <nav>
+      {% if user %}<span class="who">{{ user.name }}</span><a href="{{ url_for('logout') }}">Logga ut</a>{% endif %}
+    </nav>
+  </header>
+  <main>{% block main %}{% endblock %}</main>
+</body>
+</html>

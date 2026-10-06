@@ -1,0 +1,6 @@
+azure-functions==1.21.3
+azure-identity==1.19.0
+azure-data-tables==12.6.0
+azure-communication-email==1.0.0
+requests==2.32.3
+tzdata==2024.2

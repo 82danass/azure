@@ -1,0 +1,78 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/defaults.schema.json",
+  "location": "swedencentral",
+  "tags": {
+    "foretag": "Nordvik Fastigheter AB",
+    "miljo": "${env}",
+    "avdelning": "gemensam",
+    "fastighet": "gemensam",
+    "kostnadsstalle": "it-plattform",
+    "managedBy": "mov"
+  },
+  "stages": [
+    "preflight",
+    "rg",
+    "cost"
+  ],
+  "admin": {
+    "sshSource": "@caller"
+  },
+  "cost": {
+    "amount": 2500,
+    "currency": "SEK",
+    "timeGrain": "Monthly",
+    "thresholds": [
+      {
+        "percent": 50,
+        "type": "Actual",
+        "operator": "GreaterThan"
+      },
+      {
+        "percent": 80,
+        "type": "Actual",
+        "operator": "GreaterThan"
+      },
+      {
+        "percent": 100,
+        "type": "Actual",
+        "operator": "GreaterThan"
+      },
+      {
+        "percent": 100,
+        "type": "Forecasted",
+        "operator": "GreaterThan"
+      }
+    ],
+    "notify": {
+      "emails": [
+        "82danass@gafe.molndal.se"
+      ]
+    }
+  },
+  "verify": {
+    "httpPath": "/health",
+    "expectStatus": 200,
+    "expectText": "\"status\":\"ok\"",
+    "timeoutSeconds": 420,
+    "intervalSeconds": 10
+  },
+  "docs": {
+    "maxOutputLines": 40,
+    "redact": []
+  },
+  "itemDefaults": {
+    "network.nsg.*": {
+      "direction": "Inbound",
+      "access": "Allow",
+      "protocol": "Tcp",
+      "source": "*",
+      "destination": "*",
+      "ports": [
+        "*"
+      ]
+    },
+    "storage.containers": {
+      "publicAccess": "None"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+:root { --ink: #1d2b36; --soft: #5b6b77; --line: #d9e1e7; --accent: #1f6f8b; --urgent: #b3261e; --bg: #f6f8fa; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+header { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #fff; border-bottom: 1px solid var(--line); }
+header nav a, header .who { margin-left: 16px; color: var(--accent); text-decoration: none; }
+header .who { color: var(--soft); }
+.brand { font-weight: 700; color: var(--ink); text-decoration: none; }
+main { max-width: 860px; margin: 24px auto; padding: 0 16px; }
+h1 { font-size: 1.6rem; margin: 0 0 8px; }
+.lead, .note { color: var(--soft); }
+.error { color: var(--urgent); font-weight: 600; }
+form { display: grid; gap: 12px; margin: 16px 0; }
+label { display: grid; gap: 4px; font-weight: 600; }
+input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.pair { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+button { font: inherit; padding: 8px 14px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+button.warn { background: var(--urgent); }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.actions form { display: inline-flex; gap: 6px; margin: 0 6px 0 0; }
+.tabs { display: flex; gap: 8px; margin: 12px 0; }
+.tabs a { padding: 6px 12px; border-radius: 6px; text-decoration: none; color: var(--accent); background: #fff; border: 1px solid var(--line); }
+.tabs a.on { background: var(--accent); color: #fff; }
+.incident { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 6px; padding: 8px 16px; margin: 12px 0; }
+.incident.urgent { border-left-color: var(--urgent); }
+.incident.closed { opacity: 0.6; }
+.incident h2 { font-size: 1.05rem; margin: 6px 0; }
+.incident ul { list-style: none; padding: 0; margin: 0; }
+.incident li { display: flex; gap: 12px; padding: 4px 0; }
+.count, .when { color: var(--soft); font-weight: 400; }
+.flag { color: #fff; background: var(--urgent); border-radius: 4px; padding: 0 6px; font-size: 0.8rem; }
+.status { border-radius: 4px; padding: 0 6px; background: var(--line); font-size: 0.85rem; }
+.status.atgardad { background: #d6f0dd; }
+.status.pagar { background: #fdebc8; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
+dt { color: var(--soft); }
+.description { white-space: pre-wrap; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+.photo { max-width: 100%; border-radius: 6px; margin: 12px 0; }
+.actions { display: flex; gap: 16px; flex-wrap: wrap; }
+@media (max-width: 600px) { .pair { grid-template-columns: 1fr; } header { flex-wrap: wrap; } }

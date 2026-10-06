@@ -1,0 +1,1096 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/profile.schema.json",
+  "env": "nordvik-v41-prod",
+  "description": "Nordvik Fastigheter AB's tenant portal, production. Tenants report faults with an image at mov25-nordvik.assarelius.org without an account: a one-time code to their own email confirms it, and a personal link lets them follow their reports. Managers judge and handle them on a board in the same portal; finance reads reports and what hosting costs at mov25-ekonomi.assarelius.org. Both sites are Container Apps in a zone-redundant environment: the portal keeps 2 replicas on weekdays 06-21 and scales to 6 on traffic and to 0 at night. A report is saved to private storage and queued; a Flex Consumption Function works the queue, groups reports into incidents, writes each to the list in Nordvik's Microsoft 365 through Graph, and mails through Communication Services only where someone must act. Nothing holds a secret that reaches Azure or Microsoft 365: staff sign in through registrations that trust the sites' identities, and the Function and the finance site borrow, while this environment stands, the rights of two apps made once by v41/setup. All storage is reached through private endpoints only. Pinned to rg-nordvik, the brief's own example. Switch to this workspace with `mov workspace use mov25-nordvik`. NORDVIK_M365_APP_ID and NORDVIK_COST_APP_ID are the app ids of app-nordvik-m365 and app-nordvik-kostnad, written in once by v41/setup/setup.ps1 after it has made the two apps.",
+  "resourceGroup": "rg-nordvik",
+  "stages": [
+    "preflight",
+    "rg",
+    "network",
+    "cost",
+    "directory",
+    "identity",
+    "applications",
+    "cloudflare",
+    "storage",
+    "resources",
+    "rbac",
+    "apps",
+    "verify"
+  ],
+  "network": {
+    "addressSpace": "10.41.0.0/16",
+    "subnets": [
+      {
+        "purpose": "apps",
+        "prefix": "10.41.0.0/27",
+        "kind": "containerApps",
+        "private": true
+      },
+      {
+        "purpose": "func",
+        "prefix": "10.41.0.32/27",
+        "kind": "containerApps",
+        "private": false
+      },
+      {
+        "purpose": "data",
+        "prefix": "10.41.1.0/27",
+        "nsg": "data",
+        "private": true
+      }
+    ],
+    "nsg": {
+      "data": [
+        {
+          "name": "storage-from-apps",
+          "priority": 100,
+          "ports": [
+            "443"
+          ],
+          "source": "10.41.0.0/27",
+          "description": "The portal and the finance site reach Nordvik's storage through its private endpoints."
+        },
+        {
+          "name": "storage-from-func",
+          "priority": 110,
+          "ports": [
+            "443"
+          ],
+          "source": "10.41.0.32/27",
+          "description": "The Function reaches the queue, the table and its own storage through their private endpoints."
+        },
+        {
+          "name": "deny-all-inbound",
+          "priority": 4000,
+          "access": "Deny",
+          "protocol": "*",
+          "ports": [
+            "*"
+          ]
+        }
+      ]
+    }
+  },
+  "identity": {
+    "userAssigned": [
+      {
+        "purpose": "portal",
+        "description": "The portal's identity: writes report images to container bilder, records to table anmalningar and a message to queue nya-anmalningar, each on that one container, table or queue. Its sign-in registration trusts it, so the portal holds no client secret. It also sends tenants their one-time codes and personal links through Communication Services."
+      },
+      {
+        "purpose": "notify",
+        "description": "The Function's identity: works the queue, records each report's incident, mails through Communication Services, and runs the Function host on its own account. It borrows app-nordvik-m365's right to write the one list in Nordvik's Microsoft 365. The trust is added by v41/setup/trust.ps1 after `mov up` and removed by it before `mov down`."
+      },
+      {
+        "purpose": "ekonomi",
+        "description": "The finance site's identity: reads the group's resources and counts reports. It borrows app-nordvik-kostnad's right to read cost, budgets and the billing profile. Its sign-in registration trusts it. The trust is added by v41/setup/trust.ps1 after `mov up` and removed by it before `mov down`."
+      }
+    ],
+    "applications": [
+      {
+        "purpose": "portal",
+        "description": "Staff sign-in to the portal: managers and finance; the groups claim decides the role. Tenants need no account. Holds no secret: it trusts the portal's identity.",
+        "redirectUris": [
+          "https://mov25-nordvik.assarelius.org/auth/callback"
+        ],
+        "claims": {
+          "email": true,
+          "groups": true
+        },
+        "trusts": [
+          "portal"
+        ]
+      },
+      {
+        "purpose": "ekonomi",
+        "description": "Sign-in to the finance site; the site lets in grp-nordvik-ekonomi only. Holds no secret: it trusts the finance site's identity.",
+        "redirectUris": [
+          "https://mov25-ekonomi.assarelius.org/auth/callback"
+        ],
+        "claims": {
+          "email": true,
+          "groups": true
+        },
+        "trusts": [
+          "ekonomi"
+        ]
+      }
+    ]
+  },
+  "cloudflare": {
+    "records": [
+      {
+        "name": "nordvik",
+        "type": "CNAME",
+        "value": "@output:apps.apps.portal.fqdn",
+        "proxied": false
+      },
+      {
+        "name": "asuid",
+        "under": "nordvik",
+        "type": "TXT",
+        "value": "@output:apps.apps.portal.verificationId"
+      },
+      {
+        "name": "ekonomi",
+        "type": "CNAME",
+        "value": "@output:apps.apps.ekonomi.fqdn",
+        "proxied": false
+      },
+      {
+        "name": "asuid",
+        "under": "ekonomi",
+        "type": "TXT",
+        "value": "@output:apps.apps.ekonomi.verificationId"
+      }
+    ]
+  },
+  "storage": {
+    "seq": 1,
+    "sku": "Standard_ZRS",
+    "kind": "StorageV2",
+    "accessTier": "Hot",
+    "allowBlobPublicAccess": false,
+    "allowSharedKeyAccess": false,
+    "minimumTlsVersion": "TLS1_2",
+    "publicNetworkAccess": "Disabled",
+    "containers": [
+      {
+        "name": "bilder"
+      },
+      {
+        "name": "dokument"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2023-05-01",
+      "purpose": "anmalningar",
+      "name": "stnordvik82danass01/default/anmalningar",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+      "apiVersion": "2023-05-01",
+      "purpose": "fastigheter",
+      "name": "stnordvik82danass01/default/fastigheter",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+      "apiVersion": "2023-05-01",
+      "purpose": "nyaanmalningar",
+      "name": "stnordvik82danass01/default/nya-anmalningar",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-05-01",
+      "purpose": "blobservice",
+      "name": "stnordvik82danass01/default",
+      "properties": {
+        "isVersioningEnabled": true,
+        "deleteRetentionPolicy": {
+          "enabled": true,
+          "days": 14
+        },
+        "containerDeleteRetentionPolicy": {
+          "enabled": true,
+          "days": 14
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+      "apiVersion": "2023-05-01",
+      "purpose": "lifecycle",
+      "location": null,
+      "tags": null,
+      "name": "stnordvik82danass01/default",
+      "properties": {
+        "policy": {
+          "rules": [
+            {
+              "name": "dokument-cool-90",
+              "enabled": true,
+              "type": "Lifecycle",
+              "definition": {
+                "filters": {
+                  "blobTypes": [
+                    "blockBlob"
+                  ],
+                  "prefixMatch": [
+                    "dokument/"
+                  ]
+                },
+                "actions": {
+                  "baseBlob": {
+                    "tierToCool": {
+                      "daysAfterModificationGreaterThan": 90
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "purpose": "fnstorage",
+      "name": "stnordvik82danass02",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "publicNetworkAccess": "Disabled",
+        "allowSharedKeyAccess": false,
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "purpose": "fnpackage",
+      "name": "stnordvik82danass02/default/app-package",
+      "dependsOn": [
+        "fnstorage"
+      ],
+      "properties": {
+        "publicAccess": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2024-06-01",
+      "purpose": "zoneblob",
+      "name": "privatelink.blob.core.windows.net",
+      "location": "global",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2024-06-01",
+      "purpose": "zonetable",
+      "name": "privatelink.table.core.windows.net",
+      "location": "global",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2024-06-01",
+      "purpose": "zonequeue",
+      "name": "privatelink.queue.core.windows.net",
+      "location": "global",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2024-06-01",
+      "purpose": "linkblob",
+      "name": "privatelink.blob.core.windows.net/vnet-nordvik",
+      "location": "global",
+      "dependsOn": [
+        "zoneblob"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "@output:network.vnetId"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2024-06-01",
+      "purpose": "linktable",
+      "name": "privatelink.table.core.windows.net/vnet-nordvik",
+      "location": "global",
+      "dependsOn": [
+        "zonetable"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "@output:network.vnetId"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2024-06-01",
+      "purpose": "linkqueue",
+      "name": "privatelink.queue.core.windows.net/vnet-nordvik",
+      "location": "global",
+      "dependsOn": [
+        "zonequeue"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "@output:network.vnetId"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2024-05-01",
+      "purpose": "blob",
+      "properties": {
+        "subnet": {
+          "id": "@output:network.subnets.data.id"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "blob",
+            "properties": {
+              "privateLinkServiceId": "@output:storage.accountId",
+              "groupIds": [
+                "blob"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2024-05-01",
+      "purpose": "table",
+      "properties": {
+        "subnet": {
+          "id": "@output:network.subnets.data.id"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "table",
+            "properties": {
+              "privateLinkServiceId": "@output:storage.accountId",
+              "groupIds": [
+                "table"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2024-05-01",
+      "purpose": "queue",
+      "properties": {
+        "subnet": {
+          "id": "@output:network.subnets.data.id"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "queue",
+            "properties": {
+              "privateLinkServiceId": "@output:storage.accountId",
+              "groupIds": [
+                "queue"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints",
+      "apiVersion": "2024-05-01",
+      "purpose": "fnblob",
+      "dependsOn": [
+        "fnstorage"
+      ],
+      "properties": {
+        "subnet": {
+          "id": "@output:network.subnets.data.id"
+        },
+        "privateLinkServiceConnections": [
+          {
+            "name": "fnblob",
+            "properties": {
+              "privateLinkServiceId": "@resourceId:fnstorage",
+              "groupIds": [
+                "blob"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2024-05-01",
+      "purpose": "dnsblob",
+      "location": null,
+      "tags": null,
+      "name": "pep-nordvik-blob/default",
+      "dependsOn": [
+        "blob",
+        "zoneblob"
+      ],
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "blob",
+            "properties": {
+              "privateDnsZoneId": "@resourceId:zoneblob"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2024-05-01",
+      "purpose": "dnstable",
+      "location": null,
+      "tags": null,
+      "name": "pep-nordvik-table/default",
+      "dependsOn": [
+        "table",
+        "zonetable"
+      ],
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "table",
+            "properties": {
+              "privateDnsZoneId": "@resourceId:zonetable"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2024-05-01",
+      "purpose": "dnsqueue",
+      "location": null,
+      "tags": null,
+      "name": "pep-nordvik-queue/default",
+      "dependsOn": [
+        "queue",
+        "zonequeue"
+      ],
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "queue",
+            "properties": {
+              "privateDnsZoneId": "@resourceId:zonequeue"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+      "apiVersion": "2024-05-01",
+      "purpose": "dnsfnblob",
+      "location": null,
+      "tags": null,
+      "name": "pep-nordvik-fnblob/default",
+      "dependsOn": [
+        "fnblob",
+        "zoneblob"
+      ],
+      "properties": {
+        "privateDnsZoneConfigs": [
+          {
+            "name": "blob",
+            "properties": {
+              "privateDnsZoneId": "@resourceId:zoneblob"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Communication/emailServices",
+      "apiVersion": "2023-04-01",
+      "purpose": "mail",
+      "location": "global",
+      "properties": {
+        "dataLocation": "Europe"
+      }
+    },
+    {
+      "type": "Microsoft.Communication/emailServices/domains",
+      "apiVersion": "2023-04-01",
+      "purpose": "maildomain",
+      "name": "mail-${env}/AzureManagedDomain",
+      "location": "global",
+      "dependsOn": [
+        "mail"
+      ],
+      "properties": {
+        "domainManagement": "AzureManaged",
+        "userEngagementTracking": "Disabled"
+      }
+    },
+    {
+      "type": "Microsoft.Communication/communicationServices",
+      "apiVersion": "2023-04-01",
+      "purpose": "acs",
+      "location": "global",
+      "properties": {
+        "dataLocation": "Europe",
+        "linkedDomains": [
+          "@resourceId:maildomain"
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2024-04-01",
+      "purpose": "plan",
+      "name": "asp-nordvik-notify",
+      "kind": "functionapp",
+      "sku": {
+        "name": "FC1",
+        "tier": "FlexConsumption"
+      },
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2024-04-01",
+      "purpose": "notify",
+      "kind": "functionapp,linux",
+      "tags": {
+        "foretag": "${tags.foretag}",
+        "miljo": "${env}",
+        "avdelning": "forvaltning",
+        "fastighet": "gemensam",
+        "kostnadsstalle": "${tags.kostnadsstalle}",
+        "managedBy": "mov"
+      },
+      "dependsOn": [
+        "plan",
+        "fnpackage",
+        "dnsfnblob",
+        "acs",
+        "maildomain"
+      ],
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'id-nordvik-notify')]": {}
+        }
+      },
+      "properties": {
+        "serverFarmId": "@resourceId:plan",
+        "httpsOnly": true,
+        "virtualNetworkSubnetId": "@output:network.subnets.func.id",
+        "functionAppConfig": {
+          "deployment": {
+            "storage": {
+              "type": "blobContainer",
+              "value": "https://stnordvik82danass02.blob.core.windows.net/app-package",
+              "authentication": {
+                "type": "UserAssignedIdentity",
+                "userAssignedIdentityResourceId": "@output:identity.identities.notify.id"
+              }
+            }
+          },
+          "scaleAndConcurrency": {
+            "maximumInstanceCount": 40,
+            "instanceMemoryMB": 2048
+          },
+          "runtime": {
+            "name": "python",
+            "version": "3.12"
+          }
+        },
+        "siteConfig": {
+          "minTlsVersion": "1.2",
+          "appSettings": [
+            {
+              "name": "AzureWebJobsStorage__accountName",
+              "value": "stnordvik82danass02"
+            },
+            {
+              "name": "AzureWebJobsStorage__credential",
+              "value": "managedidentity"
+            },
+            {
+              "name": "AzureWebJobsStorage__clientId",
+              "value": "@output:identity.identities.notify.clientId"
+            },
+            {
+              "name": "Reports__queueServiceUri",
+              "value": "https://stnordvik82danass01.queue.core.windows.net"
+            },
+            {
+              "name": "Reports__credential",
+              "value": "managedidentity"
+            },
+            {
+              "name": "Reports__clientId",
+              "value": "@output:identity.identities.notify.clientId"
+            },
+            {
+              "name": "AZURE_CLIENT_ID",
+              "value": "@output:identity.identities.notify.clientId"
+            },
+            {
+              "name": "NORDVIK_TABLE_ENDPOINT",
+              "value": "https://stnordvik82danass01.table.core.windows.net"
+            },
+            {
+              "name": "NORDVIK_ACS_ID",
+              "value": "@resourceId:acs"
+            },
+            {
+              "name": "NORDVIK_MAIL_DOMAIN_ID",
+              "value": "@resourceId:maildomain"
+            },
+            {
+              "name": "NORDVIK_M365_TENANT",
+              "value": "mov25areslius.onmicrosoft.com"
+            },
+            {
+              "name": "NORDVIK_M365_APP_ID",
+              "value": "8d652112-3597-44ad-80af-ac331f89e28b"
+            },
+            {
+              "name": "NORDVIK_LIST_SITE",
+              "value": "mov25areslius.sharepoint.com,c1844220-0830-4f85-9c13-3a8a0fdea5b3,28b34f2a-3eac-4c0e-9b3d-c30e8274aad6"
+            },
+            {
+              "name": "NORDVIK_LIST",
+              "value": "602e0797-7c51-4f89-bbae-c00e5f182789"
+            },
+            {
+              "name": "NORDVIK_ONCALL_EMAIL",
+              "value": "DanielAssarelius@mov25areslius.onmicrosoft.com"
+            },
+            {
+              "name": "NORDVIK_PORTAL_URL",
+              "value": "https://mov25-nordvik.assarelius.org"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "rbac": {
+    "assignments": [
+      {
+        "role": "Storage Blob Data Contributor",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "portal"
+        },
+        "scope": {
+          "container": "bilder"
+        },
+        "justification": "The portal saves each report's image. On container bilder only: contracts in dokument are out of its reach."
+      },
+      {
+        "role": "Storage Table Data Contributor",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "portal"
+        },
+        "scope": {
+          "table": "anmalningar"
+        },
+        "justification": "The portal writes each report's record and reads a tenant's own, or a manager's board."
+      },
+      {
+        "role": "Storage Table Data Contributor",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "portal"
+        },
+        "scope": {
+          "table": "fastigheter"
+        },
+        "justification": "Managers add properties and take responsibility for them on the board; the form lists them."
+      },
+      {
+        "role": "Storage Queue Data Message Sender",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "portal"
+        },
+        "scope": {
+          "queue": "nya-anmalningar"
+        },
+        "justification": "The portal hands each report to the Function and never waits for it. It may send, not read."
+      },
+      {
+        "role": "Communication and Email Service Owner",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "portal"
+        },
+        "scope": {
+          "purpose": "acs"
+        },
+        "justification": "The portal sends a tenant's one-time code and the personal link to their reports. On the Communication Services resource alone; no key exists to leak."
+      },
+      {
+        "role": "Storage Queue Data Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "queue": "nya-anmalningar"
+        },
+        "justification": "The queue trigger reads the queue's length and its messages."
+      },
+      {
+        "role": "Storage Queue Data Message Processor",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "queue": "nya-anmalningar"
+        },
+        "justification": "The trigger takes a message and deletes it once the report is handled."
+      },
+      {
+        "role": "Storage Table Data Contributor",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "table": "anmalningar"
+        },
+        "justification": "The Function reads the report and records its incident and its item in the list."
+      },
+      {
+        "role": "Storage Table Data Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "table": "fastigheter"
+        },
+        "justification": "The Function looks up who holds a report's property. A property nobody holds goes to Otilldelade. It reads; it writes nothing."
+      },
+      {
+        "role": "Storage Blob Data Owner",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "purpose": "fnstorage"
+        },
+        "justification": "The Function host keeps its package and bookkeeping here, as Microsoft's template grants it. Its own account, so the role reaches no tenant data."
+      },
+      {
+        "role": "Communication and Email Service Owner",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "purpose": "acs"
+        },
+        "justification": "The Function sends the mail and reads the managed domain's sender address. On the Communication Services resource alone; no key exists to leak."
+      },
+      {
+        "role": "Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "ekonomi"
+        },
+        "scope": "resourceGroup",
+        "justification": "The finance site lists the group's resources and their tags. Reader sees names and settings, no data, and no key exists to read."
+      },
+      {
+        "role": "Storage Table Data Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "ekonomi"
+        },
+        "scope": {
+          "table": "anmalningar"
+        },
+        "justification": "The finance site counts reports per property to share the common cost out. It reads; it writes nothing."
+      },
+      {
+        "role": "Storage Table Data Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "ekonomi"
+        },
+        "scope": {
+          "table": "fastigheter"
+        },
+        "justification": "The finance site lists the properties to share the common cost out per property. It reads; it writes nothing."
+      }
+    ]
+  },
+  "apps": {
+    "environment": {
+      "purpose": "env",
+      "properties": {
+        "zoneRedundant": true,
+        "workloadProfiles": [
+          {
+            "name": "Consumption",
+            "workloadProfileType": "Consumption"
+          }
+        ],
+        "vnetConfiguration": {
+          "infrastructureSubnetId": "@output:network.subnets.apps.id",
+          "internal": false
+        }
+      }
+    },
+    "apps": [
+      {
+        "purpose": "portal",
+        "identities": [
+          "portal"
+        ],
+        "tags": {
+          "foretag": "${tags.foretag}",
+          "miljo": "${env}",
+          "avdelning": "forvaltning",
+          "fastighet": "gemensam",
+          "kostnadsstalle": "${tags.kostnadsstalle}",
+          "managedBy": "mov"
+        },
+        "domains": [
+          {
+            "name": "@output:cloudflare.hosts.nordvik",
+            "certificate": "managed"
+          }
+        ],
+        "verify": {
+          "httpPath": "/health",
+          "expectText": "\"status\":\"ok\""
+        },
+        "properties": {
+          "environmentId": "@resourceId:env",
+          "workloadProfileName": "Consumption",
+          "configuration": {
+            "activeRevisionsMode": "Single",
+            "ingress": {
+              "external": true,
+              "targetPort": 8080,
+              "transport": "auto",
+              "allowInsecure": false
+            },
+            "secrets": [
+              {
+                "name": "session-key",
+                "value": "@secret:NORDVIK_PORTAL_SESSION_KEY"
+              }
+            ]
+          },
+          "template": {
+            "containers": [
+              {
+                "name": "portal",
+                "image": "ghcr.io/82danass/nordvik-portal:latest",
+                "resources": {
+                  "cpu": 0.5,
+                  "memory": "1Gi"
+                },
+                "env": [
+                  {
+                    "name": "AZURE_CLIENT_ID",
+                    "value": "@output:identity.identities.portal.clientId"
+                  },
+                  {
+                    "name": "NORDVIK_TENANT_ID",
+                    "value": "65b3c448-4eb8-49ce-b0fb-f373ad166449"
+                  },
+                  {
+                    "name": "NORDVIK_SIGNIN_CLIENT_ID",
+                    "value": "@output:applications.applications.portal.appId"
+                  },
+                  {
+                    "name": "NORDVIK_PUBLIC_URL",
+                    "value": "https://mov25-nordvik.assarelius.org"
+                  },
+                  {
+                    "name": "NORDVIK_STORAGE_ACCOUNT",
+                    "value": "@output:storage.accountName"
+                  },
+                  {
+                    "name": "NORDVIK_GROUP_FORVALTARE",
+                    "value": "@output:directory.groups.forvaltare.id"
+                  },
+                  {
+                    "name": "NORDVIK_GROUP_EKONOMI",
+                    "value": "@output:directory.groups.ekonomi.id"
+                  },
+                  {
+                    "name": "NORDVIK_ACS_ID",
+                    "value": "@output:resources.acsId"
+                  },
+                  {
+                    "name": "NORDVIK_MAIL_DOMAIN_ID",
+                    "value": "@output:resources.maildomainId"
+                  },
+                  {
+                    "name": "NORDVIK_SESSION_KEY",
+                    "secretRef": "session-key"
+                  }
+                ]
+              }
+            ],
+            "scale": {
+              "minReplicas": 0,
+              "maxReplicas": 6,
+              "cooldownPeriod": 300,
+              "rules": [
+                {
+                  "name": "kontorstid",
+                  "custom": {
+                    "type": "cron",
+                    "metadata": {
+                      "timezone": "Europe/Stockholm",
+                      "start": "0 6 * * 1-5",
+                      "end": "0 21 * * 1-5",
+                      "desiredReplicas": "2"
+                    }
+                  }
+                },
+                {
+                  "name": "trafik",
+                  "http": {
+                    "metadata": {
+                      "concurrentRequests": "20"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "purpose": "ekonomi",
+        "identities": [
+          "ekonomi"
+        ],
+        "tags": {
+          "foretag": "${tags.foretag}",
+          "miljo": "${env}",
+          "avdelning": "ekonomi",
+          "fastighet": "gemensam",
+          "kostnadsstalle": "${tags.kostnadsstalle}",
+          "managedBy": "mov"
+        },
+        "domains": [
+          {
+            "name": "@output:cloudflare.hosts.ekonomi",
+            "certificate": "managed"
+          }
+        ],
+        "verify": {
+          "httpPath": "/health",
+          "expectText": "\"status\":\"ok\""
+        },
+        "properties": {
+          "environmentId": "@resourceId:env",
+          "workloadProfileName": "Consumption",
+          "configuration": {
+            "activeRevisionsMode": "Single",
+            "ingress": {
+              "external": true,
+              "targetPort": 8080,
+              "transport": "auto",
+              "allowInsecure": false
+            },
+            "secrets": [
+              {
+                "name": "session-key",
+                "value": "@secret:NORDVIK_EKONOMI_SESSION_KEY"
+              }
+            ]
+          },
+          "template": {
+            "containers": [
+              {
+                "name": "ekonomi",
+                "image": "ghcr.io/82danass/nordvik-ekonomi:latest",
+                "resources": {
+                  "cpu": 0.25,
+                  "memory": "0.5Gi"
+                },
+                "env": [
+                  {
+                    "name": "AZURE_CLIENT_ID",
+                    "value": "@output:identity.identities.ekonomi.clientId"
+                  },
+                  {
+                    "name": "NORDVIK_TENANT_ID",
+                    "value": "65b3c448-4eb8-49ce-b0fb-f373ad166449"
+                  },
+                  {
+                    "name": "NORDVIK_SIGNIN_CLIENT_ID",
+                    "value": "@output:applications.applications.ekonomi.appId"
+                  },
+                  {
+                    "name": "NORDVIK_PUBLIC_URL",
+                    "value": "https://mov25-ekonomi.assarelius.org"
+                  },
+                  {
+                    "name": "NORDVIK_GROUP_EKONOMI",
+                    "value": "@output:directory.groups.ekonomi.id"
+                  },
+                  {
+                    "name": "NORDVIK_COST_APP_ID",
+                    "value": "d0b35565-b8bf-4a9b-8432-8eef7e20ecc3"
+                  },
+                  {
+                    "name": "NORDVIK_SUBSCRIPTION_ID",
+                    "value": "409a5c62-0fe5-4c23-b559-7e0e63ff8603"
+                  },
+                  {
+                    "name": "NORDVIK_STORAGE_ACCOUNT",
+                    "value": "@output:storage.accountName"
+                  },
+                  {
+                    "name": "NORDVIK_SESSION_KEY",
+                    "secretRef": "session-key"
+                  }
+                ]
+              }
+            ],
+            "scale": {
+              "minReplicas": 0,
+              "maxReplicas": 2,
+              "rules": [
+                {
+                  "name": "trafik",
+                  "http": {
+                    "metadata": {
+                      "concurrentRequests": "20"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

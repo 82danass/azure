@@ -1,0 +1,59 @@
+{
+  "displayName": "Felanmalningar",
+  "description": "Nordviks register över felanmälningar: en kopia av varje anmälan från portalen. Arbetet sker i portalen.",
+  "list": {
+    "template": "genericList"
+  },
+  "columns": [
+    {
+      "name": "Kategori",
+      "indexed": true,
+      "choice": {
+        "choices": [
+          "Värme",
+          "Vatten",
+          "Lås",
+          "El",
+          "Ventilation",
+          "Övrigt"
+        ],
+        "displayAs": "dropDownMenu",
+        "allowTextEntry": false
+      }
+    },
+    {
+      "name": "Fastighet",
+      "indexed": true,
+      "text": {}
+    },
+    {
+      "name": "Handelse",
+      "text": {}
+    },
+    {
+      "name": "Mottagen",
+      "indexed": true,
+      "dateTime": {
+        "format": "dateTime",
+        "displayAs": "default"
+      }
+    },
+    {
+      "name": "Status",
+      "indexed": true,
+      "choice": {
+        "choices": [
+          "Mottagen",
+          "Pågår",
+          "Åtgärdad"
+        ],
+        "displayAs": "dropDownMenu",
+        "allowTextEntry": false
+      }
+    },
+    {
+      "name": "Lank",
+      "text": {}
+    }
+  ]
+}

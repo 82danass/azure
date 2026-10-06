@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Arelius-D/mov/main/src/mov/data/schema/workspace.schema.json",
+  "name": "mov25-nordvik",
+  "azure": {
+    "tenantId": "65b3c448-4eb8-49ce-b0fb-f373ad166449",
+    "tenantDomain": "mov25danielassareliusoutloo.onmicrosoft.com",
+    "subscriptions": [
+      {
+        "id": "409a5c62-0fe5-4c23-b559-7e0e63ff8603",
+        "name": "MOV25 - v39-v41"
+      }
+    ],
+    "defaultSubscription": "409a5c62-0fe5-4c23-b559-7e0e63ff8603"
+  },
+  "paths": {
+    "profiles": "profiles",
+    "state": "state",
+    "keys": "keys",
+    "docs": "../v41",
+    "naming": "naming.json",
+    "defaults": "defaults.json",
+    "directory": "directory.json",
+    "subscription": "subscription.json",
+    "secrets": "secrets",
+    "cloudflare": "cloudflare.json"
+  },
+  "github": {
+    "owner": "82danass",
+    "repo": "azure",
+    "defaultBranch": "master"
+  },
+  "description": "Nordvik Fastigheter AB, the v41 examination. A workspace of its own so every name follows Nordvik's pattern (company nordvik); the course workspace beside it says novatrix. Keys, state and secrets are gitignored. Switch to it with `mov workspace use mov25-nordvik`, and back with `mov workspace use mov25-azure`."
+}

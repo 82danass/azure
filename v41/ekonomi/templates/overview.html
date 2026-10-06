@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% macro unavailable(level) %}<p class="note">Inte tillgänglig: {{ level.unavailable }}</p>{% endmacro %}
+{% macro money(value, unit='SEK') %}{{ '%.2f'|format(value or 0) }} {{ unit or 'SEK' }}{% endmacro %}
+{% block main %}
+<h1>Vad driften kostar</h1>
+<p class="lead">Uppifrån och ner, bara läsande. Azure uppdaterar kostnaden några gånger om dygnet, så dagens siffror kommer i efterhand.</p>
+
+<section class="card">
+  <h2>1. Faktureringsprofilen</h2>
+  {% if billing.unavailable is defined %}{{ unavailable(billing) }}{% else %}
+    <p>{{ billing.name }}</p>
+    {% if billing.credit.unavailable is defined %}{{ unavailable(billing.credit) }}{% else %}
+      <p>Kvar av krediten: <strong>{{ money(billing.credit.value, billing.credit.currency) }}</strong></p>
+    {% endif %}
+    <table>
+      <thead><tr><th>Prenumeration</th><th>Hittills i månaden</th></tr></thead>
+      <tbody>{% for row in billing.subscriptions %}<tr><td>{{ row.SubscriptionName }}</td><td>{{ money(row.Cost, row.Currency) }}</td></tr>{% endfor %}</tbody>
+    </table>
+    {% if billing.invoices.unavailable is defined %}{{ unavailable(billing.invoices) }}{% else %}
+      <p class="note">Fakturor det senaste året: {{ billing.invoices|length }}</p>
+    {% endif %}
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>2. Prenumerationen</h2>
+  {% if subscription.unavailable is defined %}{{ unavailable(subscription) }}{% else %}
+    {% for budget in subscription.budgets %}
+      <p>Budget <strong>{{ budget.name }}</strong>: {{ money(budget.spent, budget.unit) }} av {{ money(budget.amount, budget.unit) }}
+        {% if budget.forecast %}, prognos {{ money(budget.forecast, budget.unit) }}{% endif %}.
+        Larm vid {{ budget.thresholds|map('int')|join(', ') }} %.</p>
+      <div class="bar"><span style="width: {{ [100, (100 * budget.spent / budget.amount) if budget.amount else 0]|min }}%"></span></div>
+    {% else %}<p>Ingen budget på prenumerationen.</p>{% endfor %}
+    <h3>Larm som har gått</h3>
+    {% for alert in subscription.alerts %}
+      <p>{{ alert.source }}: {{ alert.type }}, {{ alert.status }}{% if alert.threshold %}, tröskel {{ alert.threshold }}{% endif %}</p>
+    {% else %}<p>Inga larm.</p>{% endfor %}
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>3. Resursgrupperna</h2>
+  {% if groups.unavailable is defined %}{{ unavailable(groups) }}{% else %}
+    <table>
+      <thead><tr><th>Grupp</th><th>Hittills i månaden</th><th>Budget</th></tr></thead>
+      <tbody>
+      {% for group in groups %}
+        <tr><td>{{ group.name }}</td><td>{{ money(group.cost, group.currency) }}</td>
+          <td>{% for budget in group.budgets %}{{ money(budget.spent, budget.unit) }} av {{ money(budget.amount, budget.unit) }}{% else %}ingen{% endfor %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>4. Dag för dag</h2>
+  {% if daily.unavailable is defined %}{{ unavailable(daily) }}{% else %}
+    {% set top = (daily|map(attribute='cost')|max) if daily else 0 %}
+    {% for day in daily %}
+      <div class="day"><span class="label">{{ day.day[:4] }}-{{ day.day[4:6] }}-{{ day.day[6:8] }}</span>
+        <div class="bar"><span style="width: {{ (100 * day.cost / top) if top else 0 }}%"></span></div>
+        <span class="value">{{ money(day.cost, day.currency) }}</span></div>
+    {% else %}<p>Ingen kostnad än den här månaden.</p>{% endfor %}
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>5. Resurserna</h2>
+  {% if resources.unavailable is defined %}{{ unavailable(resources) }}{% else %}
+    <table>
+      <thead><tr><th>Resurs</th><th>Avdelning</th><th>Fastighet</th><th>Hittills i månaden</th></tr></thead>
+      <tbody>
+      {% for resource in resources %}
+        <tr><td>{{ resource.name }}<br><span class="note">{{ resource.type }}</span></td>
+          <td>{{ resource.tags.avdelning or '' }}</td><td>{{ resource.tags.fastighet or '' }}</td><td>{{ money(resource.cost) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>6. Per avdelning och per fastighet</h2>
+  {% if departments.unavailable is defined %}{{ unavailable(departments) }}{% else %}
+    <table>
+      <thead><tr><th>Avdelning</th><th>Hittills i månaden</th></tr></thead>
+      <tbody>{% for row in departments %}<tr><td>{{ row.value }}</td><td>{{ money(row.cost) }}</td></tr>{% endfor %}</tbody>
+    </table>
+  {% endif %}
+  <p class="note">Miljön är gemensam, så taggar ensamma kan inte dela den. Den gemensamma kostnaden, {{ money(total) }}, delas efter varje fastighets andel av anmälningarna.</p>
+  {% if properties.unavailable is defined %}{{ unavailable(properties) }}{% else %}
+    <table>
+      <thead><tr><th>Fastighet</th><th>Anmälningar</th><th>Andel</th><th>Kostnad</th></tr></thead>
+      <tbody>{% for row in properties %}<tr><td>{{ row.property }}</td><td>{{ row.reports }}</td><td>{{ '%.0f'|format(100 * row.share) }} %</td><td>{{ money(row.cost) }}</td></tr>{% endfor %}</tbody>
+    </table>
+  {% endif %}
+</section>
+{% endblock %}
