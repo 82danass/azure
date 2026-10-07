@@ -26,7 +26,7 @@ Allt i Azure byggs från profiler i repot med [mov](https://github.com/Arelius-D
 
 ## Driftsättning av lösningen
 
-Hela lösningen byggs upp och rivs med kommandon från repots rot.
+Hela lösningen byggs upp och rivs med kommandon i terminalen från repots rot. Inget klickas någonstans, varken för att driftsätta eller för att konfigurera före eller efter. Allt följer av val som står i repot och inte av en förhoppning om att Microsoft inte har flyttat runt i sina grafiska gränssnitt.
 
 **Upp**
 
@@ -52,7 +52,7 @@ mov up nordvik-v41-prod
 .\v41\setup\trust.ps1 -Remove
 
 # 2. Allt i Azure.
-mov down nordvik-v41-prod -y --wait
+mov down nordvik-v41-prod -y
 
 # 3. Tenantens del, bara när alla miljöer är rivna.
 .\v41\setup\setup.ps1 -Remove
