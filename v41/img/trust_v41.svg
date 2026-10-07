@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="482" height="109" viewBox="0 0 482 109" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="482" height="109" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="482" height="77" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="204" lengthAdjust="spacing" fill="#e1c682">.\GitHub\azure\v41\setup\trust.ps1</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="366" lengthAdjust="spacing">app-nordvik-m365 trusts id-nordvik-notify of nordvik-v41-prod</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="390" lengthAdjust="spacing">app-nordvik-kostnad trusts id-nordvik-ekonomi of nordvik-v41-prod</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 474 0 A 8 8 0 0 1 482 8 L 482 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="362" y1="16" x2="372" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="408" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M454 11 L464 21 M464 11 L454 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>

@@ -36,6 +36,7 @@
       {
         "purpose": "data",
         "prefix": "10.41.1.0/27",
+        "privateEndpointNetworkPolicies": "NetworkSecurityGroupEnabled",
         "nsg": "data",
         "private": true
       }
@@ -663,7 +664,7 @@
             },
             {
               "name": "NORDVIK_M365_APP_ID",
-              "value": "8d652112-3597-44ad-80af-ac331f89e28b"
+              "value": "bf7cf34d-b124-47eb-9405-562d547b797e"
             },
             {
               "name": "NORDVIK_LIST_SITE",
@@ -671,7 +672,7 @@
             },
             {
               "name": "NORDVIK_LIST",
-              "value": "602e0797-7c51-4f89-bbae-c00e5f182789"
+              "value": "1a1c8d72-0fee-4548-b831-2f4fd6ffda09"
             },
             {
               "name": "NORDVIK_ONCALL_EMAIL",
@@ -744,6 +745,17 @@
         "justification": "The portal sends a tenant's one-time code and the personal link to their reports. On the Communication Services resource alone; no key exists to leak."
       },
       {
+        "role": "Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "portal"
+        },
+        "scope": {
+          "purpose": "maildomain"
+        },
+        "justification": "The portal reads the managed domain's sender address before it mails a code or a link. Reader on that one domain: settings, no data, no key."
+      },
+      {
         "role": "Storage Queue Data Reader",
         "principal": {
           "kind": "managedIdentity",
@@ -807,7 +819,18 @@
         "scope": {
           "purpose": "acs"
         },
-        "justification": "The Function sends the mail and reads the managed domain's sender address. On the Communication Services resource alone; no key exists to leak."
+        "justification": "The Function sends the mail. On the Communication Services resource alone; no key exists to leak."
+      },
+      {
+        "role": "Reader",
+        "principal": {
+          "kind": "managedIdentity",
+          "purpose": "notify"
+        },
+        "scope": {
+          "purpose": "maildomain"
+        },
+        "justification": "The Function reads the managed domain's sender address before it mails. Reader on that one domain: settings, no data, no key."
       },
       {
         "role": "Reader",
@@ -1057,7 +1080,7 @@
                   },
                   {
                     "name": "NORDVIK_COST_APP_ID",
-                    "value": "d0b35565-b8bf-4a9b-8432-8eef7e20ecc3"
+                    "value": "0cbb8db1-202c-44bc-87e2-c803c0bdc02b"
                   },
                   {
                     "name": "NORDVIK_SUBSCRIPTION_ID",

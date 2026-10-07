@@ -17,4 +17,4 @@ RUN useradd --create-home --uid 10001 ekonomi
 USER ekonomi
 EXPOSE 8080
 # One process, so the five-minute cost cache is one cache: Cost Management throttles per scope.
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--worker-class", "gthread", "--workers", "1", "--threads", "8", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--worker-class", "gthread", "--workers", "1", "--threads", "8", "--timeout", "120", "app:app"]

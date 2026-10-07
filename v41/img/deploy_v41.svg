@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="674" height="184" viewBox="0 0 674 184" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="674" height="184" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="674" height="152" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="216" lengthAdjust="spacing" fill="#e1c682">.\GitHub\azure\v41\notify\deploy.ps1</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="282" lengthAdjust="spacing" fill="#e1c682">Getting scm site credentials for zip deployment</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="432" lengthAdjust="spacing" fill="#e1c682">Starting zip deployment. This operation can take a while to complete ...</tspan></text>
+<text y="103" xml:space="preserve"><tspan x="16" textLength="642" lengthAdjust="spacing" fill="#e1c682">Deployment endpoint responded with status code 202 for deployment id &quot;a9ebeeec-79e3-4925-844a-bac29625dc50&quot;</tspan></text>
+<text y="118" xml:space="preserve"><tspan x="16" textLength="168" lengthAdjust="spacing" fill="#e1c682">Waiting for sync triggers...</tspan></text>
+<text y="133" xml:space="preserve"><tspan x="16" textLength="234" lengthAdjust="spacing" fill="#e1c682">Checking the health of the function app</tspan></text>
+<text y="148" xml:space="preserve"><tspan x="16" textLength="168" lengthAdjust="spacing">&quot;Deployment was successful.&quot;</tspan></text>
+<text y="163" xml:space="preserve"><tspan x="16" textLength="564" lengthAdjust="spacing" fill="#8ccf7f">     OK   func-nordvik-v41-prod-notify runs the notifier from D:\MOV25\GitHub\azure\v41\notify</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 666 0 A 8 8 0 0 1 674 8 L 674 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="554" y1="16" x2="564" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="600" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M646 11 L656 21 M656 11 L646 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>

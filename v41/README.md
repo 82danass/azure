@@ -5,24 +5,60 @@
 Repo: [github.com/82danass/azure](https://github.com/82danass/azure) · Vecka: [v41](https://github.com/82danass/azure/tree/master/v41)
 
 - [x] Skapa avsnitt för v41 och uppdatera README
-- [ ] Del A: redogör för tjänsterna inom compute, nätverk och storage, förklara virtualiseringsnivåerna och motivera nivån för portalen
-- [ ] Delmoment 1, Compute: värdmiljön och felanmälan med rubrik, beskrivning och bild
-- [ ] Delmoment 2, IAM: Nordviks roller enligt least privilege och en hanterad identitet mot lagringen
-- [ ] Delmoment 3, Nätverk och säkerhet: defense in depth med en publik portal och skyddad lagring
-- [ ] Delmoment 4, Storage: säker lagring av bilder och dokument
-- [ ] Delmoment 5, IaC: ARM-templates i GitHub, återskapbart från repot
-- [ ] Delmoment 6, Automation och integration: en post i en lista och en notis till rätt förvaltare i Nordviks Microsoft 365
-- [ ] Delmoment 7, Dokumentation: hur lösningen planerats, byggts och återskapas
+- [x] Del A: redogör för tjänsterna inom compute, nätverk och storage, förklara virtualiseringsnivåerna och motivera nivån för portalen: container för portalen, serverless för funktionen som tar anmälningarna
+- [x] Delmoment 1, Compute: värdmiljön och felanmälan med rubrik, beskrivning och bild: portalen och ekonomisidan på Azure Container Apps i en zonredundant miljö, funktionen på Flex Consumption
+- [x] Delmoment 2, IAM: Nordviks roller enligt least privilege och en hanterad identitet mot lagringen: en grupp per roll bland personalen, hyresgästen utan konto med en engångskod, en hanterad identitet per uppgift
+- [x] Delmoment 3, Nätverk och säkerhet: defense in depth med en publik portal och skyddad lagring: lagringen bara på privata slutpunkter bakom en nätverkssäkerhetsgrupp, nycklarna avstängda
+- [x] Delmoment 4, Storage: säker lagring av bilder och dokument: blob, tabeller och kö i ett zonredundant konto utan publik adress, dokumenten till Cool efter 90 dagar
+- [x] Delmoment 5, IaC: ARM-templates i GitHub, återskapbart från repot: allt i Azure från en profil med mov, tenantens del med setup.ps1
+- [x] Delmoment 6, Automation och integration: en post i en lista och en notis till rätt förvaltare i Nordviks Microsoft 365: funktionen för in posten i SharePoint-listan genom Microsoft Graph och mejlar genom Communication Services
+- [x] Delmoment 7, Dokumentation: hur lösningen planerats, byggts och återskapas: den här README:n
 
 ## Vägvalet
 
-Tre saker styr varje val i lösningen, i den ordning en verksamhet väger dem: vad den kostar, hur få människor som behöver röra ett ärende och hur få delar som behöver finnas. Den tredje hänger ihop med den första, eftersom varje del ska driftas, säkras och betalas.
+Tre saker styr varje val i lösningen, i den ordning en verksamhet väger dem, i någorlunda relation till hur uppgiften framställer behovet: vad den kostar, hur få människor som behöver röra ett ärende och hur få delar som behöver finnas. Den tredje hänger ihop med den första, eftersom varje del ska driftas, säkras och betalas.
 
 En hyresgäst behöver inget konto. Hen fyller i felanmälan på portalen, beskriver felet, laddar upp en bild och anger sin egen e-postadress. En engångskod till adressen bekräftar att den är hens. När koden är inskriven sparar portalen bilden och uppgifterna i lagring som saknar adress på internet och lägger anmälan i en kö. Ett bekräftelsemejl ger hyresgästen en personlig länk där hen följer sina anmälningar. Där slutar portalens jobb. En funktion tar anmälan från kön och lägger den hos den förvaltare som tagit ansvar för fastigheten. Har ingen tagit fastigheten hamnar anmälan under Otilldelade, som alla förvaltare ser. Funktionen för också in en kopia av anmälan i en SharePoint-lista i Nordviks Microsoft 365 och skickar ett mejl när någon behöver agera. Förvaltaren arbetar på ett enda ställe: en tavla i portalen med sina fastigheter och de otilldelade. Där tar hen ansvar för fastigheter, bedömer hur bråttom det är och sätter status, som hyresgästen ser genom sin länk. Ekonomi ser anmälningarna och vad driften kostar.
 
 Inget i kedjan bär en hemlighet som når Azure eller Microsoft 365. Personalen loggar in på portalen och ekonomisidan genom registreringar som litar på sidornas egna identiteter. Funktionen når Microsoft 365 genom en app som litar på funktionens identitet. Ingen VM finns, alltså finns inget operativsystem att patcha och inget skal att logga in i.
 
 Allt i Azure byggs från profiler i repot med [mov](https://github.com/Arelius-D/mov), mitt eget verktyg som översätter en profil till ARM-templates och driftsätter dem i ordning. Den del som ARM inte kan beskriva, SharePoint-listan och behörigheterna i Microsoft 365, sätts upp en gång av ett skript i samma repo.
+
+## Driftsättning av lösningen
+
+Hela lösningen byggs upp och rivs med kommandon från repots rot.
+
+**Upp**
+
+```powershell
+# 1. Nordviks tenant, en gång. Inloggning som global administratör i Microsoft 365.
+.\v41\setup\setup.ps1
+
+# 2. Miljön i Azure.
+mov workspace use mov25-nordvik
+mov up nordvik-v41-prod
+
+# 3. Identiteterna får låna apparnas rättigheter.
+.\v41\setup\trust.ps1
+
+# 4. Funktionens kod.
+.\v41\notify\deploy.ps1
+```
+
+**Ner**
+
+```powershell
+# 1. Förtroendet först, medan identiteterna finns att peka ut.
+.\v41\setup\trust.ps1 -Remove
+
+# 2. Allt i Azure.
+mov down nordvik-v41-prod -y --wait
+
+# 3. Tenantens del, bara när alla miljöer är rivna.
+.\v41\setup\setup.ps1 -Remove
+```
+
+Varför ordningen är just den står under [Återskapa miljön](#återskapa-miljön) och [Rivning](#rivning), med bilder från körningarna.
 
 ## Del A: tjänsterna och nivåerna
 
@@ -35,7 +71,7 @@ Allt i Azure byggs från profiler i repot med [mov](https://github.com/Arelius-D
 
 #### Nätverk
 
-- **Ett virtuellt nätverk**, `vnet-nordvik`, med tre subnät: ett för Container Apps-miljön, ett för funktionens utgående trafik och ett där lagringens privata adresser bor. Varje subnät har sin nätverkssäkerhetsgrupp.
+- **Ett virtuellt nätverk**, `vnet-nordvik`, med tre subnät: ett för Container Apps-miljön, ett för funktionens utgående trafik och ett där lagringens privata adresser bor. Datasubnätet har en nätverkssäkerhetsgrupp som bara släpper in HTTPS från apparnas och funktionens subnät. Den gäller också för de privata slutpunkterna, som Azure annars låter gå förbi gruppen.
 - **Privata slutpunkter** ger lagringskontot en adress inne i nätverket för blob, table och queue. Kontots publika adress är avstängd.
 - **Privata DNS-zoner** gör att lagringens vanliga namn pekar på de privata adresserna inifrån nätverket.
 - **Miljöns lastbalanserare och publika adress** tar emot HTTPS till portalen och ekonomisidan. Mina egna domännamn pekar dit via Cloudflare och Azure utfärdar certifikaten.
@@ -193,7 +229,7 @@ flowchart LR
 
 **Funktionen** kör på Flex Consumption i ett eget subnät, med ett eget lagringskonto. Den ligger i en zon. En zonredundant funktion kräver två instanser som betalas dygnet runt. Kön håller ändå varje anmälan tills funktionen är tillbaka.
 
-**Ekonomisidan** är en andra container i samma miljö, på `mov25-ekonomi.assarelius.org`. Den går ner till noll mellan besöken.
+**Ekonomisidan** är en andra container i samma miljö, på `mov25-ekonomi.assarelius.org`, byggd på samma sätt som portalen. Den går ner till noll mellan besöken.
 
 ## Delmoment 2: IAM
 
@@ -237,7 +273,7 @@ Ingen identitet har en roll på Nordviks lagringskonto som helhet. Kontonycklarn
 | --- | --- |
 | Identitet | Personalen loggar in i Entra ID med roll från grupp; hyresgästen bekräftar sin e-post med en engångskod; inga hemligheter som når Azure eller Microsoft 365 |
 | Kant | Bara HTTPS med Azures certifikat; portalen och ekonomisidan är det enda som syns utifrån |
-| Nätverk | `vnet-nordvik` med tre subnät och var sin nätverkssäkerhetsgrupp |
+| Nätverk | `vnet-nordvik` med tre subnät; till datasubnätet och dess privata slutpunkter släpper nätverkssäkerhetsgruppen bara in HTTPS från apparna och funktionen |
 | Lagring | Ingen publik adress alls: privata slutpunkter och privata DNS-zoner, nycklar avstängda, ingen anonym åtkomst, TLS 1.2 |
 | Data | Kryptering i vila, mjuk radering och versioner för blob, bilder och dokument i var sin container |
 | Applikation | Hyresgästens egen del av tabellen, rollkontroll per sida, engångskoder med kort giltighet och få försök, gränser för hur många koder som kan begäras, bildens typ och storlek kontrolleras |
@@ -260,10 +296,12 @@ Dokumenten flyttas till Cool och inte till Archive. De läses sällan efter tre 
 
 ## Delmoment 5: IaC
 
-Lösningen återskapas i två lager, båda i repot:
+Lösningen återskapas från repot i fyra delar:
 
-- **Nordviks tenant, en gång:** ett skript i [setup/](setup/) skapar SharePoint-listan och de två apparna med sina rättigheter. ARM beskriver Azure, inte Microsoft 365, så den delen är kod i stället för klick.
+- **Nordviks tenant, en gång:** [setup.ps1](setup/setup.ps1) skapar SharePoint-listan och de två apparna med sina rättigheter. ARM beskriver Azure, inte Microsoft 365, så den delen är kod i stället för klick.
+- **Imagerna:** GitHub Actions bygger portalen och ekonomisidan vid varje push som ändrar `v41/portal` eller `v41/ekonomi`, med [v41-portal.yml](../.github/workflows/v41-portal.yml) och [v41-ekonomi.yml](../.github/workflows/v41-ekonomi.yml). Varje bygge hamnar på `ghcr.io` med två taggar: `sha-` följt av commitens hash samt `latest`, som profilen kör. Paketen är publika, så Container Apps hämtar dem utan inloggning mot registret.
 - **Miljön, så ofta det behövs:** `mov up nordvik-v41-prod` bygger allt i Azure från [profilen](../mov-workspace-nordvik/profiles/nordvik-v41-prod.json) med [mov](https://github.com/Arelius-D/mov) och `mov down nordvik-v41-prod` river det.
+- **Förtroendet och funktionens kod:** efter `mov up` låter [trust.ps1](setup/trust.ps1) apparna lita på miljöns nya identiteter och [deploy.ps1](notify/deploy.ps1) lägger funktionens kod i funktionsappen. Ordningen och skälen står under [Återskapa miljön](#återskapa-miljön).
 
 **Test- eller demomiljön** är `nordvik-v41-prod` med ett annat namn: [nordvik-v41-test.json](../mov-workspace-nordvik/profiles/nordvik-v41-test.json) ärver allt och byter bara grupp och budget. Prenumerationen tillåter en Container Apps-miljö, så test och prod står aldrig samtidigt här.
 
@@ -334,24 +372,21 @@ Det mesta är nätet som håller lagringen borta från internet och portalen nå
 
 <!-- Efter bygget: en bild per delmoment. -->
 
+### Delmoment 6: posten i SharePoint-listan och notisen i Outlook
+
+Listan `Felanmalningar` ligger på Nordviks rotwebbplats, https://mov25areslius.sharepoint.com, under Site contents. Funktionen för in en post per anmälan.
+
+![SharePoint, Communication site, Site contents: listan Felanmalningar med 3 poster bredvid webbplatsens standardbibliotek](img/sharepoint_site_contents_v41.png)
+
+![Listan Felanmalningar: Värme och Badkar läcker i Kvarnbacken 3, Badkar läcker igen i Sjöviksgatan 5, var och en med kategori, händelse, mottagen tid, status och länken till anmälan i portalen](img/sharepoint_felanmalningar_v41.png)
+
+Notiserna landar i Outlook. I exemplet har förvaltarna och jouren samma brevlåda, `DanielAssarelius@mov25areslius.onmicrosoft.com`. Vatten och Värme i Kvarnbacken 3 går till Karin Ek som har tagit fastigheten och till jouren. Vatten i Sjöviksgatan 5 går bara till jouren eftersom ingen har tagit fastigheten.
+
+![Outlook: AKUT: Vatten i Sjöviksgatan 5 öppnat med att ingen förvaltare har tagit fastigheten och länken till tavlan, under det AKUT: Vatten i Kvarnbacken 3 och AKUT: Värme i Kvarnbacken 3](img/outlook_akut_v41.png)
+
 ## Återskapa miljön
 
-Lösningen byggs i fyra steg och ordningen bestäms av vad varje steg behöver från det förra. Kommandona körs från repots rot.
-
-```powershell
-# 1. Nordviks tenant, en gång. Inloggning som global administratör i Microsoft 365.
-.\v41\setup\setup.ps1
-
-# 2. Miljön i Azure.
-mov workspace use mov25-nordvik
-mov up nordvik-v41-prod
-
-# 3. Identiteterna får låna apparnas rättigheter.
-.\v41\setup\trust.ps1
-
-# 4. Funktionens kod.
-.\v41\notify\deploy.ps1
-```
+Lösningen byggs i fyra steg med kommandona under [Driftsättning av lösningen](#driftsättning-av-lösningen). Ordningen bestäms av vad varje steg behöver från det förra.
 
 | Steg | Vad det gör | Varför just där |
 | --- | --- | --- |
@@ -360,17 +395,30 @@ mov up nordvik-v41-prod
 | 3. [trust.ps1](setup/trust.ps1) | Låter de två apparna lita på funktionens och ekonomisidans identiteter. | Identiteterna finns först efter `mov up` och varje `up` gör dem nya, så förtroendet kan ges först nu. |
 | 4. [deploy.ps1](notify/deploy.ps1) | Lägger funktionens kod i funktionsappen och låter Azure bygga Python-paketen. | Funktionsappen finns först efter `mov up`. |
 
+![setup.ps1: apparna registrerade utan hemlighet, Cost Management Reader och Billing profile reader, SharePoint-listan Felanmalningar skapad med skrivrätt för app-nordvik-m365 och id:na skrivna i profilen](img/setup_v41.svg)
+
+Kräver Entra en ny inloggning med MFA, som morgonen efter en kväll med mov, loggar `mov use --login` in i Nordviks Azure-tenant innan steg 1.
+
+![mov use --login: inloggad i tenanten via webbläsaren, token giltig en timme, redan på prenumerationen MOV25 - v39-v41](img/mov_use_login_v41.svg)
+
+![mov up nordvik-v41-prod: preflight lägger miljöns form för Azure, sedan nät, budget, grupper, identiteter, inloggningsregistreringar utan hemlighet, lagring, de privata slutpunkterna, funktionen, rollerna, Container Apps-miljön med portalen och ekonomisidan och sist verify](img/mov_up_v41.svg)
+
+![trust.ps1: app-nordvik-m365 litar på funktionens identitet och app-nordvik-kostnad på ekonomisidans, båda i nordvik-v41-prod](img/trust_v41.svg)
+
+![deploy.ps1: funktionens kod i func-nordvik-v41-prod-notify, Python-paketen byggda av Azure och funktionsappen frisk](img/deploy_v41.svg)
+
+En ny miljö har inga fastigheter. För en demo lägger `.\v41\setup\seed.ps1` in fastigheterna i [exempel.json](setup/exempel.json): två för varje förvaltare och en som ingen har tagit. Skriptet skriver genom portalens egen kod som portalens identitet, i ett kortlivat jobb i miljön som tas bort efteråt.
+
 En test- eller demomiljö är samma fyra steg med `nordvik-v41-test`, utan steg 1: tenanten är redan uppsatt.
 
 Steg 1 och 3 är skript och inte ARM. Uppgiften kräver att resultatet hamnar i Microsoft 365 och ARM beskriver bara Azure, så en lösning som hela vägen är IaC går inte att bygga mot den beställningen. Det är beställningen som styr hit, inte tekniken. Uppgiften ser ut att vara skriven med en AI-modell: den låser lösningen till bestämda moduler i stället för att beskriva Nordviks behov och lämna valet av teknik åt den som bygger.
 
 ## Rivning
 
-```powershell
-.\v41\setup\trust.ps1 -Remove
-mov down nordvik-v41-prod -y --wait
-```
+Kommandona står under [Driftsättning av lösningen](#driftsättning-av-lösningen).
 
 Förtroendet tas bort först, medan identiteterna fortfarande finns att peka ut. `mov down` tar sedan resursgruppen med allt i den, budgeten, app-registreringarna för inloggningen och posterna hos Cloudflare. Det som `setup.ps1` gjorde ligger kvar, eftersom det är tenantens och inte miljöns.
 
 Ska även tenanten tillbaka till noll körs `.\v41\setup\setup.ps1 -Remove` när alla miljöer är rivna. Den tar bort listan, båda apparna med deras rättigheter och nollställer värdena den skrev i profilen. Nästa `setup.ps1` bygger då allt från början.
+
+![setup.ps1 -Remove: listan och dess skrivrätt borttagna, appen och dess medgivande borttagna i Microsoft 365, rollerna och båda apparna borttagna i Azure, profilens värden nollställda](img/setup_remove_v41.svg)

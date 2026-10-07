@@ -1,0 +1,10 @@
+{
+  "description": "Example properties for a demo of the portal: two for each manager and one nobody has taken, so the board shows both a manager's own and Otilldelade. Loaded by seed.ps1 into the environment's table fastigheter. In a real start Nordvik's property register is loaded the same way.",
+  "properties": [
+    { "name": "Storgatan 12", "address": "Storgatan 12, 411 38 Göteborg", "manager": "forvaltare1" },
+    { "name": "Kvarnbacken 3", "address": "Kvarnbacken 3, 431 30 Mölndal", "manager": "forvaltare1" },
+    { "name": "Hamnvägen 8", "address": "Hamnvägen 8, 426 71 Västra Frölunda", "manager": "forvaltare2" },
+    { "name": "Björkallén 21", "address": "Björkallén 21, 435 33 Mölnlycke", "manager": "forvaltare2" },
+    { "name": "Sjöviksgatan 5", "address": "Sjöviksgatan 5, 417 05 Göteborg", "manager": null }
+  ]
+}

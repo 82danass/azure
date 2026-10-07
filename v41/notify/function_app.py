@@ -77,16 +77,18 @@ def _new_report(reports: TableClient, properties: TableClient, pk: str, rk: str)
     building = _property(properties, report["property_id"])
     incident = _incident(reports, report)
 
-    if not report.get("list_item_id"):
-        item = _graph("POST", f"/sites/{_site()}/lists/{_list()}/items", {"fields": _fields(report, building, incident)})
-        report["list_item_id"] = item["id"]
-        reports.update_entity(report, mode=UpdateMode.MERGE)
-
+    # The mail first: it is what someone acts on, and it must not wait for SharePoint. The copy in
+    # the list follows; if Graph fails, the message comes back and only the copy is tried again.
     opened_it = incident["RowKey"] == report["RowKey"]
     if opened_it and not incident.get("notified"):
         _notify(properties, report, building, urgent=bool(incident.get("urgent")))
         incident["notified"] = True
         reports.update_entity(incident, mode=UpdateMode.MERGE)
+
+    if not report.get("list_item_id"):
+        item = _graph("POST", f"/sites/{_site()}/lists/{_list()}/items", {"fields": _fields(report, building, incident)})
+        report["list_item_id"] = item["id"]
+        reports.update_entity(report, mode=UpdateMode.MERGE)
 
 
 def _incident(reports: TableClient, report: dict[str, Any]) -> dict[str, Any]:
