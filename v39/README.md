@@ -236,7 +236,7 @@ mov up v39-cf
 
 Utan Cloudflare: `mov secrets set v39 NC_ADMIN_PASSWORD`, `mov secrets set v39 NC_AUTH_JWT_SECRET` och `mov up v39`; ingen Cloudflare-token behövs.
 
-`TUNNEL_TOKEN` och `OAUTH_CLIENT_SECRET` skapar mov under körningen. `mov down v39-cf` river resursgruppen, budgeten, appregistreringen och exakt de Cloudflare-objekt som skapades: tunneln, posterna, Access-appen, policyn och identitetsleverantören. De fem posterna som redan fanns i zonen har aldrig listats.
+`TUNNEL_TOKEN` och `OAUTH_CLIENT_SECRET` skapar mov under körningen. `mov down v39-cf --wait` river resursgruppen, budgeten, appregistreringen och exakt de Cloudflare-objekt som skapades: tunneln, posterna, Access-appen, policyn och identitetsleverantören. De fem posterna som redan fanns i zonen har aldrig listats.
 
 ## Rivning
 
