@@ -31,11 +31,19 @@ Hela lösningen byggs upp och rivs med kommandon i terminalen från repots rot. 
 **Upp**
 
 ```powershell
+# 0. Repot och arbetsytan, en gång per dator. Hemligheterna och Cloudflare-token ligger inte i repot.
+git clone https://github.com/82danass/azure.git
+cd azure
+mov -w mov-workspace-nordvik secrets set cloudflare CLOUDFLARE_API_TOKEN
+mov -w mov-workspace-nordvik secrets set nordvik-v41-prod NORDVIK_PORTAL_SESSION_KEY    # valfri lång slumpsträng
+mov -w mov-workspace-nordvik secrets set nordvik-v41-prod NORDVIK_EKONOMI_SESSION_KEY   # valfri lång slumpsträng
+mov workspace use mov25-nordvik
+mov use --login
+
 # 1. Nordviks tenant, en gång. Inloggning som global administratör i Microsoft 365.
 .\v41\setup\setup.ps1
 
 # 2. Miljön i Azure.
-mov workspace use mov25-nordvik
 mov up nordvik-v41-prod
 
 # 3. Identiteterna får låna apparnas rättigheter.
