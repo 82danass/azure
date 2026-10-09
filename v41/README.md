@@ -130,7 +130,7 @@ Systemet fördelar anmälningarna efter fastighet, till den förvaltare som tagi
 | Ta ansvar för en fastighet, lämna den eller lämna över den | människa: förvaltaren, i portalen |
 | Mejlet till jouren när förvaltaren höjer en anmälan till akut | människan beslutar, systemet mejlar |
 
-Kategorin som hyresgästen väljer säger vad som är trasigt, inte hur bråttom det är. En katt som gjort sina behov i toaletten kan hamna under vatten men är inte akut. En konstig lukt från spisen dagen efter att en elektriker varit där kan hamna under övrigt och är akut. Värme, vatten och lås mejlar direkt eftersom inget bättre är känt i den stunden. Därefter avgör den som kan.
+Kategorin som hyresgästen väljer säger vad som är trasigt, inte hur bråttom det är. En katt kan hamna under vatten men är inte akut. En konstig lukt från spisen dagen efter att en elektriker varit där kan hamna under övrigt och är akut. Värme, vatten och lås mejlar direkt eftersom inget bättre är känt i den stunden. Därefter avgör förvaltaren hur bråttom det är.
 
 **Mejl bara där någon måste agera.** En vattenläcka i ett hus med hundra lägenheter blir hundra anmälningar om samma fel. Hundra mejl till samma förvaltare hjälper ingen.
 
@@ -176,39 +176,54 @@ Kategorin som hyresgästen väljer säger vad som är trasigt, inte hur bråttom
 ## Lösningen
 
 ```mermaid
-flowchart LR
+flowchart TB
+    H(["Hyresgäst"])
+    FV(["Förvaltare"])
+    EK(["Ekonomi"])
+
     subgraph AZ["Azure, Sweden Central, rg-nordvik"]
         subgraph CA["Container Apps-miljö, zonredundant, snet-nordvik-apps"]
-            P["Portalen"]
-            E["Ekonomisidan"]
+            P("Portalen")
+            E("Ekonomisidan")
         end
         subgraph FN["Serverless, snet-nordvik-func"]
-            F["Funktionen<br/>tar anmälningar från kön"]
+            F{{"Funktionen<br/>tar anmälningar från kön"}}
         end
         subgraph DATA["snet-nordvik-data: bara privata slutpunkter"]
-            ST["stnordvik82danass01, ZRS<br/>blob: bilder, dokument<br/>table: anmalningar<br/>queue: nya-anmalningar"]
-            ST2["stnordvik82danass02<br/>funktionens eget"]
+            subgraph ST["stnordvik82danass01, ZRS"]
+                BL[("blob<br/>bilder, dokument")]
+                TA[("table<br/>anmalningar, fastigheter")]
+                Q[/"queue<br/>nya-anmalningar"/]
+            end
+            ST2[("stnordvik82danass02<br/>funktionens eget")]
         end
-        ACS["Communication Services<br/>mejl"]
-        CM["Cost Management<br/>budgetar och kostnad"]
+        ACS>"Communication Services<br/>mejl"]
+        CM[["Cost Management<br/>budgetar och kostnad"]]
     end
+
     subgraph ENTRA["Entra ID"]
-        G["grp-nordvik-forvaltare<br/>grp-nordvik-ekonomi"]
-        APN["app-nordvik-m365"]
-        APK["app-nordvik-kostnad"]
+        G[\"grp-nordvik-forvaltare<br/>grp-nordvik-ekonomi"/]
+        APN[["app-nordvik-m365"]]
+        APK[["app-nordvik-kostnad"]]
     end
+
     subgraph M365["Nordviks Microsoft 365"]
-        L["SharePoint-listan<br/>Felanmalningar"]
-        O["Förvaltarens Outlook"]
+        L[("SharePoint-listan<br/>Felanmalningar")]
+        O>"Förvaltarens Outlook"]
     end
-    H["Hyresgäst"] -->|"HTTPS, e-post och engångskod"| P
-    FV["Förvaltare"] -->|"HTTPS, inloggning"| P
-    EK["Ekonomi"] -->|"HTTPS, inloggning"| E
+
+    H -->|"HTTPS, e-post och engångskod"| P
+    FV -->|"HTTPS, inloggning"| P
+    EK -->|"HTTPS, inloggning"| E
     P --- G
     E --- G
-    P -->|"bild, post, meddelande"| ST
-    ST -->|"meddelande i kön"| F
+    P -->|"bild"| BL
+    P -->|"anmälan"| TA
+    P -->|"meddelande"| Q
+    Q -->|"meddelande i kön"| F
+    F -->|"händelse"| TA
     F --- ST2
+    E -->|"räknar anmälningar"| TA
     F -.->|"lånar rätten"| APN
     APN -->|"en post per anmälan"| L
     F -->|"mejl när någon måste agera"| ACS
@@ -401,6 +416,8 @@ Kräver Entra en ny inloggning med MFA, som morgonen efter en kväll med mov, lo
 
 ![mov use --login: inloggad i tenanten via webbläsaren, token giltig en timme, redan på prenumerationen MOV25 - v39-v41](img/mov_use_login_v41.svg)
 
+![mov workspace use mov25-nordvik: kommandon utan arbetsyta går nu mot Nordviks, i tenanten mov25danielassareliusoutloo.onmicrosoft.com och prenumerationen MOV25 - v39-v41](img/mov_workspace_use_v41.svg)
+
 ![mov up nordvik-v41-prod: preflight lägger miljöns form för Azure, sedan nät, budget, grupper, identiteter, inloggningsregistreringar utan hemlighet, lagring, de privata slutpunkterna, funktionen, rollerna, Container Apps-miljön med portalen och ekonomisidan och sist verify](img/mov_up_v41.svg)
 
 ![trust.ps1: app-nordvik-m365 litar på funktionens identitet och app-nordvik-kostnad på ekonomisidans, båda i nordvik-v41-prod](img/trust_v41.svg)
@@ -418,6 +435,10 @@ Steg 1 och 3 är skript och inte ARM. Uppgiften kräver att resultatet hamnar i 
 Kommandona står under [Driftsättning av lösningen](#driftsättning-av-lösningen).
 
 Förtroendet tas bort först, medan identiteterna fortfarande finns att peka ut. `mov down` tar sedan resursgruppen med allt i den, budgeten, app-registreringarna för inloggningen och posterna hos Cloudflare. Det som `setup.ps1` gjorde ligger kvar, eftersom det är tenantens och inte miljöns.
+
+![trust.ps1 -Remove: app-nordvik-m365 slutar lita på funktionens identitet och app-nordvik-kostnad på ekonomisidans, båda i nordvik-v41-prod](img/trust_remove_v41.svg)
+
+![mov down nordvik-v41-prod -y: rg-nordvik med sina 31 resurser, utanför den båda inloggningsregistreringarna och fyra poster hos Cloudflare; budgeten, registreringarna och posterna borttagna, domänerna tagna från apparna, certifikaten borttagna, gruppen raderas i bakgrunden](img/mov_down_v41.svg)
 
 Ska även tenanten tillbaka till noll körs `.\v41\setup\setup.ps1 -Remove` när alla miljöer är rivna. Den tar bort listan, båda apparna med deras rättigheter och nollställer värdena den skrev i profilen. Nästa `setup.ps1` bygger då allt från början.
 

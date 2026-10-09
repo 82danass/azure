@@ -2,7 +2,7 @@
 <defs><clipPath id="win"><rect width="1130" height="349" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
 <rect y="32" width="1130" height="317" fill="#24273a"/>
 
-<text y="58" xml:space="preserve"><tspan x="16" textLength="204" lengthAdjust="spacing" fill="#e1c682">.\GitHub\azure\v41\setup\setup.ps1</tspan><tspan x="220" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="226" textLength="42" lengthAdjust="spacing" fill="#5b6078">-Remove</tspan></text>
+<text y="58" xml:space="preserve"><tspan x="16" textLength="126" lengthAdjust="spacing" fill="#e1c682">.\v41\setup\setup.ps1</tspan><tspan x="142" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="148" textLength="42" lengthAdjust="spacing" fill="#5b6078">-Remove</tspan></text>
 <text y="88" xml:space="preserve"><tspan x="16" textLength="678" lengthAdjust="spacing" fill="#63cbc0">Microsoft 365 tenant, mov25areslius.onmicrosoft.com: signing in as DanielAssarelius@mov25areslius.onmicrosoft.com</tspan></text>
 <text y="103" xml:space="preserve"><tspan x="16" textLength="546" lengthAdjust="spacing">     the sign-in window opens with that account filled in; it may open behind this terminal</tspan></text>
 <text y="118" xml:space="preserve"><tspan x="16" textLength="1098" lengthAdjust="spacing" fill="#eed49f" font-weight="bold">WARNING: Note: Sign in by Web Account Manager (WAM) is enabled by default on Windows. If using an embedded terminal, the interactive browser window may be hidden behind other windows.</tspan></text>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="542" height="109" viewBox="0 0 542 109" font-family="MesloLGS NF, monospace, 'Cascadia Mono', Consolas, 'JetBrains Mono', 'SF Mono', Menlo, monospace" font-size="10" fill="#cad3f5">
+<defs><clipPath id="win"><rect width="542" height="109" rx="8" ry="8"/></clipPath></defs><g clip-path="url(#win)">
+<rect y="32" width="542" height="77" fill="#24273a"/>
+
+<text y="58" xml:space="preserve"><tspan x="16" textLength="126" lengthAdjust="spacing" fill="#e1c682">.\v41\setup\trust.ps1</tspan><tspan x="142" textLength="6" lengthAdjust="spacing"> </tspan><tspan x="148" textLength="42" lengthAdjust="spacing" fill="#5b6078">-Remove</tspan></text>
+<text y="73" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="426" lengthAdjust="spacing">app-nordvik-m365 no longer trusts id-nordvik-notify of nordvik-v41-prod</tspan></text>
+<text y="88" xml:space="preserve"><tspan x="16" textLength="60" lengthAdjust="spacing" fill="#8ccf7f">     OK   </tspan><tspan x="76" textLength="450" lengthAdjust="spacing">app-nordvik-kostnad no longer trusts id-nordvik-ekonomi of nordvik-v41-prod</tspan></text>
+<path d="M0 8 A 8 8 0 0 1 8 0 L 534 0 A 8 8 0 0 1 542 8 L 542 32 L 0 32 Z" fill="#181926"/><text x="16" y="16" fill="#cad3f5" font-size="12" opacity="0.75" text-anchor="start" dominant-baseline="central">pwsh</text><line x1="422" y1="16" x2="432" y2="16" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><rect x="468" y="11" width="10" height="10" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/><path d="M514 11 L524 21 M524 11 L514 21" stroke="#cad3f5" stroke-width="1" fill="none" opacity="0.9"/>
+</g>
+</svg>
